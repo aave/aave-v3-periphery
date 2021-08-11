@@ -25,6 +25,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
+    "@aave/core-v3": "github:aave/aave-v3-core",
     "@ethersproject/abi": "^5.1.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",

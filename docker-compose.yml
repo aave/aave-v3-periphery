@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  contracts-env:
+    env_file:
+      - .env
+    build:
+      context: ./
+    working_dir: /src
+    command: npm run run-env
+    volumes:
+      - ./:/src
+      - $HOME/.tenderly/config.yaml:/root/.tenderly/config.yaml
+    environment:
+      MNEMONIC: ${MNEMONIC}
+      WALLET_INDEX: ${WALLET_INDEX}
+      PRIVATE_KEY: ${PRIVATE_KEY}
+      ALCHEMY_KEY: ${ALCHEMY_KEY}
+      INFURA_KEY: ${INFURA_KEY}
+      ETHERSCAN_KEY: ${ETHERSCAN_KEY}
+      TENDERLY_PROJECT: ${TENDERLY_PROJECT}
+      TENDERLY_USERNAME: ${TENDERLY_USERNAME}
+      TENDERLY_FORK: ${TENDERLY_FORK}
+      TENDERLY_HEAD: ${TENDERLY_HEAD}
+      TENDERLY_FORK_NETWORK_ID: ${TENDERLY_FORK_NETWORK_ID}
+      DEFENDER_API_KEY: ${DEFENDER_API_KEY}
+      DEFENDER_SECRET_KEY: ${DEFENDER_SECRET_KEY}

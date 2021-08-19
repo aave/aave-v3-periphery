@@ -2,6 +2,7 @@ import { Wallet, Signer, utils } from 'ethers';
 import { DefenderRelaySigner, DefenderRelayProvider } from 'defender-relay-client/lib/ethers';
 import { DRE, getImpersonatedSigner } from './misc-utils';
 import { usingTenderly } from './tenderly-utils';
+import { tEthereumAddress } from './types';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
@@ -80,3 +81,6 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
 export const getFirstSigner = async (): Promise<Signer> => {
   return (await getEthersSigners())[0];
 };
+
+export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>
+  await Promise.all((await getEthersSigners()).map((signer) => signer.getAddress()));

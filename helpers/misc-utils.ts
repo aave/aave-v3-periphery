@@ -1,12 +1,12 @@
 import BigNumber from 'bignumber.js';
 import BN = require('bn.js');
-// import low from 'lowdb';
-// import FileSync from 'lowdb/adapters/FileSync';
+import low from 'lowdb';
+import FileSync from 'lowdb/adapters/FileSync';
 import { WAD } from './constants';
 import { Wallet, ContractTransaction, Signer } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { tEthereumAddress } from './types';
-import { isAddress } from 'ethers/lib/utils';
+import { utils, BigNumberish } from 'ethers';
 import { isZeroAddress } from 'ethereumjs-util';
 
 export const toWad = (value: string | number) => new BigNumber(value).times(WAD).toFixed();
@@ -14,7 +14,7 @@ export const toWad = (value: string | number) => new BigNumber(value).times(WAD)
 export const bnToBigNumber = (amount: BN): BigNumber => new BigNumber(<any>amount);
 export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(amount);
 
-// export const getDb = () => low(new FileSync('./deployed-contracts.json'));
+export const getDb = () => low(new FileSync('./deployed-contracts.json'));
 
 export let DRE: HardhatRuntimeEnvironment;
 
@@ -112,7 +112,7 @@ export const notFalsyOrZeroAddress = (address: tEthereumAddress | null | undefin
   if (!address) {
     return false;
   }
-  return isAddress(address) && !isZeroAddress(address);
+  return utils.isAddress(address) && !isZeroAddress(address);
 };
 
 export const getImpersonatedSigner = async (address: tEthereumAddress): Promise<Signer> => {

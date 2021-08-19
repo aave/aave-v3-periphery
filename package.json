@@ -25,7 +25,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/core-v3": "github:aave/aave-v3-core",
+    "@aave/core-v3": "file:../aave-v3-core",
     "@ethersproject/abi": "^5.1.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",
@@ -47,6 +47,7 @@
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.1.0",
     "hardhat": "^2.1.2",
+    "hardhat-dependency-compiler": "^1.1.1",
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^6.0.0",
     "prettier": "2.2.1",

@@ -27,7 +27,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   IAaveIncentivesController public immutable incentivesController;
   IPriceOracleGetter public immutable oracle;
 
-  constructor(IAaveIncentivesController _incentivesController, IPriceOracleGetter _oracle) public {
+  constructor(IAaveIncentivesController _incentivesController, IPriceOracleGetter _oracle) {
     incentivesController = _incentivesController;
     oracle = _oracle;
   }

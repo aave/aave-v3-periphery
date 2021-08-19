@@ -22,7 +22,7 @@ contract WETHGateway is IWETHGateway, Ownable {
    * @dev Sets the WETH address and the LendingPoolAddressesProvider address. Infinite approves lending pool.
    * @param weth Address of the Wrapped Ether contract
    **/
-  constructor(address weth) public {
+  constructor(address weth) {
     WETH = IWETH(weth);
   }
 

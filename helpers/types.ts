@@ -13,7 +13,7 @@ export enum eEthereumNetwork {
   coverage = 'coverage',
   hardhat = 'hardhat',
   tenderlyMain = 'tenderlyMain',
-  buidlerevm = 'buidlerevm',
+  hardhatevm = 'hardhatevm',
 }
 
 export enum ePolygonNetwork {
@@ -52,7 +52,7 @@ export interface iParamsPerNetworkAll<T>
 
 export interface iEthereumParamsPerNetwork<eNetwork> {
   [eEthereumNetwork.coverage]: eNetwork;
-  [eEthereumNetwork.buidlerevm]: eNetwork;
+  [eEthereumNetwork.hardhatevm]: eNetwork;
   [eEthereumNetwork.kovan]: eNetwork;
   [eEthereumNetwork.ropsten]: eNetwork;
   [eEthereumNetwork.main]: eNetwork;

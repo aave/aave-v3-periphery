@@ -15,10 +15,14 @@ import {
   iXDaiParamsPerNetwork,
   tEthereumAddress,
 } from './types';
-import { getIErc20Detailed } from './contracts-getters';
+import { getIErc20Detailed, getMintableERC20 } from './contracts-getters';
 import { DRE, getDb, waitForTx } from './misc-utils';
 import { usingTenderly, verifyAtTenderly } from './tenderly-utils';
 import { verifyEtherscanContract } from './etherscan-verification';
+import { MintableERC20, WETH9Mocked } from '@aave/core-v3/types';
+import { MockContract } from '@ethereum-waffle/mock-contract';
+
+export type MockTokenMap = { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked };
 
 export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
   const {

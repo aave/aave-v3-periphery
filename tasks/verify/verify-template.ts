@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config';
 import { setDRE } from '../../helpers/misc-utils';
-import { verifyContract } from '../../helpers/etherscan-verification';
+import { verifyEtherscanContract } from '../../helpers/etherscan-verification';
 import {
   printExpectedParams,
   parseParams,
@@ -55,7 +55,7 @@ task('verify-template', 'verify contract on etherscan')
       }
 
       const contractInstance = await ContractFactory.attach(contractaddress);
-      await verifyContract(
+      await verifyEtherscanContract(
         contractInstance.address,
         Object.values(paramsArray),
         parsedLibraries.libraries ? JSON.stringify(parsedLibraries.libraries) : ''

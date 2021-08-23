@@ -8,8 +8,9 @@
     "noImplicitAny": false,
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test"],
+  "include": ["./scripts", "./test", "./tasks", "./helpers"],
   "files": [
-    "./hardhat.config.ts"
+    "./hardhat.config.ts",
+    "@aave/core-v3/types/index.ts"
   ]
 }

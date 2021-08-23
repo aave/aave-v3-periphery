@@ -11,6 +11,7 @@ import '@typechain/hardhat';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
+import 'hardhat-dependency-compiler';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
@@ -73,6 +74,15 @@ const config: HardhatUserConfig = {
       evmVersion: 'berlin',
     },
   },
+  dependencyCompiler: {
+    paths: [
+      '@aave/core-v3/contracts/protocol/libraries/logic/DepositLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/BorrowLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/LiquidationLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/ConfiguratorLogic.sol',
+    ],
+    keep: false,
+  },
   tenderly: {
     project: TENDERLY_PROJECT,
     username: TENDERLY_USERNAME,
@@ -96,7 +106,7 @@ const config: HardhatUserConfig = {
     mumbai: getCommonNetworkConfig(ePolygonNetwork.mumbai, 80001),
     xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     hardhat: {
-      hardfork: 'london',
+      hardfork: 'berlin',
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,

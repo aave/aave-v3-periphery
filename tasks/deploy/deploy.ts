@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { Signer } from 'ethers';
 import { setDRE } from '../../helpers/misc-utils';
-import { verifyContract } from '../../helpers/etherscan-verification';
+import { verifyEtherscanContract } from '../../helpers/etherscan-verification';
 import { getDefaultSigner } from '../../helpers/wallet-helpers';
 
 import {
@@ -70,7 +70,7 @@ task('deploy', 'deploy contract - add contract name and params as arguements')
 
       const contractInstance = await deployContract(paramsArray, ContractFactory, contractSigner);
       if (verify) {
-        await verifyContract(
+        await verifyEtherscanContract(
           contractInstance.address,
           paramsArray,
           parsedLibraries.libraries ? JSON.stringify(parsedLibraries.libraries) : ''

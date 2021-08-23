@@ -15,16 +15,9 @@ export const setNewHead = (head: string) => {
   DRE.ethers.provider = provider;
 };
 
-export const logError = () => {
-  if (DRE.network.name.includes('tenderly')) {
-    const transactionLink = `https://dashboard.tenderly.co/${DRE.config.tenderly.username}/${
-      DRE.config.tenderly.project
-    }/fork/${DRE.tenderly.network().getFork()}/simulation/${DRE.tenderly.network().getHead()}`;
-    console.error(
-      '[TENDERLY] Transaction Reverted. Check TX simulation error at:',
-      transactionLink
-    );
-  }
+export const logTenderlyError = () => {
+  const transactionLink = getTenderlyTransactionLink();
+  console.error('[TENDERLY] Transaction Reverted. Check TX simulation error at:', transactionLink);
 };
 
 export const verifyAtTenderly = async (id: string, instance: Contract) => {
@@ -34,4 +27,11 @@ export const verifyAtTenderly = async (id: string, instance: Contract) => {
     address: instance.address,
   });
   console.log(`  - Verified ${id} at Tenderly!`);
+};
+
+export const getTenderlyTransactionLink = (): String => {
+  const { username, project } = DRE.config.tenderly;
+  const forkId = DRE.tenderlyNetwork.getFork();
+  const headId = DRE.tenderlyNetwork.getHead();
+  return `https://dashboard.tenderly.co/${username}/${project}/fork/${forkId}/simulation/${headId}`;
 };

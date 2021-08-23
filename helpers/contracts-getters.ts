@@ -1,5 +1,5 @@
 import { DRE, getDb, notFalsyOrZeroAddress } from './misc-utils';
-import { eContractid, tEthereumAddress } from './types';
+import { eContractid, tEthereumAddress, TokenContractId } from './types';
 import { IERC20Detailed__factory, WETHGateway__factory } from '../types';
 import { getFirstSigner } from '../helpers/wallet-helpers';
 import {
@@ -16,7 +16,10 @@ import {
   WETH9MockedFactory,
   PoolAddressesProviderRegistryFactory,
   AaveProtocolDataProviderFactory,
+  AaveOracleFactory,
+  RateOracleFactory,
 } from '../../aave-v3-core/types';
+import { MockTokenMap } from './contracts-helpers';
 
 export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
   return await PoolAddressesProviderFactory.connect(
@@ -155,3 +158,30 @@ export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
         .address,
     await getFirstSigner()
   );
+
+export const getAaveOracle = async (address?: tEthereumAddress) =>
+  await AaveOracleFactory.connect(
+    address || (await getDb().get(`${eContractid.AaveOracle}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getRateOracle = async (address?: tEthereumAddress) =>
+  await RateOracleFactory.connect(
+    address || (await getDb().get(`${eContractid.RateOracle}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+
+export const getAllMockedTokens = async () => {
+  const db = getDb();
+  const tokens: MockTokenMap = await Object.keys(TokenContractId).reduce<Promise<MockTokenMap>>(
+    async (acc, tokenSymbol) => {
+      const accumulator = await acc;
+      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
+      accumulator[tokenSymbol] = await getMintableERC20(address);
+      return Promise.resolve(acc);
+    },
+    Promise.resolve({})
+  );
+  return tokens;
+};

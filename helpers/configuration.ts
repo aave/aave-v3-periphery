@@ -112,15 +112,15 @@ export const getWethAddress = async (config: ICommonConfiguration) => {
 
 export const getWrappedNativeTokenAddress = async (config: ICommonConfiguration) => {
   const currentNetwork = process.env.MAINNET_FORK === 'true' ? 'main' : DRE.network.name;
-  const wethAddress = getParamPerNetwork(config.WrappedNativeToken, <eNetwork>currentNetwork);
-  if (wethAddress) {
-    return wethAddress;
-  }
-  if (currentNetwork.includes('main')) {
+  let wethAddress = getParamPerNetwork(config.WrappedNativeToken, <eNetwork>currentNetwork);
+  if (!wethAddress && currentNetwork.includes('main')) {
     throw new Error('WETH not set at mainnet configuration.');
   }
-  const weth = await deployWETHMocked();
-  return weth.address;
+  if (!wethAddress) {
+    const weth = await deployWETHMocked();
+    wethAddress = weth.address;
+  }
+  return wethAddress;
 };
 
 export const getRateOracles = (poolConfig: ICommonConfiguration) => {

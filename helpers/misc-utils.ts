@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import BN = require('bn.js');
 import low from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
-import { WAD } from './constants';
+import { WAD, ZERO_ADDRESS } from './constants';
 import { Wallet, ContractTransaction, Signer } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { tEthereumAddress } from './types';
@@ -92,21 +92,21 @@ interface DbEntry {
   };
 }
 
-// export const printContracts = () => {
-//   const network = DRE.network.name;
-//   const db = getDb();
-//   console.log('Contracts deployed at', network);
-//   console.log('---------------------------------');
+export const printContracts = () => {
+  const network = DRE.network.name;
+  const db = getDb();
+  console.log('Contracts deployed at', network);
+  console.log('---------------------------------');
 
-//   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
+  const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
 
-//   const contractsPrint = entries.map(
-//     ([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`
-//   );
+  const contractsPrint = entries.map(
+    ([key, value]: [string, DbEntry]) => `${key}: ${value[network].address}`
+  );
 
-//   console.log('N# Contracts:', entries.length);
-//   console.log(contractsPrint.join('\n'), '\n');
-// };
+  console.log('N# Contracts:', entries.length);
+  console.log(contractsPrint.join('\n'), '\n');
+};
 
 export const notFalsyOrZeroAddress = (address: tEthereumAddress | null | undefined): boolean => {
   if (!address) {
@@ -121,4 +121,14 @@ export const getImpersonatedSigner = async (address: tEthereumAddress): Promise<
     params: [address],
   });
   return await DRE.ethers.getSigner(address);
+};
+
+export const setBalance = async (
+  address: tEthereumAddress,
+  amount: BigNumberish
+): Promise<void> => {
+  await DRE.network.provider.request({
+    method: 'hardhat_setBalance',
+    params: [address, amount],
+  });
 };

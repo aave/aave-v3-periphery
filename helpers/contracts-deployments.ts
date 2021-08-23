@@ -1,12 +1,25 @@
 import { DRE } from './misc-utils';
-import { eContractid, tEthereumAddress, tStringTokenSmallUnits } from './types';
+import {
+  AavePools,
+  eContractid,
+  tEthereumAddress,
+  TokenContractId,
+  tStringTokenSmallUnits,
+} from './types';
 import { getFirstSigner } from './wallet-helpers';
-import { insertContractAddressInDb, linkBytecode, withSaveAndVerify } from './contracts-helpers';
+import {
+  insertContractAddressInDb,
+  linkBytecode,
+  registerContractInJsonDb,
+  withSaveAndVerify,
+} from './contracts-helpers';
 import {
   WalletBalanceProvider__factory,
   WETHGateway__factory,
   SelfdestructTransfer__factory,
 } from '../types';
+import { getReservesConfigByPool } from './configuration';
+import { MockContract } from '@ethereum-waffle/mock-contract';
 
 import {
   MintableERC20,
@@ -201,6 +214,25 @@ export const deployPriceOracle = async (verify?: boolean) =>
     [],
     verify
   );
+
+export const deployAllMockTokens = async (verify?: boolean) => {
+  const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
+
+  const protoConfigData = getReservesConfigByPool(AavePools.proto);
+
+  for (const tokenSymbol of Object.keys(TokenContractId)) {
+    let decimals = '18';
+
+    let configData = (<any>protoConfigData)[tokenSymbol];
+
+    tokens[tokenSymbol] = await deployMintableERC20(
+      [tokenSymbol, tokenSymbol, configData ? configData.reserveDecimals : decimals],
+      verify
+    );
+    await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
+  }
+  return tokens;
+};
 
 export const deployMockAggregator = async (price: tStringTokenSmallUnits, verify?: boolean) =>
   withSaveAndVerify(

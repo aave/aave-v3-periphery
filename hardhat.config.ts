@@ -19,7 +19,7 @@ dotenv.config({ path: '../.env' });
 const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
 // Prevent to load scripts before compilation and typechain
 if (!SKIP_LOAD) {
-  ['deploy', 'misc', 'setup', 'verify'].forEach((folder) => {
+  ['deploy', 'deployments', 'dev', 'full', 'migrations', 'misc', 'setup', 'verify'].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
       .filter((pth) => pth.includes('.ts'))

@@ -3,7 +3,7 @@ import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './helpers/test-wallets';
 import { eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
-import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
+import { HARDHATEVM_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
 import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS } from './helper-hardhat-config';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHATEVM_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
@@ -119,12 +119,12 @@ const config: HardhatUserConfig = {
       })),
       forking: mainnetFork,
     },
-    buidlerevm_docker: {
+    hardhatevm_docker: {
       hardfork: 'istanbul',
       blockGasLimit: 9500000,
       gas: 9500000,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHATEVM_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       url: 'http://localhost:8545',

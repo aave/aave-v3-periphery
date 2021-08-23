@@ -8,7 +8,7 @@ import { deploySelfdestructTransferMock } from '../helpers/contracts-deployments
 
 const { expect } = require('chai');
 
-makeSuite('Use native ETH at LendingPool via WETHGateway', (testEnv: TestEnv) => {
+makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
   const zero = BigNumber.from('0');
   const depositSize = utils.parseEther('5');
   const daiSize = utils.parseEther('10000');

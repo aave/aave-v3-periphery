@@ -90,6 +90,11 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: 'types',
+    externalArtifacts: [
+      'node_modules/@aave/core-v3/artifacts/contracts/**/*[!dbg].json',
+      'node_modules/@aave/core-v3/artifacts/contracts/**/**/*[!dbg].json',
+      'node_modules/@aave/core-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
+    ],
   },
   etherscan: {
     apiKey: ETHERSCAN_KEY,

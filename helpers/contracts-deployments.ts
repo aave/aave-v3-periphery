@@ -6,34 +6,35 @@ import {
   WalletBalanceProvider__factory,
   WETHGateway__factory,
   SelfdestructTransfer__factory,
+  WETH9Mocked__factory,
+  WETH9Mocked,
 } from '../types';
 
 import {
   MintableERC20,
-  MintableERC20Factory,
-  PoolAddressesProviderFactory,
-  PoolAddressesProviderRegistryFactory,
-  WETH9Mocked,
-  WETH9MockedFactory,
-  PoolFactory,
-  ConfiguratorLogicFactory,
-  PoolConfiguratorFactory,
-  StableAndVariableTokensHelperFactory,
-  ATokensAndRatesHelperFactory,
-  PriceOracleFactory,
-  MockAggregatorFactory,
-  AaveOracleFactory,
-  MockFlashLoanReceiverFactory,
-  AaveProtocolDataProviderFactory,
-  RateOracleFactory,
-  MockUniswapV2Router02Factory,
-  DefaultReserveInterestRateStrategyFactory,
-  DelegationAwareATokenFactory,
-  StableDebtTokenFactory,
-  VariableDebtTokenFactory,
-  ATokenFactory,
-} from '@aave/core-v3/types';
-import { PoolLibraryAddresses } from '@aave/core-v3/types/PoolFactory';
+  MintableERC20__factory,
+  PoolAddressesProvider__factory,
+  PoolAddressesProviderRegistry__factory,
+  WETH9,
+  WETH9__factory,
+  Pool__factory,
+  ConfiguratorLogic__factory,
+  PoolConfigurator__factory,
+  StableAndVariableTokensHelper__factory,
+  ATokensAndRatesHelper__factory,
+  PriceOracle__factory,
+  MockAggregator__factory,
+  AaveOracle__factory,
+  MockFlashLoanReceiver__factory,
+  AaveProtocolDataProvider__factory,
+  RateOracle__factory,
+  DefaultReserveInterestRateStrategy__factory,
+  DelegationAwareAToken__factory,
+  StableDebtToken__factory,
+  VariableDebtToken__factory,
+  AToken__factory,
+} from '../types';
+import { PoolLibraryAddresses } from '../types/factories/Pool__factory';
 
 const readArtifact = async (id: string) => {
   return DRE.artifacts.readArtifact(id);
@@ -41,7 +42,7 @@ const readArtifact = async (id: string) => {
 
 export const deployWETHMocked = async (verify?: boolean): Promise<WETH9Mocked> =>
   withSaveAndVerify(
-    await new WETH9MockedFactory(await getFirstSigner()).deploy(),
+    await new WETH9Mocked__factory(await getFirstSigner()).deploy(),
     eContractid.WETHMocked,
     [],
     verify
@@ -52,7 +53,7 @@ export const deployMintableERC20 = async (
   verify?: boolean
 ): Promise<MintableERC20> =>
   withSaveAndVerify(
-    await new MintableERC20Factory(await getFirstSigner()).deploy(...args),
+    await new MintableERC20__factory(await getFirstSigner()).deploy(...args),
     eContractid.MintableERC20,
     args,
     verify
@@ -60,7 +61,7 @@ export const deployMintableERC20 = async (
 
 export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
-    await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
+    await new PoolAddressesProvider__factory(await getFirstSigner()).deploy(marketId),
     eContractid.PoolAddressesProvider,
     [marketId],
     verify
@@ -68,7 +69,7 @@ export const deployPoolAddressesProvider = async (marketId: string, verify?: boo
 
 export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
+    await new PoolAddressesProviderRegistry__factory(await getFirstSigner()).deploy(),
     eContractid.PoolAddressesProviderRegistry,
     [],
     verify
@@ -77,12 +78,12 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
 export const deployDepositLogic = async (verify?: boolean) => {
   const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
   const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
-  const depositLogicFactory = await DRE.ethers.getContractFactory(
+  const depositLogic__factory = await DRE.ethers.getContractFactory(
     depositLogicArtifact.abi,
     linkedDepositLogicByteCode
   );
   const depositLogic = await (
-    await depositLogicFactory.connect(await getFirstSigner()).deploy()
+    await depositLogic__factory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
   return withSaveAndVerify(depositLogic, eContractid.DepositLogic, [], verify);
@@ -91,12 +92,12 @@ export const deployDepositLogic = async (verify?: boolean) => {
 export const deployBorrowLogic = async (verify?: boolean) => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
 
-  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+  const borrowLogic__factory = await DRE.ethers.getContractFactory(
     borrowLogicArtifact.abi,
     borrowLogicArtifact.bytecode
   );
   const borrowLogic = await (
-    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+    await borrowLogic__factory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
   return withSaveAndVerify(borrowLogic, eContractid.BorrowLogic, [], verify);
@@ -105,12 +106,12 @@ export const deployBorrowLogic = async (verify?: boolean) => {
 export const deployLiquidationLogic = async (verify?: boolean) => {
   const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
 
-  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+  const borrowLogic__factory = await DRE.ethers.getContractFactory(
     liquidationLogicArtifact.abi,
     liquidationLogicArtifact.bytecode
   );
   const liquidationLogic = await (
-    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+    await borrowLogic__factory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
   return withSaveAndVerify(liquidationLogic, eContractid.LiquidationLogic, [], verify);
@@ -132,23 +133,23 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
   return {
-    //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
-    ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
-    ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
-    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
+    ['contracts/protocol/libraries/logic/DepositLogic.sol:DepositLogic']: depositLogic.address,
+    ['contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic']: borrowLogic.address,
+    ['contracts/protocol/libraries/logic/LiquidationLogic.sol:LiquidationLogic']:
+      liquidationLogic.address,
   };
 };
 
 export const deployPool = async (verify?: boolean) => {
   const libraries = await deployAaveLibraries(verify);
-  const poolImpl = await new PoolFactory(libraries, await getFirstSigner()).deploy();
+  const poolImpl = await new Pool__factory(libraries, await getFirstSigner()).deploy();
   await insertContractAddressInDb(eContractid.PoolImpl, poolImpl.address);
   return withSaveAndVerify(poolImpl, eContractid.Pool, [], verify);
 };
 
 export const deployConfiguratorLogicLibrary = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new ConfiguratorLogicFactory(await getFirstSigner()).deploy(),
+    await new ConfiguratorLogic__factory(await getFirstSigner()).deploy(),
     eContractid.ConfiguratorLogic,
     [],
     verify
@@ -156,8 +157,11 @@ export const deployConfiguratorLogicLibrary = async (verify?: boolean) =>
 
 export const deployPoolConfigurator = async (verify?: boolean) => {
   const configuratorLogic = await deployConfiguratorLogicLibrary(verify);
-  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
-    { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
+  const poolConfiguratorImpl = await new PoolConfigurator__factory(
+    {
+      ['contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic']:
+        configuratorLogic.address,
+    },
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
@@ -177,7 +181,7 @@ export const deployStableAndVariableTokensHelper = async (
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new StableAndVariableTokensHelperFactory(await getFirstSigner()).deploy(...args),
+    await new StableAndVariableTokensHelper__factory(await getFirstSigner()).deploy(...args),
     eContractid.StableAndVariableTokensHelper,
     args,
     verify
@@ -188,7 +192,7 @@ export const deployATokensAndRatesHelper = async (
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new ATokensAndRatesHelperFactory(await getFirstSigner()).deploy(...args),
+    await new ATokensAndRatesHelper__factory(await getFirstSigner()).deploy(...args),
     eContractid.ATokensAndRatesHelper,
     args,
     verify
@@ -196,7 +200,7 @@ export const deployATokensAndRatesHelper = async (
 
 export const deployPriceOracle = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new PriceOracleFactory(await getFirstSigner()).deploy(),
+    await new PriceOracle__factory(await getFirstSigner()).deploy(),
     eContractid.PriceOracle,
     [],
     verify
@@ -204,7 +208,7 @@ export const deployPriceOracle = async (verify?: boolean) =>
 
 export const deployMockAggregator = async (price: tStringTokenSmallUnits, verify?: boolean) =>
   withSaveAndVerify(
-    await new MockAggregatorFactory(await getFirstSigner()).deploy(price),
+    await new MockAggregator__factory(await getFirstSigner()).deploy(price),
     eContractid.MockAggregator,
     [price],
     verify
@@ -215,7 +219,7 @@ export const deployAaveOracle = async (
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new AaveOracleFactory(await getFirstSigner()).deploy(...args),
+    await new AaveOracle__factory(await getFirstSigner()).deploy(...args),
     eContractid.AaveOracle,
     args,
     verify
@@ -223,7 +227,7 @@ export const deployAaveOracle = async (
 
 export const deployRateOracle = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new RateOracleFactory(await getFirstSigner()).deploy(),
+    await new RateOracle__factory(await getFirstSigner()).deploy(),
     eContractid.RateOracle,
     [],
     verify
@@ -234,7 +238,7 @@ export const deployAaveProtocolDataProvider = async (
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new AaveProtocolDataProviderFactory(await getFirstSigner()).deploy(addressesProvider),
+    await new AaveProtocolDataProvider__factory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.AaveProtocolDataProvider,
     [addressesProvider],
     verify
@@ -245,17 +249,9 @@ export const deployMockFlashLoanReceiver = async (
   verify?: boolean
 ) =>
   withSaveAndVerify(
-    await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(addressesProvider),
+    await new MockFlashLoanReceiver__factory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.MockFlashLoanReceiver,
     [addressesProvider],
-    verify
-  );
-
-export const deployMockUniswapRouter = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new MockUniswapV2Router02Factory(await getFirstSigner()).deploy(),
-    eContractid.MockUniswapV2Router02,
-    [],
     verify
   );
 
@@ -280,7 +276,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
   verify: boolean
 ) =>
   withSaveAndVerify(
-    await new DefaultReserveInterestRateStrategyFactory(await getFirstSigner()).deploy(...args),
+    await new DefaultReserveInterestRateStrategy__factory(await getFirstSigner()).deploy(...args),
     eContractid.DefaultReserveInterestRateStrategy,
     args,
     verify
@@ -288,7 +284,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
 
 export const deployDelegationAwareATokenImpl = async (verify: boolean) =>
   withSaveAndVerify(
-    await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(),
+    await new DelegationAwareAToken__factory(await getFirstSigner()).deploy(),
     eContractid.DelegationAwareAToken,
     [],
     verify
@@ -296,7 +292,7 @@ export const deployDelegationAwareATokenImpl = async (verify: boolean) =>
 
 export const deployGenericStableDebtToken = async () =>
   withSaveAndVerify(
-    await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new StableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.StableDebtToken,
     [],
     false
@@ -304,7 +300,7 @@ export const deployGenericStableDebtToken = async () =>
 
 export const deployGenericVariableDebtToken = async () =>
   withSaveAndVerify(
-    await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new VariableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.VariableDebtToken,
     [],
     false
@@ -312,7 +308,7 @@ export const deployGenericVariableDebtToken = async () =>
 
 export const deployGenericATokenImpl = async (verify: boolean) =>
   withSaveAndVerify(
-    await new ATokenFactory(await getFirstSigner()).deploy(),
+    await new AToken__factory(await getFirstSigner()).deploy(),
     eContractid.AToken,
     [],
     verify

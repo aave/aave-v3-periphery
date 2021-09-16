@@ -11,6 +11,5 @@
   "include": ["./scripts", "./test", "./tasks", "./helpers"],
   "files": [
     "./hardhat.config.ts",
-    "@aave/core-v3/types/index.ts"
   ]
 }

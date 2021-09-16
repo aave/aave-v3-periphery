@@ -1,21 +1,13 @@
 import rawHRE from 'hardhat';
 import { ethers, Signer } from 'ethers';
-import { MockContract } from 'ethereum-waffle';
 import { waitForTx } from '../helpers/misc-utils';
-import {
-  AavePools,
-  eContractid,
-  iAssetBase,
-  tEthereumAddress,
-  TokenContractId,
-} from '../helpers/types';
+import { AavePools, eContractid, iAssetBase, TokenContractId } from '../helpers/types';
 import {
   deployAaveOracle,
   deployAaveProtocolDataProvider,
   deployATokensAndRatesHelper,
   deployMintableERC20,
   deployMockFlashLoanReceiver,
-  deployMockUniswapRouter,
   deployPool,
   deployPoolAddressesProvider,
   deployPoolAddressesProviderRegistry,
@@ -41,7 +33,6 @@ import {
 import { getEthersSigners, getEthersSignersAddresses } from '../helpers/wallet-helpers';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import {
-  getAllMockedTokens,
   getPairsTokenAggregator,
   getPool,
   getPoolConfiguratorProxy,
@@ -60,7 +51,6 @@ import {
 } from '../helpers/init-helpers';
 import { initializeMakeSuite } from './helpers/make-suite';
 
-import { MintableERC20, WETH9Mocked } from '@aave/core-v3/types';
 import { getAllAggregatorsAddresses, getAllTokenAddresses } from '../helpers/mock-helpers';
 
 const deployAllMockTokens = async (deployer: Signer) => {
@@ -223,18 +213,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
   await deployMockFlashLoanReceiver(addressesProvider.address);
-
-  const mockUniswapRouter = await deployMockUniswapRouter();
-
-  const adapterParams: [string, string, string] = [
-    addressesProvider.address,
-    mockUniswapRouter.address,
-    mockTokens.WETH.address,
-  ];
-
-  //   await deployUniswapLiquiditySwapAdapter(adapterParams);
-  //   await deployUniswapRepayAdapter(adapterParams);
-  //   await deployFlashLiquidationAdapter(adapterParams);
 
   await deployWalletBalancerProvider();
 

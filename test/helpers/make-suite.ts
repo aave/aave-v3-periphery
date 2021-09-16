@@ -36,7 +36,7 @@ import {
   StableDebtToken,
   VariableDebtToken,
   WETH9Mocked,
-} from '@aave/core-v3/types';
+} from '../../types';
 import { WETHGateway } from '../../types';
 
 chai.use(bignumberChai());

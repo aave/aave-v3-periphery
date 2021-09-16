@@ -3,23 +3,23 @@ import { eContractid, tEthereumAddress } from './types';
 import { IERC20Detailed__factory, WETHGateway__factory } from '../types';
 import { getFirstSigner } from '../helpers/wallet-helpers';
 import {
-  PoolConfiguratorFactory,
-  PoolAddressesProviderFactory,
-  PoolFactory,
-  PriceOracleFactory,
-  StableAndVariableTokensHelperFactory,
-  ATokensAndRatesHelperFactory,
-  ATokenFactory,
-  StableDebtTokenFactory,
-  VariableDebtTokenFactory,
-  MintableERC20Factory,
-  WETH9MockedFactory,
-  PoolAddressesProviderRegistryFactory,
-  AaveProtocolDataProviderFactory,
-} from '../../aave-v3-core/types';
+  PoolConfigurator__factory,
+  PoolAddressesProvider__factory,
+  Pool__factory,
+  PriceOracle__factory,
+  StableAndVariableTokensHelper__factory,
+  ATokensAndRatesHelper__factory,
+  AToken__factory,
+  StableDebtToken__factory,
+  VariableDebtToken__factory,
+  MintableERC20__factory,
+  WETH9Mocked__factory,
+  PoolAddressesProviderRegistry__factory,
+  AaveProtocolDataProvider__factory,
+} from '../types';
 
 export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
-  return await PoolAddressesProviderFactory.connect(
+  return await PoolAddressesProvider__factory.connect(
     address ||
       (await getDb().get(`${eContractid.PoolAddressesProvider}.${DRE.network.name}`).value())
         .address,
@@ -28,20 +28,20 @@ export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
 };
 
 export const getPool = async (address?: tEthereumAddress) =>
-  await PoolFactory.connect(
+  await Pool__factory.connect(
     address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getPriceOracle = async (address?: tEthereumAddress) =>
-  await PriceOracleFactory.connect(
+  await PriceOracle__factory.connect(
     address ||
       (await getDb().get(`${eContractid.PriceOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
-  return await PoolConfiguratorFactory.connect(
+  return await PoolConfigurator__factory.connect(
     address ||
       (await getDb().get(`${eContractid.PoolConfigurator}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
@@ -52,7 +52,7 @@ export const getIErc20Detailed = async (address: tEthereumAddress) =>
   await IERC20Detailed__factory.connect(address, await getFirstSigner());
 
 export const getPoolAddressesProviderRegistry = async (address?: tEthereumAddress) =>
-  await PoolAddressesProviderRegistryFactory.connect(
+  await PoolAddressesProviderRegistry__factory.connect(
     notFalsyOrZeroAddress(address)
       ? address
       : (
@@ -90,7 +90,7 @@ export const getPairsTokenAggregator = (
 };
 
 export const getStableAndVariableTokensHelper = async (address?: tEthereumAddress) =>
-  await StableAndVariableTokensHelperFactory.connect(
+  await StableAndVariableTokensHelper__factory.connect(
     address ||
       (
         await getDb()
@@ -101,7 +101,7 @@ export const getStableAndVariableTokensHelper = async (address?: tEthereumAddres
   );
 
 export const getATokensAndRatesHelper = async (address?: tEthereumAddress) =>
-  await ATokensAndRatesHelperFactory.connect(
+  await ATokensAndRatesHelper__factory.connect(
     address ||
       (await getDb().get(`${eContractid.ATokensAndRatesHelper}.${DRE.network.name}`).value())
         .address,
@@ -109,7 +109,7 @@ export const getATokensAndRatesHelper = async (address?: tEthereumAddress) =>
   );
 
 export const getWETHMocked = async (address?: tEthereumAddress) =>
-  await WETH9MockedFactory.connect(
+  await WETH9Mocked__factory.connect(
     address || (await getDb().get(`${eContractid.WETHMocked}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
@@ -122,34 +122,34 @@ export const getWETHGateway = async (address?: tEthereumAddress) =>
   );
 
 export const getAToken = async (address?: tEthereumAddress) =>
-  await ATokenFactory.connect(
+  await AToken__factory.connect(
     address || (await getDb().get(`${eContractid.AToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getStableDebtToken = async (address?: tEthereumAddress) =>
-  await StableDebtTokenFactory.connect(
+  await StableDebtToken__factory.connect(
     address ||
       (await getDb().get(`${eContractid.StableDebtToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getVariableDebtToken = async (address?: tEthereumAddress) =>
-  await VariableDebtTokenFactory.connect(
+  await VariableDebtToken__factory.connect(
     address ||
       (await getDb().get(`${eContractid.VariableDebtToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getMintableERC20 = async (address: tEthereumAddress) =>
-  await MintableERC20Factory.connect(
+  await MintableERC20__factory.connect(
     address ||
       (await getDb().get(`${eContractid.MintableERC20}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
-  await AaveProtocolDataProviderFactory.connect(
+  await AaveProtocolDataProvider__factory.connect(
     address ||
       (await getDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}`).value())
         .address,

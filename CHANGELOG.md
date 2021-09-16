@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.0.0...v1.1.0) (2021-09-16)
+
+
+### Features
+
+* bump Solidity version to 0.8.7 ([a0a9758](https://www.github.com/aave/aave-v3-periphery/commit/a0a9758239383898e2b193e4cc465ee2b35ca37d))
+* fix github packages installation in workflows. ([40727dc](https://www.github.com/aave/aave-v3-periphery/commit/40727dcfcc2941aae373dd076e4097ab0c205336))
+
+
+### Bug Fixes
+
+* test scripts and fix typescript integration with dependencies ([02ec4b9](https://www.github.com/aave/aave-v3-periphery/commit/02ec4b9d8c73e9c80229baa13ac5321f0da9cdce))
+
 ## 1.0.0 (2021-09-15)
 
 

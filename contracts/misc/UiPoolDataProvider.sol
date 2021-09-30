@@ -43,10 +43,10 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     )
   {
     return (
-      interestRateStrategy.variableRateSlope1(),
-      interestRateStrategy.variableRateSlope2(),
-      interestRateStrategy.stableRateSlope1(),
-      interestRateStrategy.stableRateSlope2()
+      interestRateStrategy.getVariableRateSlope1(),
+      interestRateStrategy.getVariableRateSlope2(),
+      interestRateStrategy.getStableRateSlope1(),
+      interestRateStrategy.getStableRateSlope2()
     );
   }
 
@@ -111,16 +111,16 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         reserveData.reserveLiquidationThreshold,
         reserveData.reserveLiquidationBonus,
         reserveData.decimals,
-        reserveData.reserveFactor
-      ) = baseData.configuration.getParamsMemory();
-      (reserveData.borrowCap, reserveData.supplyCap) = baseData.configuration.getCapsMemory();
+        reserveData.reserveFactor,
+      ) = baseData.configuration.getParams();
+      (reserveData.borrowCap, reserveData.supplyCap) = baseData.configuration.getCaps();
       (
         reserveData.isActive,
         reserveData.isFrozen,
         reserveData.borrowingEnabled,
         reserveData.stableBorrowRateEnabled,
         reserveData.isPaused
-      ) = baseData.configuration.getFlagsMemory();
+      ) = baseData.configuration.getFlags();
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
       (
         reserveData.variableRateSlope1,

@@ -76,10 +76,11 @@ const config: HardhatUserConfig = {
   },
   dependencyCompiler: {
     paths: [
-      '@aave/core-v3/contracts/protocol/libraries/logic/DepositLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/SupplyLogic.sol',
       '@aave/core-v3/contracts/protocol/libraries/logic/BorrowLogic.sol',
       '@aave/core-v3/contracts/protocol/libraries/logic/LiquidationLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/ConfiguratorLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/EModeLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/BridgeLogic.sol',
     ],
     keep: false,
   },
@@ -93,6 +94,7 @@ const config: HardhatUserConfig = {
     externalArtifacts: [
       'node_modules/@aave/core-v3/artifacts/contracts/**/*[!dbg].json',
       'node_modules/@aave/core-v3/artifacts/contracts/**/**/*[!dbg].json',
+      'node_modules/@aave/core-v3/artifacts/contracts/**/**/**/*[!dbg].json',
       'node_modules/@aave/core-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
     ],
   },
@@ -123,6 +125,7 @@ const config: HardhatUserConfig = {
         balance,
       })),
       forking: mainnetFork,
+      allowUnlimitedContractSize: true,
     },
     hardhatevm_docker: {
       hardfork: 'istanbul',

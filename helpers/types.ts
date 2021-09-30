@@ -83,6 +83,12 @@ export enum eContractid {
   WETHGateway = 'WETHGateway',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   WalletBalanceProvider = 'WalletBalanceProvider',
+  EModeLogic = 'EModeLogic',
+  BridgeLogic = 'BridgeLogic',
+  SupplyLogic = 'SupplyLogic',
+  ACLManager = 'ACLManager',
+  ReservesSetupHelper = 'ReservesSetupHelper',
+  MockIncentivesController = 'MockIncentivesController',
 }
 
 export type tEthereumAddress = string;
@@ -222,6 +228,9 @@ export interface IInterestRateStrategyParams {
   variableRateSlope2: string;
   stableRateSlope1: string;
   stableRateSlope2: string;
+  baseStableRateOffset: string;
+  stableRateExcessOffset: string;
+  optimalStableToTotalDebtRatio: string;
 }
 
 export interface IReserveBorrowParams {

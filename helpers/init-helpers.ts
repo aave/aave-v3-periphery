@@ -1,10 +1,10 @@
 import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from './types';
 import { chunk, waitForTx } from './misc-utils';
 import {
-  getATokensAndRatesHelper,
+  getACLManager,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
-  getStableAndVariableTokensHelper,
+  getReservesSetupHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish, Signer } from 'ethers';
@@ -29,11 +29,9 @@ export const initReservesByHelper = async (
   symbolPrefix: string,
   admin: tEthereumAddress,
   treasuryAddress: tEthereumAddress,
-  incentivesController: tEthereumAddress,
-  verify: boolean
+  incentivesController: tEthereumAddress
 ): Promise<BigNumber> => {
   let gasUsage = BigNumber.from('0');
-  const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
 
   const addressProvider = await getPoolAddressesProvider();
 
@@ -71,6 +69,9 @@ export const initReservesByHelper = async (
     string,
     string,
     string,
+    string,
+    string,
+    string,
     string
   ];
   let rateStrategies: Record<string, typeof strategyRates> = {};
@@ -97,7 +98,7 @@ export const initReservesByHelper = async (
   stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
   variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
 
-  const aTokenImplementation = await deployGenericATokenImpl(verify);
+  const aTokenImplementation = await deployGenericATokenImpl();
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
@@ -106,7 +107,7 @@ export const initReservesByHelper = async (
   ) as [string, IReserveParams][];
 
   if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(verify);
+    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl();
     delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
     rawInsertContractAddressInDb(
       `delegationAwareATokenImpl`,
@@ -132,6 +133,9 @@ export const initReservesByHelper = async (
       variableRateSlope2,
       stableRateSlope1,
       stableRateSlope2,
+      baseStableRateOffset,
+      stableRateExcessOffset,
+      optimalStableToTotalDebtRatio,
     } = strategy;
     if (!strategyAddresses[strategy.name]) {
       // Strategy does not exist, create a new one
@@ -143,9 +147,12 @@ export const initReservesByHelper = async (
         variableRateSlope2,
         stableRateSlope1,
         stableRateSlope2,
+        baseStableRateOffset,
+        stableRateExcessOffset,
+        optimalStableToTotalDebtRatio,
       ];
       strategyAddresses[strategy.name] = (
-        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name], verify)
+        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])
       ).address;
       // This causes the last strategy to be printed twice, once under "DefaultReserveInterestRateStrategy"
       // and once under the actual `strategyASSET` key.
@@ -221,7 +228,9 @@ export const configureReservesByHelper = async (
   admin: tEthereumAddress
 ) => {
   const addressProvider = await getPoolAddressesProvider();
-  const atokenAndRatesDeployer = await getATokensAndRatesHelper();
+  const aclManager = await getACLManager();
+  const reservesSetupHelper = await getReservesSetupHelper();
+
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -272,8 +281,8 @@ export const configureReservesByHelper = async (
       console.log(`- Reserve ${assetSymbol} is already enabled as collateral, skipping`);
       continue;
     }
-
     // Push data
+
     inputParams.push({
       asset: tokenAddress,
       baseLTV: baseLTVAsCollateral,
@@ -290,25 +299,27 @@ export const configureReservesByHelper = async (
     symbols.push(assetSymbol);
   }
   if (tokens.length) {
-    // Set aTokenAndRatesDeployer as temporal admin
-    await waitForTx(await addressProvider.setPoolAdmin(atokenAndRatesDeployer.address));
+    // Add reservesSetupHelper as temporal admin
+    await waitForTx(await aclManager.addPoolAdmin(reservesSetupHelper.address));
 
     // Deploy init per chunks
     const enableChunks = 20;
     const chunkedSymbols = chunk(symbols, enableChunks);
     const chunkedInputParams = chunk(inputParams, enableChunks);
+    const poolConfiguratorAddress = await addressProvider.getPoolConfigurator();
 
     console.log(`- Configure reserves in ${chunkedInputParams.length} txs`);
     for (let chunkIndex = 0; chunkIndex < chunkedInputParams.length; chunkIndex++) {
       await waitForTx(
-        await atokenAndRatesDeployer.configureReserves(chunkedInputParams[chunkIndex], {
-          gasLimit: 12000000,
-        })
+        await reservesSetupHelper.configureReserves(
+          poolConfiguratorAddress,
+          chunkedInputParams[chunkIndex]
+        )
       );
       console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     }
-    // Set deployer back as admin
-    await waitForTx(await addressProvider.setPoolAdmin(admin));
+    // Remove reservesSetupHelper as admin
+    await waitForTx(await aclManager.removePoolAdmin(reservesSetupHelper.address));
   }
 };
 

@@ -16,7 +16,7 @@ import {
   getWETHGateway,
   getWETHMocked,
 } from '../../helpers/contracts-getters';
-import AaveConfig from '../../markets/aave';
+import AaveConfig from '../../market-config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { DRE, evmRevert, evmSnapshot } from '../../helpers/misc-utils';
 import { usingTenderly } from '../../helpers/tenderly-utils';

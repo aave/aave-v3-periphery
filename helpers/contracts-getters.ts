@@ -1,14 +1,14 @@
 import { DRE, getDb, notFalsyOrZeroAddress } from './misc-utils';
 import { eContractid, tEthereumAddress } from './types';
-import { IERC20Detailed__factory, WETHGateway__factory } from '../types';
 import { getFirstSigner } from '../helpers/wallet-helpers';
 import {
+  IERC20Detailed__factory,
+  ReservesSetupHelper__factory,
+  WETHGateway__factory,
   PoolConfigurator__factory,
   PoolAddressesProvider__factory,
   Pool__factory,
   PriceOracle__factory,
-  StableAndVariableTokensHelper__factory,
-  ATokensAndRatesHelper__factory,
   AToken__factory,
   StableDebtToken__factory,
   VariableDebtToken__factory,
@@ -16,6 +16,7 @@ import {
   WETH9Mocked__factory,
   PoolAddressesProviderRegistry__factory,
   AaveProtocolDataProvider__factory,
+  ACLManager__factory,
 } from '../types';
 
 export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
@@ -89,25 +90,6 @@ export const getPairsTokenAggregator = (
   return [mappedPairs, mappedAggregators];
 };
 
-export const getStableAndVariableTokensHelper = async (address?: tEthereumAddress) =>
-  await StableAndVariableTokensHelper__factory.connect(
-    address ||
-      (
-        await getDb()
-          .get(`${eContractid.StableAndVariableTokensHelper}.${DRE.network.name}`)
-          .value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getATokensAndRatesHelper = async (address?: tEthereumAddress) =>
-  await ATokensAndRatesHelper__factory.connect(
-    address ||
-      (await getDb().get(`${eContractid.ATokensAndRatesHelper}.${DRE.network.name}`).value())
-        .address,
-    await getFirstSigner()
-  );
-
 export const getWETHMocked = async (address?: tEthereumAddress) =>
   await WETH9Mocked__factory.connect(
     address || (await getDb().get(`${eContractid.WETHMocked}.${DRE.network.name}`).value()).address,
@@ -153,5 +135,19 @@ export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
     address ||
       (await getDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}`).value())
         .address,
+    await getFirstSigner()
+  );
+
+export const getACLManager = async (address?: tEthereumAddress) => {
+  return await ACLManager__factory.connect(
+    address || (await getDb().get(`${eContractid.ACLManager}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+};
+
+export const getReservesSetupHelper = async (address?: tEthereumAddress) =>
+  await ReservesSetupHelper__factory.connect(
+    address ||
+      (await getDb().get(`${eContractid.ReservesSetupHelper}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );

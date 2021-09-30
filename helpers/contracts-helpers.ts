@@ -131,6 +131,15 @@ export const withSaveAndVerify = async <ContractType extends Contract>(
   return instance;
 };
 
+export const withSave = async <ContractType extends Contract>(
+  instance: ContractType,
+  id: string
+): Promise<ContractType> => {
+  await waitForTx(instance.deployTransaction);
+  await registerContractInJsonDb(id, instance);
+  return instance;
+};
+
 export const insertContractAddressInDb = async (id: eContractid, address: tEthereumAddress) =>
   await getDb()
     .set(`${id}.${DRE.network.name}`, {

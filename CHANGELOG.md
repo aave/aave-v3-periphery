@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.1.0...v1.2.0) (2021-10-01)
+
+
+### Features
+
+* Adapt codebase and test setup to @aave/core-v3@1.1.0 ([79c8468](https://www.github.com/aave/aave-v3-periphery/commit/79c8468eca13dfde6ee24b1c996e3602be5d4d95))
+
 ## [1.1.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.0.0...v1.1.0) (2021-09-16)
 
 

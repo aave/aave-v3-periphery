@@ -325,8 +325,8 @@ export const configureReservesByHelper = async (
 
 export const authorizeWETHGateway = async (
   wethGateWay: tEthereumAddress,
-  lendingPool: tEthereumAddress
+  pool: tEthereumAddress
 ) =>
   await new WETHGateway__factory(await getFirstSigner())
     .attach(wethGateWay)
-    .authorizeLendingPool(lendingPool);
+    .authorizePool(pool);

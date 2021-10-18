@@ -40,6 +40,8 @@ interface IUiPoolDataProvider {
     uint256 variableRateSlope2;
     uint256 stableRateSlope1;
     uint256 stableRateSlope2;
+    //
+    uint256 debtCeiling;
   }
 
   struct UserReserveData {

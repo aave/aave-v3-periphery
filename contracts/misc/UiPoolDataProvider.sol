@@ -16,12 +16,7 @@ import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTy
 import {
   DefaultReserveInterestRateStrategy
 } from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
-import {IEACAggregatorProxy} from '../interfaces/IEACAggregatorProxy.sol';
-
-// SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
-
+import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
@@ -65,7 +60,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     override
     returns (address[] memory)
   {
-    IPool lendingPool = IPool(provider.getLendingPool());
+    IPool lendingPool = IPool(provider.getPool());
     return lendingPool.getReservesList();
   }
 
@@ -79,7 +74,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     )
   {
     IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
-    IPool lendingPool = IPool(provider.getLendingPool());
+    IPool lendingPool = IPool(provider.getPool());
     address[] memory reserves = lendingPool.getReservesList();
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
 
@@ -90,15 +85,21 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       // reserve current state
       DataTypes.ReserveData memory baseData =
         lendingPool.getReserveData(reserveData.underlyingAsset);
+      //the liquidity index. Expressed in ray
       reserveData.liquidityIndex = baseData.liquidityIndex;
+      //variable borrow index. Expressed in ray
       reserveData.variableBorrowIndex = baseData.variableBorrowIndex;
+      //the current supply rate. Expressed in ray
       reserveData.liquidityRate = baseData.currentLiquidityRate;
+      //the current variable borrow rate. Expressed in ray
       reserveData.variableBorrowRate = baseData.currentVariableBorrowRate;
+      //the current stable borrow rate. Expressed in ray
       reserveData.stableBorrowRate = baseData.currentStableBorrowRate;
       reserveData.lastUpdateTimestamp = baseData.lastUpdateTimestamp;
       reserveData.aTokenAddress = baseData.aTokenAddress;
       reserveData.stableDebtTokenAddress = baseData.stableDebtTokenAddress;
       reserveData.variableDebtTokenAddress = baseData.variableDebtTokenAddress;
+      //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
       reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
 
@@ -140,6 +141,17 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       ) = getInterestRateStrategySlopes(
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
+
+
+      //stores the reserve configuration
+      DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
+      reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
+      reserveData.eModeCategory = reserveConfigurationMap.getEModeCategory();
+      (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps()
+      // reserveData.
+      // reserveData.
+      // reserveData.
+
     }
 
     BaseCurrencyInfo memory baseCurrencyInfo;

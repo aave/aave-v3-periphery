@@ -43,14 +43,20 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       uint256,
       uint256,
       uint256,
+      uint256,
+      uint256,
+      uint256,
       uint256
     )
   {
     return (
-      interestRateStrategy.variableRateSlope1(),
-      interestRateStrategy.variableRateSlope2(),
-      interestRateStrategy.stableRateSlope1(),
-      interestRateStrategy.stableRateSlope2()
+      interestRateStrategy.getVariableRateSlope1(),
+      interestRateStrategy.getVariableRateSlope2(),
+      interestRateStrategy.getStableRateSlope1(),
+      interestRateStrategy.getStableRateSlope2(),
+      interestRateStrategy.getBaseStableBorrowRate(),
+      interestRateStrategy.getBaseVariableBorrowRate(),
+      interestRateStrategy.getMaxVariableBorrowRate()
     );
   }
 
@@ -60,8 +66,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     override
     returns (address[] memory)
   {
-    IPool lendingPool = IPool(provider.getPool());
-    return lendingPool.getReservesList();
+    IPool pool = IPool(provider.getPool());
+    return pool.getReservesList();
   }
 
   function getReservesData(IPoolAddressesProvider provider)
@@ -74,8 +80,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     )
   {
     IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
-    IPool lendingPool = IPool(provider.getPool());
-    address[] memory reserves = lendingPool.getReservesList();
+    IPool pool = IPool(provider.getPool());
+    address[] memory reserves = pool.getReservesList();
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
 
     for (uint256 i = 0; i < reserves.length; i++) {
@@ -84,7 +90,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
       // reserve current state
       DataTypes.ReserveData memory baseData =
-        lendingPool.getReserveData(reserveData.underlyingAsset);
+        pool.getReserveData(reserveData.underlyingAsset);
       //the liquidity index. Expressed in ray
       reserveData.liquidityIndex = baseData.liquidityIndex;
       //variable borrow index. Expressed in ray
@@ -119,38 +125,41 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
       reserveData.name = '';
 
+      //stores the reserve configuration
+      DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
+      reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
+      (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
+      // reserveData.
+      // reserveData.
+      // reserveData.
+      uint256 eModeCategoryId;
       (
         reserveData.baseLTVasCollateral,
         reserveData.reserveLiquidationThreshold,
         reserveData.reserveLiquidationBonus,
         reserveData.decimals,
-        reserveData.reserveFactor
-      ) = baseData.configuration.getParamsMemory();
+        reserveData.reserveFactor,
+        eModeCategoryId
+      ) = reserveConfigurationMap.getParams();
+      reserveData.eModeCategoryId = uint8(eModeCategoryId);
+
       (
         reserveData.isActive,
         reserveData.isFrozen,
         reserveData.borrowingEnabled,
-        reserveData.stableBorrowRateEnabled
-      ) = baseData.configuration.getFlagsMemory();
+        reserveData.stableBorrowRateEnabled,
+        reserveData.isPaused
+      ) = reserveConfigurationMap.getFlags();
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
-      (
-        reserveData.variableRateSlope1,
-        reserveData.variableRateSlope2,
-        reserveData.stableRateSlope1,
-        reserveData.stableRateSlope2
-      ) = getInterestRateStrategySlopes(
-        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
-      );
+      
+    //   (    reserveData.ltv,
+    // reserveData.liquidationThreshold,
+    // reserveData.liquidationBonus,
+    // // each eMode category may or may not have a custom oracle to override the individual assets price oracles
+    // reserveData.priceSource,) = pool.getEModeCategoryData(reserveData.eModeCategoryId);
+    DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
+      
 
-
-      //stores the reserve configuration
-      DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
-      reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
-      reserveData.eModeCategory = reserveConfigurationMap.getEModeCategory();
-      (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps()
-      // reserveData.
-      // reserveData.
-      // reserveData.
 
     }
 
@@ -175,15 +184,15 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     override
     returns (UserReserveData[] memory)
   {
-    IPool lendingPool = IPool(provider.getLendingPool());
-    address[] memory reserves = lendingPool.getReservesList();
-    DataTypes.UserConfigurationMap memory userConfig = lendingPool.getUserConfiguration(user);
+    IPool pool = IPool(provider.getPool());
+    address[] memory reserves = pool.getReservesList();
+    DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
     UserReserveData[] memory userReservesData =
       new UserReserveData[](user != address(0) ? reserves.length : 0);
 
     for (uint256 i = 0; i < reserves.length; i++) {
-      DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
+      DataTypes.ReserveData memory baseData = pool.getReserveData(reserves[i]);
 
       // user reserve data
       userReservesData[i].underlyingAsset = reserves[i];
@@ -214,4 +223,6 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
     return (userReservesData);
   }
+
+  fallback () external {}
 }

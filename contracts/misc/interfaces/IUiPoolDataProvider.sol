@@ -2,6 +2,7 @@
 pragma solidity 0.8.7;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
 interface IUiPoolDataProvider {
   struct AggregatedReserveData {
@@ -18,6 +19,7 @@ interface IUiPoolDataProvider {
     bool stableBorrowRateEnabled;
     bool isActive;
     bool isFrozen;
+    bool isPaused;
     // base data
     uint128 liquidityIndex;
     uint128 variableBorrowIndex;
@@ -36,12 +38,19 @@ interface IUiPoolDataProvider {
     uint256 stableDebtLastUpdateTimestamp;
     uint256 totalScaledVariableDebt;
     uint256 priceInMarketReferenceCurrency;
-    uint256 variableRateSlope1;
-    uint256 variableRateSlope2;
-    uint256 stableRateSlope1;
-    uint256 stableRateSlope2;
     //
     uint256 debtCeiling;
+    uint8 eModeCategoryId;
+    uint256 borrowCap;
+    uint256 supplyCap; 
+
+    // DataTypes.EModeCategory eModeCategory;
+    uint16 ltv;
+    uint16 liquidationThreshold;
+    uint16 liquidationBonus;
+    // each eMode category may or may not have a custom oracle to override the individual assets price oracles
+    address priceSource;
+    string label;
   }
 
   struct UserReserveData {

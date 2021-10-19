@@ -31,7 +31,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   constructor(
     IEACAggregatorProxy _networkBaseTokenPriceInUsdProxyAggregator, 
     IEACAggregatorProxy _marketReferenceCurrencyPriceInUsdProxyAggregator
-  ) public {
+  ) {
     networkBaseTokenPriceInUsdProxyAggregator = _networkBaseTokenPriceInUsdProxyAggregator;
     marketReferenceCurrencyPriceInUsdProxyAggregator = _marketReferenceCurrencyPriceInUsdProxyAggregator;
   }
@@ -129,9 +129,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
-      // reserveData.
-      // reserveData.
-      // reserveData.
+
       uint256 eModeCategoryId;
       (
         reserveData.baseLTVasCollateral,
@@ -152,15 +150,13 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       ) = reserveConfigurationMap.getFlags();
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
       
-    //   (    reserveData.ltv,
-    // reserveData.liquidationThreshold,
-    // reserveData.liquidationBonus,
-    // // each eMode category may or may not have a custom oracle to override the individual assets price oracles
-    // reserveData.priceSource,) = pool.getEModeCategoryData(reserveData.eModeCategoryId);
-    DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
-      
-
-
+      DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
+      reserveData.eModeLtv = categoryData.ltv;
+      reserveData.eModeLiquidationThreshold =categoryData.liquidationThreshold;
+      reserveData.eModeLiquidationBonus =categoryData.liquidationBonus;
+      // each eMode category may or may not have a custom oracle to override the individual assets price oracles
+      reserveData.eModePriceSource =categoryData.priceSource;
+      reserveData.eModeLabel = categoryData.label;
     }
 
     BaseCurrencyInfo memory baseCurrencyInfo;
@@ -182,12 +178,14 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     external
     view
     override
-    returns (UserReserveData[] memory)
+    returns (UserReserveData[] memory, uint8)
   {
     IPool pool = IPool(provider.getPool());
     address[] memory reserves = pool.getReservesList();
     DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
+    uint8 userEmodeCategoryId = uint8(pool.getUserEMode((user)));
+    
     UserReserveData[] memory userReservesData =
       new UserReserveData[](user != address(0) ? reserves.length : 0);
 
@@ -221,8 +219,6 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       }
     }
 
-    return (userReservesData);
+    return (userReservesData, userEmodeCategoryId);
   }
-
-  fallback () external {}
 }

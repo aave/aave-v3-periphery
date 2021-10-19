@@ -39,6 +39,11 @@ interface IUiPoolDataProvider {
     uint256 totalScaledVariableDebt;
     uint256 priceInMarketReferenceCurrency;
     //
+    uint256 variableRateSlope1;
+    uint256 variableRateSlope2;
+    uint256 stableRateSlope1;
+    uint256 stableRateSlope2;
+    //
     uint256 debtCeiling;
     uint8 eModeCategoryId;
     uint256 borrowCap;

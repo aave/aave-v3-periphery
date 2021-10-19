@@ -43,9 +43,6 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       uint256,
       uint256,
       uint256,
-      uint256,
-      uint256,
-      uint256,
       uint256
     )
   {
@@ -53,10 +50,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       interestRateStrategy.getVariableRateSlope1(),
       interestRateStrategy.getVariableRateSlope2(),
       interestRateStrategy.getStableRateSlope1(),
-      interestRateStrategy.getStableRateSlope2(),
-      interestRateStrategy.getBaseStableBorrowRate(),
-      interestRateStrategy.getBaseVariableBorrowRate(),
-      interestRateStrategy.getMaxVariableBorrowRate()
+      interestRateStrategy.getStableRateSlope2()
     );
   }
 
@@ -124,6 +118,16 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       // we're getting this info from the aToken, because some of assets can be not compliant with ETC20Detailed
       reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
       reserveData.name = '';
+
+      (
+        reserveData.variableRateSlope1,
+        reserveData.variableRateSlope2,
+        reserveData.stableRateSlope1,
+        reserveData.stableRateSlope2
+      ) = getInterestRateStrategySlopes(
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+      );
+
 
       //stores the reserve configuration
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;

@@ -2,7 +2,7 @@
 pragma solidity 0.8.7;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IAaveIncentivesController} from '@aave/core-v3/contracts/interfaces/IAaveIncentivesController.sol';
+import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
 interface IUiPoolDataProvider {
   struct AggregatedReserveData {
@@ -14,8 +14,6 @@ interface IUiPoolDataProvider {
     uint256 reserveLiquidationThreshold;
     uint256 reserveLiquidationBonus;
     uint256 reserveFactor;
-    uint256 borrowCap;
-    uint256 supplyCap;
     bool usageAsCollateralEnabled;
     bool borrowingEnabled;
     bool stableBorrowRateEnabled;
@@ -39,21 +37,23 @@ interface IUiPoolDataProvider {
     uint256 averageStableRate;
     uint256 stableDebtLastUpdateTimestamp;
     uint256 totalScaledVariableDebt;
-    uint256 priceInEth;
+    uint256 priceInMarketReferenceCurrency;
+    //
     uint256 variableRateSlope1;
     uint256 variableRateSlope2;
     uint256 stableRateSlope1;
     uint256 stableRateSlope2;
-    // incentives
-    uint256 aEmissionPerSecond;
-    uint256 vEmissionPerSecond;
-    uint256 sEmissionPerSecond;
-    uint256 aIncentivesLastUpdateTimestamp;
-    uint256 vIncentivesLastUpdateTimestamp;
-    uint256 sIncentivesLastUpdateTimestamp;
-    uint256 aTokenIncentivesIndex;
-    uint256 vTokenIncentivesIndex;
-    uint256 sTokenIncentivesIndex;
+    //
+    uint256 debtCeiling;
+    uint8 eModeCategoryId;
+    uint256 borrowCap;
+    uint256 supplyCap; 
+    // eMode
+    uint16 eModeLtv;
+    uint16 eModeLiquidationThreshold;
+    uint16 eModeLiquidationBonus;
+    address eModePriceSource;
+    string eModeLabel;
   }
 
   struct UserReserveData {
@@ -64,19 +64,32 @@ interface IUiPoolDataProvider {
     uint256 scaledVariableDebt;
     uint256 principalStableDebt;
     uint256 stableBorrowLastUpdateTimestamp;
-    // incentives
-    uint256 aTokenincentivesUserIndex;
-    uint256 vTokenincentivesUserIndex;
-    uint256 sTokenincentivesUserIndex;
   }
 
-  function getReservesData(IPoolAddressesProvider provider, address user)
+  struct BaseCurrencyInfo {
+    uint256 marketReferenceCurrencyUnit;
+    int256 marketReferenceCurrencyPriceInUsd;
+    int256 networkBaseTokenPriceInUsd;
+    uint8 networkBaseTokenPriceDecimals;
+  }
+
+  function getReservesList(IPoolAddressesProvider provider)
+    external
+    view
+    returns (address[] memory);
+
+  function getReservesData(IPoolAddressesProvider provider)
     external
     view
     returns (
       AggregatedReserveData[] memory,
-      UserReserveData[] memory,
-      uint256,
-      uint256
+      BaseCurrencyInfo memory
+    );
+
+  function getUserReservesData(IPoolAddressesProvider provider, address user)
+    external
+    view
+    returns (
+      UserReserveData[] memory, uint8
     );
 }

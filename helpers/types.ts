@@ -89,6 +89,7 @@ export enum eContractid {
   ACLManager = 'ACLManager',
   ReservesSetupHelper = 'ReservesSetupHelper',
   MockIncentivesController = 'MockIncentivesController',
+  FlashLoanLogic = 'FlashLoanLogic',
 }
 
 export type tEthereumAddress = string;
@@ -329,27 +330,25 @@ export interface ICommonConfiguration {
   ProviderId: number;
   ProtocolGlobalParams: IProtocolGlobalConfig;
   Mocks: IMocksConfig;
-  ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
-  ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
-  Pool: iParamsPerNetwork<tEthereumAddress>;
-  RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  RateOracle: iParamsPerNetwork<tEthereumAddress>;
-  TokenDistributor: iParamsPerNetwork<tEthereumAddress>;
-  AaveOracle: iParamsPerNetwork<tEthereumAddress>;
-  FallbackOracle: iParamsPerNetwork<tEthereumAddress>;
-  ChainlinkAggregator: iParamsPerNetwork<ITokenAddress>;
-  PoolAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  ProviderRegistry: tEthereumAddress | undefined;
+  ProviderRegistryOwner: tEthereumAddress | undefined;
+  PoolConfigurator: tEthereumAddress | undefined;
+  Pool: tEthereumAddress | undefined;
+  TokenDistributor: tEthereumAddress | undefined;
+  AaveOracle: tEthereumAddress | undefined;
+  FallbackOracle: tEthereumAddress | undefined;
+  ChainlinkAggregator: tEthereumAddress | undefined;
+  PoolAdmin: tEthereumAddress | undefined;
   PoolAdminIndex: number;
-  EmergencyAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
-  ReserveAssets: iParamsPerNetwork<SymbolMap<tEthereumAddress>>;
+  ReserveAssets: SymbolMap<tEthereumAddress> | SymbolMap<undefined>;
   ReservesConfig: iMultiPoolsAssets<IReserveParams>;
-  ATokenDomainSeparator: iParamsPerNetwork<string>;
-  WETH: iParamsPerNetwork<tEthereumAddress>;
-  WrappedNativeToken: iParamsPerNetwork<tEthereumAddress>;
-  ReserveFactorTreasuryAddress: iParamsPerNetwork<tEthereumAddress>;
-  IncentivesController: iParamsPerNetwork<tEthereumAddress>;
+  ATokenDomainSeparator: string;
+  WETH: tEthereumAddress | undefined;
+  WrappedNativeToken: tEthereumAddress | undefined;
+  ReserveFactorTreasuryAddress: tEthereumAddress;
+  IncentivesController: tEthereumAddress | undefined;
 }
 
 export interface IAaveConfiguration extends ICommonConfiguration {

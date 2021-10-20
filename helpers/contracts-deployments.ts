@@ -1,3 +1,4 @@
+import { FlashLoanLogic } from './../types/FlashLoanLogic.d';
 import { DRE } from './misc-utils';
 import { eContractid, tEthereumAddress, TokenContractId, tStringTokenSmallUnits } from './types';
 import { getFirstSigner } from './wallet-helpers';
@@ -57,8 +58,8 @@ export const deployMintableERC20 = async (
     verify
   );
 
-export const deployGenericATokenImpl = async () =>
-  withSave(await new AToken__factory(await getFirstSigner()).deploy(), eContractid.AToken);
+export const deployGenericATokenImpl = async (pool: tEthereumAddress) =>
+  withSave(await new AToken__factory(await getFirstSigner()).deploy(pool), eContractid.AToken);
 
 export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
@@ -166,12 +167,32 @@ export const deployEModeLogic = async () => {
   return withSave(eModeLogic, eContractid.EModeLogic);
 };
 
+export const deployFlashLoanLogic = async (borrowLogicAddress: tEthereumAddress) => {
+  const flashLoanLogicArtifact = await readArtifact(eContractid.FlashLoanLogic);
+
+  const linkedFlashLoanLogicByteCode = linkBytecode(flashLoanLogicArtifact, {
+    [eContractid.BorrowLogic]: borrowLogicAddress,
+  });
+
+  const flashLoanLogicFactory = await DRE.ethers.getContractFactory(
+    flashLoanLogicArtifact.abi,
+    linkedFlashLoanLogicByteCode
+  );
+
+  const flashLoanLogic = await (
+    await flashLoanLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(flashLoanLogic, eContractid.FlashLoanLogic);
+};
+
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
   const bridgeLogic = await deployBridgeLogic();
   const eModeLogic = await deployEModeLogic();
+  const flashLoanLogic = await deployFlashLoanLogic(borrowLogic.address);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -190,6 +211,8 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
     ['contracts/protocol/libraries/logic/EModeLogic.sol:EModeLogic']: eModeLogic.address,
     ['contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic']: borrowLogic.address,
     ['contracts/protocol/libraries/logic/BridgeLogic.sol:BridgeLogic']: bridgeLogic.address,
+    ['contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic']:
+      flashLoanLogic.address,
   };
 };
 
@@ -246,7 +269,14 @@ export const deployMockAggregator = async (price: tStringTokenSmallUnits, verify
   );
 
 export const deployAaveOracle = async (
-  args: [tEthereumAddress[], tEthereumAddress[], tEthereumAddress, tEthereumAddress, string],
+  args: [
+    tEthereumAddress,
+    tEthereumAddress[],
+    tEthereumAddress[],
+    tEthereumAddress,
+    tEthereumAddress,
+    string
+  ],
   verify?: boolean
 ) =>
   withSaveAndVerify(
@@ -296,7 +326,7 @@ export const deployWalletBalancerProvider = async (verify?: boolean) =>
 
 export const deployDefaultReserveInterestRateStrategy = async (
   args: [tEthereumAddress, string, string, string, string, string, string, string, string, string],
-  verify: boolean
+  verify?: boolean
 ) =>
   withSaveAndVerify(
     await new DefaultReserveInterestRateStrategy__factory(await getFirstSigner()).deploy(...args),
@@ -311,28 +341,28 @@ export const deployReservesSetupHelper = async () =>
     eContractid.ReservesSetupHelper
   );
 
-export const deployDelegationAwareATokenImpl = async (verify?: boolean) =>
+export const deployDelegationAwareATokenImpl = async (pool: tEthereumAddress, verify?: boolean) =>
   withSaveAndVerify(
-    await new DelegationAwareAToken__factory(await getFirstSigner()).deploy(),
+    await new DelegationAwareAToken__factory(await getFirstSigner()).deploy(pool),
     eContractid.DelegationAwareAToken,
-    [],
+    [pool],
     verify
   );
 
-export const deployGenericStableDebtToken = async () =>
+export const deployGenericStableDebtToken = async (pool: tEthereumAddress, verify?: boolean) =>
   withSaveAndVerify(
-    await new StableDebtToken__factory(await getFirstSigner()).deploy(),
+    await new StableDebtToken__factory(await getFirstSigner()).deploy(pool),
     eContractid.StableDebtToken,
-    [],
-    false
+    [pool],
+    verify
   );
 
-export const deployGenericVariableDebtToken = async () =>
+export const deployGenericVariableDebtToken = async (pool: tEthereumAddress, verify?: boolean) =>
   withSaveAndVerify(
-    await new VariableDebtToken__factory(await getFirstSigner()).deploy(),
+    await new VariableDebtToken__factory(await getFirstSigner()).deploy(pool),
     eContractid.VariableDebtToken,
-    [],
-    false
+    [pool],
+    verify
   );
 
 export const deployAllMockTokens = async () => {

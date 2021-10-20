@@ -81,6 +81,7 @@ const config: HardhatUserConfig = {
       '@aave/core-v3/contracts/protocol/libraries/logic/LiquidationLogic.sol',
       '@aave/core-v3/contracts/protocol/libraries/logic/EModeLogic.sol',
       '@aave/core-v3/contracts/protocol/libraries/logic/BridgeLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/FlashLoanLogic.sol',
     ],
     keep: false,
   },

@@ -1,3 +1,4 @@
+import { ZERO_ADDRESS } from './../helpers/constants';
 import rawHRE from 'hardhat';
 import { ethers, Signer } from 'ethers';
 import { waitForTx } from '../helpers/misc-utils';
@@ -60,6 +61,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await addressesProvider.setACLManager(aclManager.address));
 
   await waitForTx(await aclManager.addPoolAdmin(aaveAdmin));
+
+  await waitForTx(await aclManager.addAssetListingAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
   const addressList = await getEthersSignersAddresses();
@@ -165,6 +168,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
   await deployAaveOracle([
+    addressesProvider.address,
     tokens,
     aggregators,
     fallbackOracle.address,
@@ -180,10 +184,16 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const reservesParams = AaveConfig.ReservesConfig;
 
-  const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
+  const protocolDataProvider = await deployAaveProtocolDataProvider(addressesProvider.address);
+  console.log(5);
 
-  await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
+  await insertContractAddressInDb(
+    eContractid.AaveProtocolDataProvider,
+    protocolDataProvider.address
+  );
   const admin = await deployer.getAddress();
+
+  await addressesProvider.setPoolDataProvider(protocolDataProvider.address);
 
   console.log('Initialize configuration');
 
@@ -208,11 +218,16 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     VariableDebtTokenNamePrefix,
     SymbolPrefix,
     admin,
-    treasuryAddress,
+    ZERO_ADDRESS,
     mockIncentivesController.address // ZERO_ADDRESS
   );
 
-  await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
+  await configureReservesByHelper(
+    reservesParams,
+    allReservesAddresses,
+    protocolDataProvider,
+    admin
+  );
 
   await deployMockFlashLoanReceiver(addressesProvider.address);
 

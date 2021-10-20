@@ -2,6 +2,7 @@ import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from
 import { chunk, waitForTx } from './misc-utils';
 import {
   getACLManager,
+  getPool,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
   getReservesSetupHelper,
@@ -18,7 +19,7 @@ import {
 import { WETHGateway__factory } from '../types';
 import { getFirstSigner } from './wallet-helpers';
 
-import { AaveProtocolDataProvider } from '@aave/core-v3/types';
+import { AaveProtocolDataProvider } from '../types';
 
 export const initReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
@@ -34,9 +35,10 @@ export const initReservesByHelper = async (
   let gasUsage = BigNumber.from('0');
 
   const addressProvider = await getPoolAddressesProvider();
+  const pool = await getPool();
 
   // CHUNK CONFIGURATION
-  const initChunks = 4;
+  const initChunks = 5;
 
   // Initialize variables for future reserves initialization
   let reserveTokens: string[] = [];
@@ -95,10 +97,13 @@ export const initReservesByHelper = async (
   //   rawInsertContractAddressInDb(`variableDebtTokenImpl`, variableDebtTokenImplementationAddress);
   // });
   //gasUsage = gasUsage.add(tx1.gasUsed);
-  stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
-  variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
+  stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken(pool.address))
+    .address;
+  variableDebtTokenImplementationAddress = await (
+    await deployGenericVariableDebtToken(pool.address)
+  ).address;
 
-  const aTokenImplementation = await deployGenericATokenImpl();
+  const aTokenImplementation = await deployGenericATokenImpl(pool.address);
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
@@ -107,7 +112,7 @@ export const initReservesByHelper = async (
   ) as [string, IReserveParams][];
 
   if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl();
+    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(pool.address);
     delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
     rawInsertContractAddressInDb(
       `delegationAwareATokenImpl`,
@@ -220,7 +225,6 @@ export const initReservesByHelper = async (
 
   return gasUsage; // Deprecated
 };
-
 export const configureReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
@@ -323,10 +327,5 @@ export const configureReservesByHelper = async (
   }
 };
 
-export const authorizeWETHGateway = async (
-  wethGateWay: tEthereumAddress,
-  pool: tEthereumAddress
-) =>
-  await new WETHGateway__factory(await getFirstSigner())
-    .attach(wethGateWay)
-    .authorizePool(pool);
+export const authorizeWETHGateway = async (wethGateWay: tEthereumAddress, pool: tEthereumAddress) =>
+  await new WETHGateway__factory(await getFirstSigner()).attach(wethGateWay).authorizePool(pool);

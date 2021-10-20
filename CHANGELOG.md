@@ -12,7 +12,6 @@
 ### Bug Fixes
 
 * added slopes ([b8f98a3](https://www.github.com/aave/aave-v3-periphery/commit/b8f98a35b513113585daaffe0eb3e22ca3d46d32))
-* not compiling ([a984d48](https://www.github.com/aave/aave-v3-periphery/commit/a984d48f72f8472e0dcc878819069489a26670d8))
 
 ## [1.2.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.1.0...v1.2.0) (2021-10-01)
 

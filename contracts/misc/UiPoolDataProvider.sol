@@ -27,7 +27,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   IEACAggregatorProxy public immutable networkBaseTokenPriceInUsdProxyAggregator;
   IEACAggregatorProxy public immutable marketReferenceCurrencyPriceInUsdProxyAggregator;
   uint256 public constant ETH_CURRENCY_UNIT = 1 ether;
-  address public constant MKRAddress = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
+  address public constant MKR_ADDRESS = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
 
 
   constructor(
@@ -117,8 +117,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       reserveData.totalScaledVariableDebt = IVariableDebtToken(reserveData.variableDebtTokenAddress)
         .scaledTotalSupply();
 
-      // as we take the symbol from underlying we need special case for maker as they have it in bytes32
-      if (address(reserveData.underlyingAsset) == address(MKRAddress)) {
+      // Due we take the symbol from underlying token we need a special case for $MKR as symbol() returns bytes32
+      if (address(reserveData.underlyingAsset) == address(MKR_ADDRESS)) {
         bytes32 symbol = IERC20DetailedBytes(reserveData.underlyingAsset).symbol();
         reserveData.symbol = bytes32ToString(symbol);
       } else {

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.3.0...v1.4.0) (2021-11-05)
+
+
+### Features
+
+* updated with maker case ([55a2be9](https://www.github.com/aave/aave-v3-periphery/commit/55a2be961aca772a5762ad4e9b627271aae7de47))
+
 ## [1.3.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.2.0...v1.3.0) (2021-10-20)
 
 

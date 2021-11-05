@@ -17,6 +17,7 @@ import {
   DefaultReserveInterestRateStrategy
 } from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
+import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
@@ -26,6 +27,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   IEACAggregatorProxy public immutable networkBaseTokenPriceInUsdProxyAggregator;
   IEACAggregatorProxy public immutable marketReferenceCurrencyPriceInUsdProxyAggregator;
   uint256 public constant ETH_CURRENCY_UNIT = 1 ether;
+  address public constant MKR_ADDRESS = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
 
 
   constructor(
@@ -115,9 +117,13 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       reserveData.totalScaledVariableDebt = IVariableDebtToken(reserveData.variableDebtTokenAddress)
         .scaledTotalSupply();
 
-      // we're getting this info from the aToken, because some of assets can be not compliant with ETC20Detailed
-      reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
-      reserveData.name = '';
+      // Due we take the symbol from underlying token we need a special case for $MKR as symbol() returns bytes32
+      if (address(reserveData.underlyingAsset) == address(MKR_ADDRESS)) {
+        bytes32 symbol = IERC20DetailedBytes(reserveData.underlyingAsset).symbol();
+        reserveData.symbol = bytes32ToString(symbol);
+      } else {
+        reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
+      }
 
       (
         reserveData.variableRateSlope1,
@@ -224,5 +230,17 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     }
 
     return (userReservesData, userEmodeCategoryId);
+  }
+
+  function bytes32ToString(bytes32 _bytes32) public pure returns (string memory) {
+    uint8 i = 0;
+    while (i < 32 && _bytes32[i] != 0) {
+      i++;
+    }
+    bytes memory bytesArray = new bytes(i);
+    for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+      bytesArray[i] = _bytes32[i];
+    }
+    return string(bytesArray);
   }
 }

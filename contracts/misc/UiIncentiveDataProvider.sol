@@ -5,9 +5,7 @@ import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAd
 import {IAaveIncentivesController} from '@aave/core-v3/contracts/interfaces/IAaveIncentivesController.sol';
 import {IUiIncentiveDataProvider} from './interfaces/IUiIncentiveDataProvider.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
-import {IVariableDebtToken} from '@aave/core-v3/contracts/interfaces/IVariableDebtToken.sol';
-import {IStableDebtToken} from '@aave/core-v3/contracts/interfaces/IStableDebtToken.sol';
+import {IncentivizedERC20} from '@aave/core-v3/contracts/protocol/tokenization/IncentivizedERC20.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
@@ -51,7 +49,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
 
       DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
 
-      try IStableDebtToken(baseData.aTokenAddress).getIncentivesController() returns (IAaveIncentivesController aTokenIncentiveController) {
+      try IncentivizedERC20(baseData.aTokenAddress).getIncentivesController() returns (IAaveIncentivesController aTokenIncentiveController) {
         if (address(aTokenIncentiveController) != address(0)) {
           address aRewardToken = aTokenIncentiveController.REWARD_TOKEN();
 
@@ -95,7 +93,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
         // Will not get here
       } 
 
-      try IStableDebtToken(baseData.stableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController sTokenIncentiveController) {
+      try IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController sTokenIncentiveController) {
         if (address(sTokenIncentiveController) != address(0)) {
 
           address sRewardToken = sTokenIncentiveController.REWARD_TOKEN();
@@ -139,7 +137,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
         // Will not get here
       }
 
-      try IStableDebtToken(baseData.variableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController vTokenIncentiveController) {
+      try IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController vTokenIncentiveController) {
         if (address(vTokenIncentiveController) != address(0)) {
           address vRewardToken = vTokenIncentiveController.REWARD_TOKEN();
 
@@ -200,7 +198,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
     view
     returns (UserReserveIncentiveData[] memory)
   {
-    IPool lendingPool = IPool(provider.getLendingPool());
+    IPool lendingPool = IPool(provider.getPool());
     address[] memory reserves = lendingPool.getReservesList();
 
     UserReserveIncentiveData[] memory userReservesIncentivesData =
@@ -214,7 +212,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
 
       IUiIncentiveDataProvider.UserIncentiveData memory aUserIncentiveData;
 
-      try IAToken(baseData.aTokenAddress).getIncentivesController() returns (IAaveIncentivesController aTokenIncentiveController) {
+      try IncentivizedERC20(baseData.aTokenAddress).getIncentivesController() returns (IAaveIncentivesController aTokenIncentiveController) {
         if (address(aTokenIncentiveController) != address(0)) {
           address aRewardToken = aTokenIncentiveController.REWARD_TOKEN();
           aUserIncentiveData.tokenincentivesUserIndex = aTokenIncentiveController.getUserAssetData(
@@ -237,7 +235,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
 
       UserIncentiveData memory vUserIncentiveData;
 
-      try IVariableDebtToken(baseData.variableDebtTokenAddress).getIncentivesController() returns(IAaveIncentivesController vTokenIncentiveController) {
+      try IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController() returns(IAaveIncentivesController vTokenIncentiveController) {
         if (address(vTokenIncentiveController) != address(0)) {
           address vRewardToken = vTokenIncentiveController.REWARD_TOKEN();
           vUserIncentiveData.tokenincentivesUserIndex = vTokenIncentiveController.getUserAssetData(
@@ -260,7 +258,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProvider {
 
       UserIncentiveData memory sUserIncentiveData;
 
-      try IStableDebtToken(baseData.stableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController sTokenIncentiveController) {
+      try IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController() returns (IAaveIncentivesController sTokenIncentiveController) {
         if (address(sTokenIncentiveController) != address(0)) {
           address sRewardToken = sTokenIncentiveController.REWARD_TOKEN();
           sUserIncentiveData.tokenincentivesUserIndex = sTokenIncentiveController.getUserAssetData(

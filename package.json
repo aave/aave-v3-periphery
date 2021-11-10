@@ -22,7 +22,8 @@
     "coverage": "hardhat coverage",
     "clean": "rm -rf artifacts cache",
     "format": "prettier --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "prepublish": "npm run compile"
   },
   "license": "AGPLv3",
   "devDependencies": {

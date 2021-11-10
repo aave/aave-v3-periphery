@@ -140,7 +140,6 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
 
-
       //stores the reserve configuration
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
@@ -157,6 +156,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         eModeCategoryId
       ) = reserveConfigurationMap.getParams();
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
+      reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
 
       (
         reserveData.isActive,
@@ -165,14 +165,13 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         reserveData.stableBorrowRateEnabled,
         reserveData.isPaused
       ) = reserveConfigurationMap.getFlags();
-      reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
       
       DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
       reserveData.eModeLtv = categoryData.ltv;
-      reserveData.eModeLiquidationThreshold =categoryData.liquidationThreshold;
-      reserveData.eModeLiquidationBonus =categoryData.liquidationBonus;
+      reserveData.eModeLiquidationThreshold = categoryData.liquidationThreshold;
+      reserveData.eModeLiquidationBonus = categoryData.liquidationBonus;
       // each eMode category may or may not have a custom oracle to override the individual assets price oracles
-      reserveData.eModePriceSource =categoryData.priceSource;
+      reserveData.eModePriceSource = categoryData.priceSource;
       reserveData.eModeLabel = categoryData.label;
     }
 
@@ -201,8 +200,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     address[] memory reserves = pool.getReservesList();
     DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
-    uint8 userEmodeCategoryId = uint8(pool.getUserEMode((user)));
-    
+    uint8 userEmodeCategoryId = uint8(pool.getUserEMode(user));
+
     UserReserveData[] memory userReservesData =
       new UserReserveData[](user != address(0) ? reserves.length : 0);
 

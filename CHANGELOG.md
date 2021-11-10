@@ -1,5 +1,25 @@
 # Changelog
 
+### [1.4.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.0...v1.4.1) (2021-11-10)
+
+
+### Features
+
+* added debt ceiling decimals ([005fec4](https://www.github.com/aave/aave-v3-periphery/commit/005fec439867746bfbdf0fdcd20f6b175ac45904))
+* added extra fields ([fd56951](https://www.github.com/aave/aave-v3-periphery/commit/fd56951654976a37478e151d7e1b415f8cab2a7d))
+* added missing fields in UiPoolDataProvider. Added UiIncentiveDataProvider helper ([ab7a460](https://www.github.com/aave/aave-v3-periphery/commit/ab7a460c9889b311dbb8eb29a11efd6c67ad9081))
+* added UiIncentiveDataProvider helper ([774f1a9](https://www.github.com/aave/aave-v3-periphery/commit/774f1a9c653b5783e8a746583fa522df7cf49345))
+
+
+### Bug Fixes
+
+* solved conflicts ([96f5793](https://www.github.com/aave/aave-v3-periphery/commit/96f5793d101362a2d55975570be0e6328353e9a0))
+
+
+### Miscellaneous Chores
+
+* release 1.4.1 ([3868319](https://www.github.com/aave/aave-v3-periphery/commit/3868319d3386fac718dd7c8bcd0c817e6b22966f))
+
 ## [1.4.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.3.0...v1.4.0) (2021-11-05)
 
 

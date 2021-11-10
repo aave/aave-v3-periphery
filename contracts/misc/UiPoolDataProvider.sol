@@ -18,6 +18,7 @@ import {
 } from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
+import {AaveProtocolDataProvider} from '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
@@ -77,6 +78,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   {
     IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
+    AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(provider.getPoolDataProvider());
+
     address[] memory reserves = pool.getReservesList();
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
 
@@ -141,6 +144,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       //stores the reserve configuration
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
+      reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
 
       uint256 eModeCategoryId;

@@ -49,6 +49,7 @@ interface IUiPoolDataProvider {
     uint128 isolationModeTotalDebt;
     //
     uint256 debtCeiling;
+    uint256 debtCeilingDecimals;
     uint8 eModeCategoryId;
     uint256 borrowCap;
     uint256 supplyCap; 

@@ -44,7 +44,12 @@ interface IUiPoolDataProvider {
     uint256 stableRateSlope1;
     uint256 stableRateSlope2;
     //
+    uint128 accruedToTreasury;
+    uint128 unbacked;
+    uint128 isolationModeTotalDebt;
+    //
     uint256 debtCeiling;
+    uint256 debtCeilingDecimals;
     uint8 eModeCategoryId;
     uint256 borrowCap;
     uint256 supplyCap; 

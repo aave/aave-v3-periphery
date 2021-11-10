@@ -18,6 +18,7 @@ import {
 } from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
+import {AaveProtocolDataProvider} from '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
@@ -77,6 +78,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
   {
     IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
+    AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(provider.getPoolDataProvider());
+
     address[] memory reserves = pool.getReservesList();
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
 
@@ -104,6 +107,9 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
       reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
+      reserveData.unbacked = baseData.unbacked;
+      reserveData.isolationModeTotalDebt = baseData.isolationModeTotalDebt;
+      reserveData.accruedToTreasury = baseData.accruedToTreasury;
 
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
@@ -134,10 +140,10 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
 
-
       //stores the reserve configuration
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
+      reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
 
       uint256 eModeCategoryId;
@@ -150,6 +156,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         eModeCategoryId
       ) = reserveConfigurationMap.getParams();
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
+      reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
 
       (
         reserveData.isActive,
@@ -158,14 +165,13 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         reserveData.stableBorrowRateEnabled,
         reserveData.isPaused
       ) = reserveConfigurationMap.getFlags();
-      reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
       
       DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
       reserveData.eModeLtv = categoryData.ltv;
-      reserveData.eModeLiquidationThreshold =categoryData.liquidationThreshold;
-      reserveData.eModeLiquidationBonus =categoryData.liquidationBonus;
+      reserveData.eModeLiquidationThreshold = categoryData.liquidationThreshold;
+      reserveData.eModeLiquidationBonus = categoryData.liquidationBonus;
       // each eMode category may or may not have a custom oracle to override the individual assets price oracles
-      reserveData.eModePriceSource =categoryData.priceSource;
+      reserveData.eModePriceSource = categoryData.priceSource;
       reserveData.eModeLabel = categoryData.label;
     }
 
@@ -194,8 +200,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     address[] memory reserves = pool.getReservesList();
     DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
-    uint8 userEmodeCategoryId = uint8(pool.getUserEMode((user)));
-    
+    uint8 userEmodeCategoryId = uint8(pool.getUserEMode(user));
+
     UserReserveData[] memory userReservesData =
       new UserReserveData[](user != address(0) ? reserves.length : 0);
 

@@ -26,7 +26,6 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/core-v3": "^1.2.1",
     "@ethersproject/abi": "^5.1.0",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",
@@ -75,5 +74,8 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/aave/aave-v3-periphery"
+  },
+  "dependencies": {
+    "@aave/core-v3": "^1.4.0"
   }
 }

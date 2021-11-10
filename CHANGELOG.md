@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.4.2](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.1...v1.4.2) (2021-11-10)
+
+
+### Bug Fixes
+
+* add prepublish compilation to export artifacts ([ec15da8](https://www.github.com/aave/aave-v3-periphery/commit/ec15da8ffb6271d1c64401e310ce954764ae7140))
+
 ### [1.4.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.0...v1.4.1) (2021-11-10)
 
 

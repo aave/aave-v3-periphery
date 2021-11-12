@@ -68,7 +68,7 @@ const mainnetFork = MAINNET_FORK
 // export hardhat config
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.7',
+    version: '0.8.10',
     settings: {
       optimizer: { enabled: true, runs: 25000 },
       evmVersion: 'berlin',

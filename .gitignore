@@ -19,3 +19,6 @@ coverage
 coverage.json
 
 .DS_Store
+
+temp-artifacts
+contracts/hardhat-dependency-compiler

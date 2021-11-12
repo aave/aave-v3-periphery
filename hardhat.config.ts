@@ -12,24 +12,10 @@ import '@tenderly/hardhat-tenderly';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-dependency-compiler';
+import 'hardhat-deploy';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
-
-const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
-// Prevent to load scripts before compilation and typechain
-if (!SKIP_LOAD) {
-  ['deploy', 'misc', 'setup', 'verify'].forEach((folder) => {
-    const tasksPath = path.join(__dirname, 'tasks', folder);
-    fs.readdirSync(tasksPath)
-      .filter((pth) => pth.includes('.ts'))
-      .forEach((task) => {
-        require(`${tasksPath}/${task}`);
-      });
-  });
-}
-
-require(`${path.join(__dirname, 'tasks/misc')}/set-DRE.ts`);
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const DEFAULT_GAS_MUL = 5;
@@ -37,7 +23,6 @@ const HARDFORK = 'istanbul';
 const MNEMONIC_PATH = `m/44'/60'/0'/${process.env.WALLET_INDEX}`;
 const MNEMONIC = process.env.MNEMONIC || '';
 const MAINNET_FORK = process.env.MAINNET_FORK === 'true';
-const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || '';
 const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || '';
 const TENDERLY_FORK_NETWORK_ID = process.env.TENDERLY_FORK_NETWORK_ID || '1';
@@ -99,9 +84,6 @@ const config: HardhatUserConfig = {
       'node_modules/@aave/core-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
     ],
   },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
-  },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
   },
@@ -150,6 +132,15 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 80000,
+    bail: true,
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: './temp-artifacts',
+        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+      },
+    ],
   },
 };
 

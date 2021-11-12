@@ -141,6 +141,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       ) = reserveConfigurationMap.getParams();
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
 
+      bool isPaused;
       (
         reserveData.isActive,
         reserveData.isFrozen,
@@ -157,7 +158,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       ) = getInterestRateStrategySlopes(
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
-      
+
       // v3 only
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();

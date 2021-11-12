@@ -19,7 +19,6 @@ interface IUiPoolDataProvider {
     bool stableBorrowRateEnabled;
     bool isActive;
     bool isFrozen;
-    bool isPaused;
     // base data
     uint128 liquidityIndex;
     uint128 variableBorrowIndex;
@@ -38,12 +37,12 @@ interface IUiPoolDataProvider {
     uint256 stableDebtLastUpdateTimestamp;
     uint256 totalScaledVariableDebt;
     uint256 priceInMarketReferenceCurrency;
-    //
     uint256 variableRateSlope1;
     uint256 variableRateSlope2;
     uint256 stableRateSlope1;
     uint256 stableRateSlope2;
-    //
+    // v3 only
+    bool isPaused;
     uint128 accruedToTreasury;
     uint128 unbacked;
     uint128 isolationModeTotalDebt;

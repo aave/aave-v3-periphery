@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",

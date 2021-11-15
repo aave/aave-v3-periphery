@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.3...v1.5.0) (2021-11-15)
+
+
+### Features
+
+* bump solc to 0.8.10 as @aave/core-v3 ([30a818f](https://www.github.com/aave/aave-v3-periphery/commit/30a818f5ec574da83e174087a2c930fc4833b624))
+
 ### [1.4.3](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.2...v1.4.3) (2021-11-12)
 
 

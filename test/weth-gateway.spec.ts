@@ -1,10 +1,16 @@
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { SelfdestructTransfer } from './../types/SelfdestructTransfer.d';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, waitForTx } from '..//helpers/misc-utils';
-import { BigNumber, utils } from 'ethers';
-import { getStableDebtToken, getVariableDebtToken } from '../helpers/contracts-getters';
-import { deploySelfdestructTransferMock } from '../helpers/contracts-deployments';
+import { BigNumber, ContractReceipt, utils } from 'ethers';
+import { parseEther } from '@ethersproject/units';
+import {
+  getStableDebtToken,
+  getVariableDebtToken,
+  MAX_UINT_AMOUNT,
+  waitForTx,
+} from '@aave/deploy-v3';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 const { expect } = require('chai');
 
@@ -44,13 +50,13 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     expect(aTokensBalance).to.be.gt(zero, 'User should have aTokens.');
 
     // Partially withdraw native ETH
-    const partialWithdraw = await convertToCurrencyDecimals(aWETH.address, '2');
+    const partialWithdraw = parseEther('2');
 
     // Approve the aTokens to Gateway so Gateway can withdraw and convert to Ether
     const approveTx = await aWETH
       .connect(user.signer)
       .approve(wethGateway.address, MAX_UINT_AMOUNT);
-    const { gasUsed: approveGas } = await waitForTx(approveTx);
+    const { gasUsed: approveGas }: ContractReceipt = await waitForTx(approveTx);
 
     // Partial Withdraw and send native Ether to user
     const { gasUsed: withdrawGas } = await waitForTx(
@@ -61,7 +67,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
 
     const afterPartialEtherBalance = await user.signer.getBalance();
     const afterPartialATokensBalance = await aWETH.balanceOf(user.address);
-    const gasCosts = approveGas.add(withdrawGas).mul(approveTx.gasPrice);
+    const gasCosts = approveGas.add(withdrawGas).mul(approveTx.gasPrice || '0');
 
     expect(afterPartialEtherBalance).to.be.equal(
       priorEthersBalance.add(partialWithdraw).sub(gasCosts),
@@ -97,7 +103,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
 
     const afterFullEtherBalance = await user.signer.getBalance();
     const afterFullATokensBalance = await aWETH.balanceOf(user.address);
-    const gasCosts = approveGas.add(withdrawGas).mul(approveTx.gasPrice);
+    const gasCosts = approveGas.add(withdrawGas).mul(approveTx.gasPrice || '0');
 
     expect(afterFullEtherBalance).to.be.eq(
       priorEthersBalance.add(aTokensBalance).sub(gasCosts),
@@ -266,7 +272,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
       user.signer.sendTransaction({
         to: wethGateway.address,
         value: amount,
-        gasLimit: DRE.network.config.gas,
+        gasLimit: hre.network.config.gas,
       })
     ).to.be.revertedWith('Receive not allowed');
   });
@@ -276,7 +282,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const user = users[0];
     const amount = utils.parseEther('1');
     const fakeABI = ['function wantToCallFallback()'];
-    const abiCoder = new DRE.ethers.utils.Interface(fakeABI);
+    const abiCoder = new hre.ethers.utils.Interface(fakeABI);
     const fakeMethodEncoded = abiCoder.encodeFunctionData('wantToCallFallback', []);
 
     // Call fallback function with value
@@ -285,7 +291,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
         to: wethGateway.address,
         data: fakeMethodEncoded,
         value: amount,
-        gasLimit: DRE.network.config.gas,
+        gasLimit: hre.network.config.gas,
       })
     ).to.be.revertedWith('Fallback not allowed');
   });
@@ -295,7 +301,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const user = users[0];
 
     const fakeABI = ['function wantToCallFallback()'];
-    const abiCoder = new DRE.ethers.utils.Interface(fakeABI);
+    const abiCoder = new hre.ethers.utils.Interface(fakeABI);
     const fakeMethodEncoded = abiCoder.encodeFunctionData('wantToCallFallback', []);
 
     // Call fallback function without value
@@ -303,7 +309,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
       user.signer.sendTransaction({
         to: wethGateway.address,
         data: fakeMethodEncoded,
-        gasLimit: DRE.network.config.gas,
+        gasLimit: hre.network.config.gas,
       })
     ).to.be.revertedWith('Fallback not allowed');
   });
@@ -341,14 +347,20 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const userBalancePriorCall = await user.signer.getBalance();
 
     // Deploy contract with payable selfdestruct contract
-    const selfdestructContract = await deploySelfdestructTransferMock();
+    const selfdestructArtifact = await hre.deployments.deploy('SelfdestructTransfer', {
+      from: deployer.address,
+    });
+    const selfdestructContract = (await hre.ethers.getContractAt(
+      'SelfdestructTransfer',
+      selfdestructArtifact.address
+    )) as SelfdestructTransfer;
 
     // Selfdestruct the mock, pointing to WETHGateway address
     const callTx = await selfdestructContract
       .connect(user.signer)
       .destroyAndTransfer(wethGateway.address, { value: amount });
     const { gasUsed } = await waitForTx(callTx);
-    const gasFees = gasUsed.mul(callTx.gasPrice);
+    const gasFees = gasUsed.mul(callTx.gasPrice || '0');
     const userBalanceAfterCall = await user.signer.getBalance();
 
     expect(userBalanceAfterCall).to.be.eq(userBalancePriorCall.sub(amount).sub(gasFees), '');
@@ -358,7 +370,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     await wethGateway.connect(deployer.signer).emergencyEtherTransfer(user.address, amount);
 
     const userBalanceAfterRecovery = await user.signer.getBalance();
-    const wethGatewayAfterRecovery = await DRE.ethers.provider.getBalance(wethGateway.address);
+    const wethGatewayAfterRecovery = await hre.ethers.provider.getBalance(wethGateway.address);
 
     expect(userBalanceAfterRecovery).to.be.eq(
       userBalancePriorCall.sub(gasFees),

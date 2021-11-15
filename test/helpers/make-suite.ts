@@ -1,30 +1,22 @@
-import hardhat from 'hardhat';
+import hre from 'hardhat';
 import { Signer } from 'ethers';
-import { eNetwork, tEthereumAddress } from '../../helpers/types';
-import { getEthersSigners } from '../../helpers/wallet-helpers';
-import {
-  getAaveProtocolDataProvider,
-  getAToken,
-  getMintableERC20,
-  getPool,
-  getPoolAddressesProvider,
-  getPoolAddressesProviderRegistry,
-  getPoolConfiguratorProxy,
-  getPriceOracle,
-  getStableDebtToken,
-  getVariableDebtToken,
-  getWETHGateway,
-  getWETHMocked,
-} from '../../helpers/contracts-getters';
-import AaveConfig from '../../market-config';
-import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import { DRE, evmRevert, evmSnapshot } from '../../helpers/misc-utils';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
 import bignumberChai from 'chai-bignumber';
 import { solidity } from 'ethereum-waffle';
-
 import {
+  getPool,
+  getPoolConfiguratorProxy,
+  getPoolAddressesProvider,
+  getPoolAddressesProviderRegistry,
+  getAaveProtocolDataProvider,
+  getAToken,
+  getVariableDebtToken,
+  getStableDebtToken,
+  getMintableERC20,
+  getWETHMocked,
+  evmSnapshot,
+  evmRevert,
   AaveProtocolDataProvider,
   AToken,
   MintableERC20,
@@ -32,12 +24,16 @@ import {
   PoolAddressesProvider,
   PoolAddressesProviderRegistry,
   PoolConfigurator,
-  PriceOracle,
   StableDebtToken,
   VariableDebtToken,
   WETH9Mocked,
-} from '../../types';
-import { WETHGateway } from '../../types';
+  AaveOracle,
+  getWETHGateway,
+  WETHGateway,
+  tEthereumAddress,
+  getEthersSigners,
+  getAaveOracle,
+} from '@aave/deploy-v3';
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -55,7 +51,7 @@ export interface TestEnv {
   riskAdmin: SignerWithAddress;
   pool: Pool;
   configurator: PoolConfigurator;
-  oracle: PriceOracle;
+  oracle: AaveOracle;
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
   aWETH: AToken;
@@ -85,7 +81,7 @@ const testEnv: TestEnv = {
   pool: {} as Pool,
   configurator: {} as PoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
-  oracle: {} as PriceOracle,
+  oracle: {} as AaveOracle,
   weth: {} as WETH9Mocked,
   aWETH: {} as AToken,
   dai: {} as MintableERC20,
@@ -123,14 +119,9 @@ export async function initializeMakeSuite() {
 
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
-  if (process.env.FORK) {
-    testEnv.registry = await getPoolAddressesProviderRegistry(
-      getParamPerNetwork(AaveConfig.ProviderRegistry, process.env.FORK as eNetwork)
-    );
-  } else {
-    testEnv.registry = await getPoolAddressesProviderRegistry();
-    testEnv.oracle = await getPriceOracle();
-  }
+  testEnv.registry = await getPoolAddressesProviderRegistry();
+  testEnv.registry = await getPoolAddressesProviderRegistry();
+  testEnv.oracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
@@ -151,7 +142,7 @@ export async function initializeMakeSuite() {
   const aaveAddress = reservesTokens.find((token) => token.symbol === 'AAVE')?.tokenAddress;
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
-  if (!aDaiAddress || !aWEthAddress) {
+  if (!aDaiAddress || !aWEthAddress || !aUsdcAddress) {
     process.exit(1);
   }
   if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
@@ -173,7 +164,7 @@ export async function initializeMakeSuite() {
 
 const setSnapshot = async () => {
   if (usingTenderly()) {
-    setHardhatevmSnapshotId((await DRE.tenderlyNetwork.getHead()) || '0x1');
+    setHardhatevmSnapshotId((await hre.tenderlyNetwork.getHead()) || '0x1');
     return;
   }
   setHardhatevmSnapshotId(await evmSnapshot());
@@ -181,16 +172,13 @@ const setSnapshot = async () => {
 
 const revertHead = async () => {
   if (usingTenderly()) {
-    await DRE.tenderlyNetwork.setHead(hardhatevmSnapshotId);
+    await hre.tenderlyNetwork.setHead(hardhatevmSnapshotId);
     return;
   }
   await evmRevert(hardhatevmSnapshotId);
 };
 
 export async function makeSuite(name: string, tests: (testEnv: TestEnv) => void): Promise<void> {
-  before(async () => {
-    await hardhat.run('set-DRE');
-  });
   describe(name, async () => {
     before(async () => {
       await setSnapshot();

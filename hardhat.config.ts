@@ -1,10 +1,7 @@
-import path from 'path';
-import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './helpers/test-wallets';
-import { eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
-import { HARDHATEVM_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
-import { NETWORKS_RPC_URL, NETWORKS_DEFAULT_GAS } from './helper-hardhat-config';
+import { NETWORKS_RPC_URL } from './helper-hardhat-config';
+
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import '@typechain/hardhat';
@@ -12,51 +9,17 @@ import '@tenderly/hardhat-tenderly';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-dependency-compiler';
+import 'hardhat-deploy';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
-const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
-// Prevent to load scripts before compilation and typechain
-if (!SKIP_LOAD) {
-  ['deploy', 'misc', 'setup', 'verify'].forEach((folder) => {
-    const tasksPath = path.join(__dirname, 'tasks', folder);
-    fs.readdirSync(tasksPath)
-      .filter((pth) => pth.includes('.ts'))
-      .forEach((task) => {
-        require(`${tasksPath}/${task}`);
-      });
-  });
-}
-
-require(`${path.join(__dirname, 'tasks/misc')}/set-DRE.ts`);
-
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
-const DEFAULT_GAS_MUL = 5;
-const HARDFORK = 'istanbul';
-const MNEMONIC_PATH = `m/44'/60'/0'/${process.env.WALLET_INDEX}`;
-const MNEMONIC = process.env.MNEMONIC || '';
 const MAINNET_FORK = process.env.MAINNET_FORK === 'true';
-const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || '';
 const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || '';
 const TENDERLY_FORK_NETWORK_ID = process.env.TENDERLY_FORK_NETWORK_ID || '1';
 const REPORT_GAS = process.env.REPORT_GAS === 'true';
-
-const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
-  url: NETWORKS_RPC_URL[networkName],
-  hardfork: HARDFORK,
-  blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
-  gasMultiplier: DEFAULT_GAS_MUL,
-  gasPrice: NETWORKS_DEFAULT_GAS[networkName],
-  chainId: networkId,
-  accounts: {
-    mnemonic: MNEMONIC,
-    path: MNEMONIC_PATH,
-    initialIndex: 0,
-    count: 20,
-  },
-});
 
 const mainnetFork = MAINNET_FORK
   ? {
@@ -71,19 +34,8 @@ const config: HardhatUserConfig = {
     version: '0.8.10',
     settings: {
       optimizer: { enabled: true, runs: 25000 },
-      evmVersion: 'berlin',
+      evmVersion: 'london',
     },
-  },
-  dependencyCompiler: {
-    paths: [
-      '@aave/core-v3/contracts/protocol/libraries/logic/SupplyLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/BorrowLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/LiquidationLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/EModeLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/BridgeLogic.sol',
-      '@aave/core-v3/contracts/protocol/libraries/logic/FlashLoanLogic.sol',
-    ],
-    keep: false,
   },
   tenderly: {
     project: TENDERLY_PROJECT,
@@ -99,26 +51,16 @@ const config: HardhatUserConfig = {
       'node_modules/@aave/core-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
     ],
   },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
-  },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
   },
   networks: {
-    kovan: getCommonNetworkConfig(eEthereumNetwork.kovan, 42),
-    ropsten: getCommonNetworkConfig(eEthereumNetwork.ropsten, 3),
-    main: getCommonNetworkConfig(eEthereumNetwork.main, 1),
-    tenderlyMain: getCommonNetworkConfig(eEthereumNetwork.tenderlyMain, 3030),
-    matic: getCommonNetworkConfig(ePolygonNetwork.matic, 137),
-    mumbai: getCommonNetworkConfig(ePolygonNetwork.mumbai, 80001),
-    xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     hardhat: {
       hardfork: 'berlin',
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,
-      chainId: HARDHATEVM_CHAINID,
+      chainId: 31337,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
@@ -127,16 +69,6 @@ const config: HardhatUserConfig = {
       })),
       forking: mainnetFork,
       allowUnlimitedContractSize: true,
-    },
-    hardhatevm_docker: {
-      hardfork: 'istanbul',
-      blockGasLimit: 9500000,
-      gas: 9500000,
-      gasPrice: 8000000000,
-      chainId: HARDHATEVM_CHAINID,
-      throwOnTransactionFailures: true,
-      throwOnCallFailures: true,
-      url: 'http://localhost:8545',
     },
     ganache: {
       url: 'http://ganache:8545',
@@ -150,6 +82,80 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 80000,
+    bail: true,
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+    aclAdmin: {
+      default: 0,
+    },
+    emergencyAdmin: {
+      default: 0,
+    },
+    poolAdmin: {
+      default: 0,
+    },
+    addressesProviderRegistryOwner: {
+      default: 0,
+    },
+    treasuryProxyAdmin: {
+      default: 1,
+    },
+    incentivesProxyAdmin: {
+      default: 2,
+    },
+  },
+  // Need to compile aave-v3 contracts due no way to import external artifacts for hre.ethers
+  dependencyCompiler: {
+    paths: [
+      '@aave/core-v3/contracts/protocol/configuration/PoolAddressesProviderRegistry.sol',
+      '@aave/core-v3/contracts/protocol/configuration/PoolAddressesProvider.sol',
+      '@aave/core-v3/contracts/misc/AaveOracle.sol',
+      '@aave/core-v3/contracts/protocol/tokenization/AToken.sol',
+      '@aave/core-v3/contracts/protocol/tokenization/DelegationAwareAToken.sol',
+      '@aave/core-v3/contracts/protocol/tokenization/StableDebtToken.sol',
+      '@aave/core-v3/contracts/protocol/tokenization/VariableDebtToken.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/GenericLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/ValidationLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/ReserveLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/SupplyLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/EModeLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/BorrowLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/BridgeLogic.sol',
+      '@aave/core-v3/contracts/protocol/libraries/logic/FlashLoanLogic.sol',
+      '@aave/core-v3/contracts/protocol/pool/Pool.sol',
+      '@aave/core-v3/contracts/protocol/pool/PoolConfigurator.sol',
+      '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol',
+      '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol',
+      '@aave/core-v3/contracts/deployments/ReservesSetupHelper.sol',
+      '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol',
+      '@aave/core-v3/contracts/protocol/configuration/ACLManager.sol',
+      '@aave/core-v3/contracts/dependencies/weth/WETH9.sol',
+      '@aave/core-v3/contracts/mocks/helpers/MockIncentivesController.sol',
+      '@aave/core-v3/contracts/mocks/helpers/MockReserveConfiguration.sol',
+      '@aave/core-v3/contracts/mocks/oracle/CLAggregators/MockAggregator.sol',
+      '@aave/core-v3/contracts/mocks/tokens/MintableERC20.sol',
+      '@aave/core-v3/contracts/mocks/flashloan/MockFlashLoanReceiver.sol',
+      '@aave/core-v3/contracts/mocks/tokens/WETH9Mocked.sol',
+      '@aave/core-v3/contracts/mocks/upgradeability/MockVariableDebtToken.sol',
+      '@aave/core-v3/contracts/mocks/upgradeability/MockAToken.sol',
+      '@aave/core-v3/contracts/mocks/upgradeability/MockStableDebtToken.sol',
+      '@aave/core-v3/contracts/mocks/upgradeability/MockInitializableImplementation.sol',
+      '@aave/core-v3/contracts/mocks/helpers/MockPool.sol',
+      '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol',
+      '@aave/core-v3/contracts/mocks/oracle/PriceOracle.sol',
+      '@aave/core-v3/contracts/mocks/tokens/MintableDelegationERC20.sol',
+    ],
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: './temp-artifacts',
+        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+      },
+    ],
   },
 };
 

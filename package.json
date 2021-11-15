@@ -7,7 +7,8 @@
     "artifacts"
   ],
   "scripts": {
-    "run-env": "npm i && tail -f /dev/null",
+    "auth-registry": "npx dotenv-cli -- bash -c 'npm config set //npm.pkg.github.com/:_authToken \"$NODE_AUTH_TOKEN\"'",
+    "run-env": "npm run auth-registry && npm i && tail -f /dev/null",
     "hardhat": "hardhat",
     "hardhat:kovan": "hardhat --network kovan",
     "hardhat:tenderly-main": "hardhat --network tenderlyMain",
@@ -18,17 +19,19 @@
     "hardhat:matic": "hardhat --network matic",
     "compile": "SKIP_LOAD=true hardhat compile",
     "console:fork": "MAINNET_FORK=true hardhat console",
-    "test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test/*.spec.ts",
-    "coverage": "hardhat coverage",
+    "test": ". ./setup-test-env.sh && MARKET_NAME=Aave TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts",
+    "coverage": "MARKET_NAME=Aave COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && MARKET_NAME=Aave COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test/*.spec.ts'",
     "clean": "rm -rf artifacts cache",
     "format": "prettier --write .",
     "lint": "eslint .",
+    "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts node_modules/@aave/periphery-v3",
     "prepublish": "npm run compile"
   },
   "license": "AGPLv3",
   "devDependencies": {
+    "@aave/deploy-v3": "^1.4.0",
     "@ethersproject/abi": "^5.1.0",
-    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.11",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",
@@ -48,9 +51,10 @@
     "eslint-config-prettier": "^8.2.0",
     "eslint-plugin-prettier": "^3.3.1",
     "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.1.0",
-    "hardhat": "2.5",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.6.8",
     "hardhat-dependency-compiler": "^1.1.1",
+    "hardhat-deploy": "^0.9.4",
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^6.0.0",
     "lowdb": "1.0.0",
@@ -77,6 +81,6 @@
     "url": "git://github.com/aave/aave-v3-periphery"
   },
   "dependencies": {
-    "@aave/core-v3": "^1.5.0"
+    "@aave/core-v3": "^1.5.2"
   }
 }

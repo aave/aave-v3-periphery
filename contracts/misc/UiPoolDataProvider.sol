@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
@@ -107,9 +107,6 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
       reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
-      reserveData.unbacked = baseData.unbacked;
-      reserveData.isolationModeTotalDebt = baseData.isolationModeTotalDebt;
-      reserveData.accruedToTreasury = baseData.accruedToTreasury;
 
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
@@ -131,21 +128,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
       }
 
-      (
-        reserveData.variableRateSlope1,
-        reserveData.variableRateSlope2,
-        reserveData.stableRateSlope1,
-        reserveData.stableRateSlope2
-      ) = getInterestRateStrategySlopes(
-        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
-      );
-
       //stores the reserve configuration
       DataTypes.ReserveConfigurationMap memory reserveConfigurationMap = baseData.configuration;
-      reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
-      reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
-      (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
-
       uint256 eModeCategoryId;
       (
         reserveData.baseLTVasCollateral,
@@ -155,17 +139,37 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
         reserveData.reserveFactor,
         eModeCategoryId
       ) = reserveConfigurationMap.getParams();
-      reserveData.eModeCategoryId = uint8(eModeCategoryId);
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
 
+      bool isPaused;
       (
         reserveData.isActive,
         reserveData.isFrozen,
         reserveData.borrowingEnabled,
         reserveData.stableBorrowRateEnabled,
-        reserveData.isPaused
+        isPaused
       ) = reserveConfigurationMap.getFlags();
-      
+
+      (
+        reserveData.variableRateSlope1,
+        reserveData.variableRateSlope2,
+        reserveData.stableRateSlope1,
+        reserveData.stableRateSlope2
+      ) = getInterestRateStrategySlopes(
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+      );
+
+      // v3 only
+      reserveData.eModeCategoryId = uint8(eModeCategoryId);
+      reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
+      reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
+      (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
+
+      reserveData.isPaused = isPaused;
+      reserveData.unbacked = baseData.unbacked;
+      reserveData.isolationModeTotalDebt = baseData.isolationModeTotalDebt;
+      reserveData.accruedToTreasury = baseData.accruedToTreasury;
+
       DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
       reserveData.eModeLtv = categoryData.ltv;
       reserveData.eModeLiquidationThreshold = categoryData.liquidationThreshold;

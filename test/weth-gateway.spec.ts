@@ -125,7 +125,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const stableDebtToken = await getStableDebtToken(stableDebtTokenAddress);
 
     // Deposit 10000 DAI
-    await dai.connect(user.signer).mint(daiSize);
+    await dai.connect(user.signer)['mint(uint256)'](daiSize);
     await dai.connect(user.signer).approve(pool.address, daiSize);
     await pool.connect(user.signer).deposit(dai.address, daiSize, user.address, '0');
 
@@ -313,7 +313,7 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const user = users[0];
     const amount = utils.parseEther('1');
 
-    await dai.connect(user.signer).mint(amount);
+    await dai.connect(user.signer)['mint(uint256)'](amount);
     const daiBalanceAfterMint = await dai.balanceOf(user.address);
 
     await dai.connect(user.signer).transfer(wethGateway.address, amount);

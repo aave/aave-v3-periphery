@@ -1,5 +1,14 @@
 # Changelog
 
+### [1.4.3](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.2...v1.4.3) (2021-11-12)
+
+
+### Bug Fixes
+
+* compiling ([1e2394b](https://www.github.com/aave/aave-v3-periphery/commit/1e2394bef6999924ac8cd3d7e357bd3e5f985640))
+* fix order of fields ([9f73cd4](https://www.github.com/aave/aave-v3-periphery/commit/9f73cd499118fb6273004b46c482efbcb3f23d54))
+* fixed interface order ([58534d3](https://www.github.com/aave/aave-v3-periphery/commit/58534d301897b08cc3f2b966450ba878d5ce0b6d))
+
 ### [1.4.2](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.1...v1.4.2) (2021-11-10)
 
 

@@ -58,6 +58,7 @@ interface IUiPoolDataProvider {
     uint16 eModeLiquidationBonus;
     address eModePriceSource;
     string eModeLabel;
+    bool borrowableInIsolation;
   }
 
   struct UserReserveData {

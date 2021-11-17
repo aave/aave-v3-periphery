@@ -177,6 +177,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       // each eMode category may or may not have a custom oracle to override the individual assets price oracles
       reserveData.eModePriceSource = categoryData.priceSource;
       reserveData.eModeLabel = categoryData.label;
+
+      reserveData.borrowableInIsolation = reserveConfigurationMap.getBorrowableInIsolation();
     }
 
     BaseCurrencyInfo memory baseCurrencyInfo;

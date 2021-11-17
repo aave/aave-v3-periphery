@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.5.0...v1.6.0) (2021-11-17)
+
+
+### Features
+
+* added borrowableInIsolation field ([272cade](https://www.github.com/aave/aave-v3-periphery/commit/272cadec329489bbba6e3ffafa50017b8f840d1d))
+* use v3 deploy as source of deployment scripts. ([200d0a3](https://www.github.com/aave/aave-v3-periphery/commit/200d0a34856c4a73e2fa11b170f99cfe27fa9bc2))
+
 ## [1.5.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.4.3...v1.5.0) (2021-11-15)
 
 

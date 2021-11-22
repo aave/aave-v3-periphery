@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.6.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.6.0...v1.6.1) (2021-11-22)
+
+
+### Bug Fixes
+
+* Upload only artifacts from this project to the NPM package ([020e1a5](https://www.github.com/aave/aave-v3-periphery/commit/020e1a5746e5597e578e813dd17e36c77d6c750c))
+
 ## [1.6.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.5.0...v1.6.0) (2021-11-17)
 
 

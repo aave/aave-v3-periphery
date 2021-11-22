@@ -4,7 +4,7 @@
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
-    "artifacts"
+    "artifacts/contracts"
   ],
   "scripts": {
     "auth-registry": "npx dotenv-cli -- bash -c 'npm config set //npm.pkg.github.com/:_authToken \"$NODE_AUTH_TOKEN\"'",

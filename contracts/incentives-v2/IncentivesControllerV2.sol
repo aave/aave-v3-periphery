@@ -102,7 +102,7 @@ contract IncentivesControllerV2 is
   /// @inheritdoc IAaveIncentivesControllerV2
   function setAaveOracle(IPriceOracleGetter aaveOracle) external onlyEmissionManager {
     _aaveOracle = aaveOracle;
-    emit AaveOracleUpdated(_aaveOracle);
+    emit AaveOracleUpdated(address(_aaveOracle));
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2

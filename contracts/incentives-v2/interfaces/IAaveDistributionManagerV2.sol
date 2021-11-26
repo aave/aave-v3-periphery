@@ -110,4 +110,10 @@ interface IAaveDistributionManagerV2 {
     external
     view
     returns (address[] memory, uint256[] memory);
+
+  /**
+   * @dev Returns the precision to calculate the distribution delta
+   * @return The precision of the calculation
+   */
+  function PRECISION() external view returns (uint8);
 }

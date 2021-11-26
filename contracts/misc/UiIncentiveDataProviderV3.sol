@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IAaveIncentivesController} from '@aave/core-v3/contracts/interfaces/IAaveIncentivesController.sol';
+import {IAaveIncentivesControllerV2} from '../incentives-v2/interfaces/IAaveIncentivesControllerV2.sol';
 import {IUiIncentiveDataProviderV3} from './interfaces/IUiIncentiveDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IncentivizedERC20} from '@aave/core-v3/contracts/protocol/tokenization/IncentivizedERC20.sol';
@@ -53,7 +53,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
 
       // Get aTokens rewards information
-      IAaveIncentivesController aTokenIncentiveController = IncentivizedERC20(baseData.aTokenAddress).getIncentivesController();
+      IAaveIncentivesControllerV2 aTokenIncentiveController = IncentivizedERC20(baseData.aTokenAddress).getIncentivesController();
       address[] memory aTokenRewardAddresses = aTokenIncentiveController.getRewardsByAsset(baseData.aTokenAddress);
 
       RewardInfo memory aRewardsInformation = new RewardInfo[](aTokenRewardAddresses.length);
@@ -85,7 +85,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       ); 
 
       // Get vTokens rewards information
-      IAaveIncentivesController vTokenIncentiveController = IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController();
+      IAaveIncentivesControllerV2 vTokenIncentiveController = IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController();
       address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(baseData.variableDebtTokenAddress);
 
       RewardInfo memory vRewardsInformation = new RewardInfo[](vTokenRewardAddresses.length);
@@ -117,7 +117,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       ); 
 
       // Get sTokens rewards information
-      IAaveIncentivesController sTokenIncentiveController = IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController();
+      IAaveIncentivesControllerV2 sTokenIncentiveController = IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController();
       address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(baseData.stableDebtTokenAddress);
 
       RewardInfo memory sRewardsInformation = new RewardInfo[](sTokenRewardAddresses.length);
@@ -179,7 +179,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       // user reserve data
       userReservesIncentivesData[i].underlyingAsset = reserves[i];
 
-      IAaveIncentivesController aTokenIncentiveController = IncentivizedERC20(baseData.aTokenAddress).getIncentivesController();      
+      IAaveIncentivesControllerV2 aTokenIncentiveController = IncentivizedERC20(baseData.aTokenAddress).getIncentivesController();      
       if (address(aTokenIncentiveController) != address(0)) {
         // get all rewards information from the asset
         address[] memory aTokenRewardAddresses = aTokenIncentiveController.getRewardsByAsset(baseData.aTokenAddress);
@@ -214,7 +214,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       }
 
       // variable debt token
-      IAaveIncentivesController vTokenIncentiveController = IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController();      
+      IAaveIncentivesControllerV2 vTokenIncentiveController = IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController();      
       if (address(vTokenIncentiveController) != address(0)) {
         // get all rewards information from the asset
         address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(baseData.variableDebtTokenAddress);
@@ -249,7 +249,7 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
       }
 
       // stable debt toekn
-      IAaveIncentivesController sTokenIncentiveController = IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController();      
+      IAaveIncentivesControllerV2 sTokenIncentiveController = IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController();      
       if (address(sTokenIncentiveController) != address(0)) {
         // get all rewards information from the asset
         address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(baseData.stableDebtTokenAddress);

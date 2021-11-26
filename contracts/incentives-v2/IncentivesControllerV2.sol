@@ -65,6 +65,16 @@ contract IncentivesControllerV2 is
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
+  function getAaveOracle() external view override returns (address) {
+    return address(_aaveOracle);
+  }
+
+  /// @inheritdoc IAaveIncentivesControllerV2
+  function getTransferStrategy(address reward) external view override returns (address) {
+    return address(_transferStrategy[reward]);
+  }
+
+  /// @inheritdoc IAaveIncentivesControllerV2
   function configureAssets(DistributionTypesV2.RewardsConfigInput[] memory config)
     external
     override

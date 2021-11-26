@@ -58,6 +58,19 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   function getClaimer(address user) external view returns (address);
 
   /**
+   * @dev Returns the current Aave Oracle address
+   * @return The Aave Oracle contract address
+   */
+  function getAaveOracle() external view returns (address);
+
+  /**
+   * @dev Returns the Transfer Strategy implementation contract address being used for a reward address
+   * @param reward The address of the reward
+   * @return The address of the TransferStrategy contract
+   */
+  function getTransferStrategy(address reward) external view returns (address);
+
+  /**
    * @dev Configure assets for a certain rewards emission
    * @param config The assets configuration
    */

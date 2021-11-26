@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
-
+import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
 import {TransferStrategyStorage} from './transfer-strategies/TransferStrategyStorage.sol';
 import {DistributionManagerV2} from './DistributionManagerV2.sol';
 import {IAaveIncentivesControllerV2} from './interfaces/IAaveIncentivesControllerV2.sol';
@@ -30,12 +30,22 @@ contract IncentivesControllerV2 is
   // reward => transfer strategy implementation contract
   mapping(address => ITransferStrategy) internal _transferStrategy;
 
+  // At the moment of reward configuration, the Incentives Controller performs
+  // a check to see if the reward asset is registered at Aave Oracle.
+  // This check is enforced for integrators to be able to show incentives at
+  // the current Aave UI without the need to setup an external price registry
+  IPriceOracleGetter internal _aaveOracle;
+
   modifier onlyAuthorizedClaimers(address claimer, address user) {
     require(_authorizedClaimers[user] == claimer, 'CLAIMER_UNAUTHORIZED');
     _;
   }
 
-  constructor(address emissionManager) DistributionManagerV2(emissionManager) {}
+  constructor(address emissionManager, IPriceOracleGetter aaveOracle)
+    DistributionManagerV2(emissionManager)
+  {
+    _aaveOracle = aaveOracle;
+  }
 
   /**
    * @dev Empty initialize IncentivesControllerV2
@@ -61,6 +71,12 @@ contract IncentivesControllerV2 is
     onlyEmissionManager
   {
     for (uint256 i = 0; i < config.length; i++) {
+      // Check if reward price source exists at Aave Oracle
+      require(
+        _aaveOracle.getAssetPrice(config[i].reward) > 0,
+        'Reward must be registered at Aave Oracle'
+      );
+
       // Get the current Scaled Total Supply of AToken or Debt token
       config[i].totalSupply = IScaledBalanceToken(config[i].asset).scaledTotalSupply();
 
@@ -81,6 +97,12 @@ contract IncentivesControllerV2 is
     bytes memory params
   ) external onlyEmissionManager {
     _installTransferStrategy(reward, transferStrategy, params);
+  }
+
+  /// @inheritdoc IAaveIncentivesControllerV2
+  function setAaveOracle(IPriceOracleGetter aaveOracle) external onlyEmissionManager {
+    _aaveOracle = aaveOracle;
+    emit AaveOracleUpdated(_aaveOracle);
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2

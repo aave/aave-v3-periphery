@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {IAaveDistributionManagerV2} from './IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from '../libraries/DistributionTypesV2.sol';
 import {ITransferStrategy} from './ITransferStrategy.sol';
+import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
 
 interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   event ClaimerSet(address indexed user, address indexed claimer);
@@ -17,6 +18,8 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   );
 
   event TransferStrategyInstalled(address indexed reward, address indexed transferStrategy);
+
+  event AaveOracleUpdated(address indexed aaveOracle);
 
   /**
    * @dev Whitelists an address to claim the rewards on behalf of another address
@@ -36,6 +39,16 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
     ITransferStrategy transferStrategy,
     bytes memory params
   ) external;
+
+  /**
+   * @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
+   * @notice At the moment of reward configuration, the Incentives Controller performs
+   * a check to see if the reward asset is registered at Aave Oracle.
+   * This check is enforced for integrators to be able to show incentives at
+   * the current Aave UI without the need to setup an external price registry
+   * @param aaveOracle The address of the Aave Oracle
+   */
+  function setAaveOracle(IPriceOracleGetter aaveOracle) external;
 
   /**
    * @dev Returns the whitelisted claimer for a certain address (0x0 if not set)

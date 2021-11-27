@@ -83,10 +83,10 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       const underlyingAsset = aDaiMockV2.address;
       const stakedByUser = 22 * caseName.length;
-      const totalStaked = 33 * caseName.length;
+      const totalSupply = 33 * caseName.length;
       const reward = stakedAave.address;
 
-      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalStaked);
+      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
 
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
@@ -97,7 +97,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
               reward,
               emissionPerSecond,
               distributionEnd,
-              totalStaked,
+              totalSupply,
               transferStrategy: stakedTokenStrategy.address,
               transferStrategyParams: '0x',
             },
@@ -108,7 +108,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const destinationAddress = to || userAddress;
 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
-      await aDaiMockV2.handleActionOnAic(userAddress, totalStaked, stakedByUser);
+      await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
       const unclaimedRewardsBefore = await incentivesControllerV2.getUserRewardsBalance(
         [underlyingAsset],
@@ -188,7 +188,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         );
         await comparatorEngine(
           ['emissionPerSecond', 'index', 'lastUpdateTimestamp'],
-          { underlyingAsset, totalStaked },
+          { underlyingAsset, totalSupply },
           assetDataBefore,
           assetDataAfter,
           actionBlockTimestamp,
@@ -200,7 +200,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       // ------- Distribution Manager tests START -----
       await assetDataComparator(
-        { underlyingAsset, totalStaked },
+        { underlyingAsset, totalSupply },
         assetDataBefore,
         assetDataAfter,
         unclaimedRewardsStorageBefore.gte(amountToClaim)

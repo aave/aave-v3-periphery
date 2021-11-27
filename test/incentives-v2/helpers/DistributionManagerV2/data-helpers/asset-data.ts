@@ -5,7 +5,7 @@ import { DistributionManagerV2, IncentivesControllerV2 } from '../../../types';
 
 export type AssetUpdateDataV2 = {
   emissionPerSecond: BigNumberish;
-  totalStaked: BigNumberish;
+  totalSupply: BigNumberish;
   distributionEnd: BigNumberish;
   asset: string;
   reward: string;
@@ -64,7 +64,7 @@ export function rewardsDataComparator<Input extends AssetUpdateDataV2, State ext
           fieldName: 'index',
           logic: async (stateUpdate, stateBefore, stateAfter, txTimestamp) => {
             return getNormalizedDistribution(
-              stateUpdate.totalStaked.toString(),
+              stateUpdate.totalSupply.toString(),
               stateBefore.index,
               stateBefore.emissionPerSecond,
               stateBefore.lastUpdateTimestamp,

@@ -1,8 +1,5 @@
 import { expect } from 'chai';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../../helpers/constants';
-import { getBlockTimestamp } from '../../helpers/contracts-helpers';
-import { waitForTx } from '../../helpers/misc-utils';
-
+import { waitForTx, getBlockTimestamp, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
 
 makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEnv) => {
@@ -16,7 +13,7 @@ makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEn
         {
           asset: aDaiMockV2.address,
           emissionPerSecond: '2000',
-          totalStaked: '0',
+          totalSupply: '0',
           reward: stakedAave.address,
           distributionEnd: distributionEndTimestamp,
           transferStrategy: stakedTokenStrategy.address,

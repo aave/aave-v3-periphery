@@ -54,13 +54,13 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
 
       const userAddress = users[1].address;
       const stakedByUser = 22 * caseName.length;
-      const totalStaked = 33 * caseName.length;
+      const totalSupply = 33 * caseName.length;
       const underlyingAsset = aDaiMockV2.address;
 
       // update emissionPerSecond in advance to not affect user calculations
       await advanceBlock((await timeLatest()).plus(100).toNumber());
       if (emissionPerSecond) {
-        await aDaiMockV2.setUserBalanceAndSupply('0', totalStaked);
+        await aDaiMockV2.setUserBalanceAndSupply('0', totalSupply);
         await waitForTx(
           await incentivesControllerV2.configureAssets([
             {
@@ -68,18 +68,18 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
               reward,
               emissionPerSecond,
               distributionEnd,
-              totalStaked,
+              totalSupply,
               transferStrategy: stakedTokenStrategy.address,
               transferStrategyParams: '0x',
             },
           ])
         );
       }
-      await aDaiMockV2.handleActionOnAic(userAddress, totalStaked, stakedByUser);
+      await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
       await advanceBlock((await timeLatest()).plus(100).toNumber());
 
       const lastTxReceipt = await waitForTx(
-        await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalStaked)
+        await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply)
       );
       const lastTxTimestamp = await getBlockTimestamp(lastTxReceipt.blockNumber);
 
@@ -107,7 +107,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       await aDaiMockV2.cleanUserState();
 
       const expectedAssetIndex = getNormalizedDistribution(
-        totalStaked,
+        totalSupply,
         assetData.index,
         assetData.emissionPerSecond,
         assetData.lastUpdateTimestamp,

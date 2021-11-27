@@ -18,7 +18,7 @@ type ScenarioAction = {
   customTimeMovement?: number;
   assets: Pick<
     AssetUpdateDataV2,
-    'emissionPerSecond' | 'totalStaked' | 'distributionEnd' | 'reward'
+    'emissionPerSecond' | 'totalSupply' | 'distributionEnd' | 'reward'
   >[];
   compareRules?: CompareRules<AssetUpdateDataV2, RewardData>;
 };
@@ -34,7 +34,7 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '11',
-            totalStaked: '0',
+            totalSupply: '0',
             distributionEnd: time + 1000 * 60 * 60,
             reward: stakedAave.address,
           },
@@ -48,13 +48,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '33',
-            totalStaked: '0',
+            totalSupply: '0',
             distributionEnd: time + 2000 * 60 * 60,
             reward: stakedAave.address,
           },
           {
             emissionPerSecond: '22',
-            totalStaked: '0',
+            totalSupply: '0',
             distributionEnd: time + 3000 * 60 * 60,
             reward: rewardToken.address,
           },
@@ -69,13 +69,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '33',
-            totalStaked: '100000',
+            totalSupply: '100000',
             distributionEnd: time + 2000 * 60 * 60,
             reward: stakedAave.address,
           },
           {
             emissionPerSecond: '22',
-            totalStaked: '200000',
+            totalSupply: '200000',
             distributionEnd: time + 3000 * 60 * 60,
             reward: rewardToken.address,
           },
@@ -89,13 +89,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '0',
-            totalStaked: '100000',
+            totalSupply: '100000',
             reward: stakedAave.address,
             distributionEnd: time + 2000 * 60 * 60,
           },
           {
             emissionPerSecond: '0',
-            totalStaked: '200000',
+            totalSupply: '200000',
             reward: rewardToken.address,
             distributionEnd: time + 3000 * 60 * 60,
           },
@@ -109,13 +109,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '0',
-            totalStaked: '100000',
+            totalSupply: '100000',
             reward: stakedAave.address,
             distributionEnd: time + 2000 * 60 * 60,
           },
           {
             emissionPerSecond: '0',
-            totalStaked: '200000',
+            totalSupply: '200000',
             reward: rewardToken.address,
             distributionEnd: time + 3000 * 60 * 60,
           },
@@ -130,13 +130,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '222',
-            totalStaked: '213213213213',
+            totalSupply: '213213213213',
             reward: stakedAave.address,
             distributionEnd: time + 2000 * 60 * 60,
           },
           {
             emissionPerSecond: '333',
-            totalStaked: '313213213213',
+            totalSupply: '313213213213',
             reward: rewardToken.address,
             distributionEnd: time + 3000 * 60 * 60,
           },
@@ -151,13 +151,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
         assets: [
           {
             emissionPerSecond: '222',
-            totalStaked: '213213213213',
+            totalSupply: '213213213213',
             reward: stakedAave.address,
             distributionEnd: time + 2000 * 60 * 60,
           },
           {
             emissionPerSecond: '333',
-            totalStaked: '313213213213',
+            totalSupply: '313213213213',
             reward: rewardToken.address,
             distributionEnd: time + 3000 * 60 * 60,
           },
@@ -209,20 +209,20 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
           const assetConfigsUpdate: AssetUpdateDataV2[] = [];
 
           for (let i = 0; i < assetsConfig.length; i++) {
-            const { emissionPerSecond, totalStaked, reward, distributionEnd } = assetsConfig[i];
+            const { emissionPerSecond, totalSupply, reward, distributionEnd } = assetsConfig[i];
             if (i > deployedAssets.length) {
               throw new Error('to many assets to test');
             }
 
             // Change current supply
-            await deployedAssets[i].setUserBalanceAndSupply('0', totalStaked);
+            await deployedAssets[i].setUserBalanceAndSupply('0', totalSupply);
 
             // Push configs
             assets.push(deployedAssets[i].address);
             assetsEmissions.push(emissionPerSecond);
             assetConfigsUpdate.push({
               emissionPerSecond,
-              totalStaked,
+              totalSupply,
               reward,
               distributionEnd,
               asset: deployedAssets[i].address,

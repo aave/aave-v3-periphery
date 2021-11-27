@@ -81,7 +81,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
               reward,
               emissionPerSecond: emissionPerSecond,
               distributionEnd,
-              totalStaked: '0',
+              totalSupply: '0',
               transferStrategy: stakedTokenStrategy.address,
               transferStrategyParams: '0x',
             },
@@ -140,7 +140,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
 
       // ------- Distribution Manager tests START -----
       await assetDataComparator(
-        { underlyingAsset, totalStaked: totalSupply },
+        { underlyingAsset, totalSupply: totalSupply },
         assetDataBefore,
         assetDataAfter,
         actionBlockTimestamp,

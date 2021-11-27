@@ -98,7 +98,7 @@ makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEn
         stakedAave.address,
         thirdClaimer.address,
         thirdClaimer.address,
-        '119999'
+        '139999'
       );
     const afterStkBalance = await stakedAave.balanceOf(thirdClaimer.address);
     expect(afterStkBalance).to.be.gt(priorStkBalance);

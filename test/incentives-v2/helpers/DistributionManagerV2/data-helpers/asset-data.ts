@@ -1,7 +1,8 @@
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
-import { comparatorEngine, CompareRules } from '../../helpers/comparator-engine';
-import { getNormalizedDistribution } from '../../helpers/ray-math';
-import { DistributionManagerV2, IncentivesControllerV2 } from '../../../types';
+import { IncentivesControllerV2 } from '../../../../../types/IncentivesControllerV2';
+import { comparatorEngine, CompareRules } from '../../comparator-engine';
+import { getNormalizedDistribution } from '../../ray-math';
+import { BigNumberValue, valueToZDBigNumber } from '../../ray-math/bignumber';
 
 export type AssetUpdateDataV2 = {
   emissionPerSecond: BigNumberish;
@@ -20,8 +21,14 @@ export type RewardData = {
   distributionEnd: BigNumber;
 };
 
+export type AssetData = {
+  emissionPerSecond: BigNumber;
+  index: BigNumber;
+  lastUpdateTimestamp: BigNumber;
+};
+
 export async function getRewardsData(
-  peiContract: DistributionManagerV2 | IncentivesControllerV2,
+  peiContract: IncentivesControllerV2,
   assets: string[],
   rewards: string[]
 ) {
@@ -70,6 +77,64 @@ export function rewardsDataComparator<Input extends AssetUpdateDataV2, State ext
               stateBefore.lastUpdateTimestamp,
               txTimestamp,
               stateBefore.distributionEnd
+            ).toString(10);
+          },
+        },
+        ...(compareRules.fieldsWithCustomLogic || []),
+      ],
+    }
+  );
+}
+
+export function getRewards(
+  balance: BigNumberValue,
+  assetIndex: BigNumberValue,
+  userIndex: BigNumberValue,
+  precision: number = 18
+): BigNumber {
+  return BigNumber.from(
+    valueToZDBigNumber(balance)
+      .multipliedBy(valueToZDBigNumber(assetIndex).minus(userIndex.toString()))
+      .dividedBy(valueToZDBigNumber(10).exponentiatedBy(precision))
+      .toString()
+  );
+}
+
+export function assetDataComparator<
+  Input extends { underlyingAsset: string; totalSupply: BigNumberish },
+  State extends AssetData
+>(
+  assetConfigUpdateInput: Input,
+  assetConfigBefore: State,
+  assetConfigAfter: State,
+  actionBlockTimestamp: number,
+  emissionEndTimestamp: number,
+  compareRules: CompareRules<Input, State>
+) {
+  return comparatorEngine(
+    ['emissionPerSecond', 'index', 'lastUpdateTimestamp'],
+    assetConfigUpdateInput,
+    assetConfigBefore,
+    assetConfigAfter,
+    actionBlockTimestamp,
+    {
+      ...compareRules,
+      fieldsWithCustomLogic: [
+        // should happen on any update
+        {
+          fieldName: 'lastUpdateTimestamp',
+          logic: (stateUpdate, stateBefore, stateAfter, txTimestamp) => txTimestamp.toString(),
+        },
+        {
+          fieldName: 'index',
+          logic: async (stateUpdate, stateBefore, stateAfter, txTimestamp) => {
+            return getNormalizedDistribution(
+              stateUpdate.totalSupply.toString(),
+              stateBefore.index,
+              stateBefore.emissionPerSecond,
+              stateBefore.lastUpdateTimestamp,
+              txTimestamp,
+              emissionEndTimestamp
             ).toString(10);
           },
         },

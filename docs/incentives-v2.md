@@ -23,6 +23,8 @@ Transfer Strategies are implementation contracts to support different reward sys
 - `performTransfer(address to, address reward, uint256 amount)`
   The `performTransfer` function is called at `claimRewards`, and holds the custom logic to transfer the rewards from the source of the reward to the destination.
 
+![alt text](./img/ClaimFlow.png)
+
 ### Supported Transfer Strategies
 
 #### Pull Rewards Transfer Strategy

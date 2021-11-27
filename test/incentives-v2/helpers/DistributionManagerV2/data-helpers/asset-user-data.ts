@@ -1,9 +1,8 @@
-import { DistributionManagerV2 } from './../../../types/DistributionManagerV2.d';
 import { BigNumber } from 'ethers';
-import { IncentivesControllerV2 } from '../../../types';
+import { IncentivesControllerV2 } from '../../../../../types/IncentivesControllerV2';
 
 export async function getUserIndex(
-  distributionManager: DistributionManagerV2 | IncentivesControllerV2,
+  distributionManager: IncentivesControllerV2,
   user: string,
   asset: string,
   reward: string

@@ -1,17 +1,15 @@
-import { getBlockTimestamp } from './../../helpers/contracts-helpers';
-import { MAX_UINT_AMOUNT, RANDOM_ADDRESSES } from '../../helpers/constants';
-
 const { expect } = require('chai');
-
 import { makeSuite } from '../helpers/make-suite';
 import { BigNumber } from 'ethers';
-import { waitForTx, increaseTime } from '../../helpers/misc-utils';
-import { comparatorEngine, eventChecker } from '../helpers/comparator-engine';
-import { assetDataComparator } from '../DistributionManager/data-helpers/asset-data';
-import { getRewards } from '../DistributionManager/data-helpers/base-math';
-import { fail } from 'assert';
-import { getRewardsData } from '../DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from '../DistributionManagerV2/data-helpers/asset-user-data';
+import { waitForTx, getBlockTimestamp, increaseTime, MAX_UINT_AMOUNT } from '@aave/deploy-v3';
+import { RANDOM_ADDRESSES } from '../helpers/constants';
+import { comparatorEngine } from './helpers/comparator-engine';
+import {
+  assetDataComparator,
+  getRewards,
+  getRewardsData,
+} from './helpers/DistributionManagerV2/data-helpers/asset-data';
+import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
 
 type ScenarioAction = {
   caseName: string;

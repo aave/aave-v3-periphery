@@ -1,14 +1,14 @@
+import { increaseTime, waitForTx, advanceBlock, getBlockTimestamp } from '@aave/deploy-v3';
 const { expect } = require('chai');
 
 import { makeSuite } from '../helpers/make-suite';
-import { getRewards } from '../DistributionManager/data-helpers/base-math';
-import { advanceBlock, timeLatest, waitForTx, increaseTime } from '../../helpers/misc-utils';
-import { getNormalizedDistribution } from '../helpers/ray-math';
-import { getBlockTimestamp } from '../../helpers/contracts-helpers';
-import { getUserIndex } from '../DistributionManagerV2/data-helpers/asset-user-data';
-import { getRewardsData } from '../DistributionManagerV2/data-helpers/asset-data';
-import { BigNumber } from '@ethersproject/bignumber';
-
+import { timeLatest } from '../helpers/utils';
+import {
+  getRewardsData,
+  getRewards,
+} from './helpers/DistributionManagerV2/data-helpers/asset-data';
+import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+import { getNormalizedDistribution } from './helpers/ray-math';
 type ScenarioAction = {
   caseName: string;
   emissionPerSecond: string;
@@ -58,7 +58,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       const underlyingAsset = aDaiMockV2.address;
 
       // update emissionPerSecond in advance to not affect user calculations
-      await advanceBlock((await timeLatest()).plus(100).toNumber());
+      await advanceBlock((await timeLatest()).add(100).toNumber());
       if (emissionPerSecond) {
         await aDaiMockV2.setUserBalanceAndSupply('0', totalSupply);
         await waitForTx(
@@ -76,7 +76,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
         );
       }
       await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
-      await advanceBlock((await timeLatest()).plus(100).toNumber());
+      await advanceBlock((await timeLatest()).add(100).toNumber());
 
       const lastTxReceipt = await waitForTx(
         await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply)

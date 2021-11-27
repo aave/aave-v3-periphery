@@ -45,8 +45,12 @@ import {
   getStakedRewardsStrategy,
   StakedAaveV3,
   getStakeAave,
+  waitForTx,
+  MAX_UINT_AMOUNT,
+  TESTNET_PRICE_AGGR_PREFIX,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../incentives-v2/helpers/deploy';
+import { parseEther } from 'ethers/lib/utils';
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -130,7 +134,7 @@ const testEnv: TestEnv = {
 } as TestEnv;
 
 export async function initializeMakeSuite() {
-  const [_deployer, ...restSigners] = await getEthersSigners();
+  const [_deployer, , , ...restSigners] = await getEthersSigners();
   const { incentivesRewardsVault } = await hre.getNamedAccounts();
   const deployer: SignerWithAddress = {
     address: await _deployer.getAddress(),
@@ -213,6 +217,36 @@ export async function initializeMakeSuite() {
   testEnv.stakedTokenStrategy = (await getStakedRewardsStrategy()) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
   testEnv.distributionEnd = (await getBlockTimestamp()) + 1000 * 60 * 60;
+
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('3000000'))
+  );
+  await waitForTx(
+    await testEnv.rewardToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('2000000'))
+  );
+
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      .transfer(incentivesControllerV2.address, parseEther('1000000'))
+  );
+
+  await waitForTx(
+    await testEnv.rewardToken
+      .connect(rewardsVault.signer)
+      .approve(incentivesControllerV2.address, MAX_UINT_AMOUNT)
+  );
+
+  await waitForTx(
+    await (await getAaveOracle()).setAssetSources(
+      [testEnv.stakedAave.address],
+      [await (await hre.deployments.get(`AAVE${TESTNET_PRICE_AGGR_PREFIX}`)).address]
+    )
+  );
 }
 
 const setSnapshot = async () => {

@@ -1,17 +1,14 @@
-import { MAX_UINT_AMOUNT } from './../../helpers/constants';
-import { getBlockTimestamp } from './../../helpers/contracts-helpers';
-const { expect } = require('chai');
-
+import { getBlockTimestamp, increaseTime, waitForTx } from '@aave/deploy-v3';
+import { BigNumberish } from 'ethers';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
-import { increaseTime, waitForTx } from '../../helpers/misc-utils';
-import { CompareRules, eventChecker } from '../helpers/comparator-engine';
-import { BigNumberish } from '@ethersproject/bignumber';
+import { CompareRules } from './helpers/comparator-engine';
 import {
-  getRewardsData,
-  RewardData,
-  rewardsDataComparator,
   AssetUpdateDataV2,
-} from '../DistributionManagerV2/data-helpers/asset-data';
+  RewardData,
+  getRewardsData,
+  rewardsDataComparator,
+} from './helpers/DistributionManagerV2/data-helpers/asset-data';
+const { expect } = require('chai');
 
 type ScenarioAction = {
   caseName: string;

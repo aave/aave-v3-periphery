@@ -98,9 +98,24 @@ const testEnv: TestEnv = {
 
 export async function initializeMakeSuite() {
   const [_deployer, ...restSigners] = await getEthersSigners();
+  const {
+    incentivesProxyAdmin,
+    incentivesEmissionManager,
+    incentivesRewardsVault,
+  } = await hre.getNamedAccounts();
   const deployer: SignerWithAddress = {
     address: await _deployer.getAddress(),
     signer: _deployer,
+  };
+
+  const emissionManager: SignerWithAddress = {
+    address: incentivesEmissionManager,
+    signer: await hre.ethers.getSigner(incentivesEmissionManager),
+  };
+
+  const rewardsVault: SignerWithAddress = {
+    address: incentivesRewardsVault,
+    signer: await hre.ethers.getSigner(incentivesRewardsVault),
   };
 
   for (const signer of restSigners) {
@@ -160,6 +175,24 @@ export async function initializeMakeSuite() {
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.wethGateway = await getWETHGateway();
+
+  // incentives-v2 setup
+  testEnv.rewardsVault = rewardsVault;
+  testEnv.stakedAave = stakedAave;
+  testEnv.aaveIncentivesController = aaveIncentivesController;
+  testEnv.pullRewardsIncentivesController = pullRewardsIncentivesController;
+  testEnv.aaveToken = aaveToken;
+  testEnv.aDaiMock = await getATokenMock({ slug: 'aDai' });
+  testEnv.aWethMock = await getATokenMock({ slug: 'aWeth' });
+  testEnv.aDaiMockV2 = await getATokenMock({ slug: 'aDaiV2' });
+  testEnv.aWethMockV2 = await getATokenMock({ slug: 'aWethV2' });
+  testEnv.incentivesControllerV2 = incentivesControllerV2;
+  testEnv.pullRewardsStrategy = pullRewardsStrategy;
+  testEnv.stakedTokenStrategy = stakedTokenStrategy;
+  testEnv.rewardToken = rewardToken;
+  testEnv.distributionEnd = (await getBlockTimestamp()) + 1000 * 60 * 60;
+  testEnv.aDaiBaseMock = await getATokenMock({ slug: 'aDaiBase' });
+  testEnv.aWethBaseMock = await getATokenMock({ slug: 'aWethBase' });
 }
 
 const setSnapshot = async () => {

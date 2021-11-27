@@ -104,6 +104,12 @@ const config: HardhatUserConfig = {
       default: 1,
     },
     incentivesProxyAdmin: {
+      default: 1,
+    },
+    incentivesEmissionManager: {
+      default: 0,
+    },
+    incentivesRewardsVault: {
       default: 2,
     },
   },

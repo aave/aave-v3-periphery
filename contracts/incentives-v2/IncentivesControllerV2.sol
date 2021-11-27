@@ -41,16 +41,15 @@ contract IncentivesControllerV2 is
     _;
   }
 
-  constructor(address emissionManager, IPriceOracleGetter aaveOracle)
-    DistributionManagerV2(emissionManager)
-  {
-    _aaveOracle = aaveOracle;
-  }
+  constructor(address emissionManager) DistributionManagerV2(emissionManager) {}
 
   /**
    * @dev Empty initialize IncentivesControllerV2
    **/
-  function initialize() external initializer {}
+  function initialize(IPriceOracleGetter aaveOracle) external initializer {
+    _aaveOracle = aaveOracle;
+    emit AaveOracleUpdated(address(_aaveOracle));
+  }
 
   /// @inheritdoc IAaveIncentivesControllerV2
   function getClaimer(address user) external view override returns (address) {

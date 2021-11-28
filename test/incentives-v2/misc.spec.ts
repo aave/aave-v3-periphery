@@ -10,6 +10,10 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const peiEmissionManager = RANDOM_ADDRESSES[1];
     const { deployer } = await hre.getNamedAccounts();
 
+    if (process.env.COVERAGE === 'true') {
+      console.log('Skip due coverage loss of data');
+      return;
+    }
     const artifact = await hre.deployments.deploy('IncentivesControllerV2', {
       from: deployer,
       args: [peiEmissionManager],

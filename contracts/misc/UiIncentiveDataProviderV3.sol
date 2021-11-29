@@ -10,6 +10,7 @@ import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/conf
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 
 contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -39,7 +40,6 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
     view
     returns (AggregatedReserveIncentiveData[] memory)
   {
-    IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
     IPool lendingPool = IPool(provider.getPool());
     address[] memory reserves = lendingPool.getReservesList();
     AggregatedReserveIncentiveData[] memory reservesIncentiveData =
@@ -72,9 +72,10 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
         rewardInformation.rewardTokenDecimals = IERC20Detailed(rewardInformation.rewardTokenAddress).decimals();
         rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress).symbol();
 
-        // Get price of reward token from Aave Oracle registry
-        rewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-        rewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(rewardInformation.rewardTokenAddress);
+        // Get price of reward token from Chainlink Proxy Oracle
+        rewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(rewardInformation.rewardTokenAddress);
+        rewardInformation.priceFeedDecimals = IEACAggregatorProxy(rewardInformation.rewardOracle).latestAnswer();
+        rewardInformation.rewardPriceFeed = IEACAggregatorProxy(rewardInformation.rewardOracle).decimals();
 
       }
       
@@ -104,9 +105,10 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
         rewardInformation.rewardTokenDecimals = IERC20Detailed(rewardInformation.rewardTokenAddress).decimals();
         rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress).symbol();
 
-        // Get price of reward token from Aave Oracle registry
-        rewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-        rewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(rewardInformation.rewardTokenAddress);
+        // Get price of reward token from Chainlink Proxy Oracle
+        rewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(rewardInformation.rewardTokenAddress);
+        rewardInformation.priceFeedDecimals = IEACAggregatorProxy(rewardInformation.rewardOracle).latestAnswer();
+        rewardInformation.rewardPriceFeed = IEACAggregatorProxy(rewardInformation.rewardOracle).decimals();
 
       }
       
@@ -136,10 +138,10 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
         rewardInformation.rewardTokenDecimals = IERC20Detailed(rewardInformation.rewardTokenAddress).decimals();
         rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress).symbol();
 
-        // Get price of reward token from Aave Oracle registry
-        rewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-        rewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(rewardInformation.rewardTokenAddress);
-
+        // Get price of reward token from Chainlink Proxy Oracle
+        rewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(rewardInformation.rewardTokenAddress);
+        rewardInformation.priceFeedDecimals = IEACAggregatorProxy(rewardInformation.rewardOracle).latestAnswer();
+        rewardInformation.rewardPriceFeed = IEACAggregatorProxy(rewardInformation.rewardOracle).decimals();
       }
       
       reserveIncentiveData.sIncentiveData = IncentiveData(
@@ -201,9 +203,10 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(userRewardInformation.rewardTokenAddress).decimals();
           userRewardInformation.rewardTokenSymbol = IERC20Detailed(userRewardInformation.rewardTokenAddress).symbol();
 
-          // Get price of reward token from Aave Oracle registry
-          userRewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-          userRewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(userRewardInformation.rewardTokenAddress);
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(userRewardInformation.rewardTokenAddress);
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(userRewardInformation.rewardOracle).latestAnswer();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(userRewardInformation.rewardOracle).decimals();
         }
         
         userReservesIncentivesData[i].aTokenIncentivesUserData = UserIncentiveData(
@@ -236,9 +239,10 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(userRewardInformation.rewardTokenAddress).decimals();
           userRewardInformation.rewardTokenSymbol = IERC20Detailed(userRewardInformation.rewardTokenAddress).symbol();
 
-          // Get price of reward token from Aave Oracle registry
-          userRewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-          userRewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(userRewardInformation.rewardTokenAddress);
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(userRewardInformation.rewardTokenAddress);
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(userRewardInformation.rewardOracle).latestAnswer();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(userRewardInformation.rewardOracle).decimals();
         }
         
         userReservesIncentivesData[i].vTokenIncentivesUserData = UserIncentiveData(
@@ -271,9 +275,11 @@ contract UiIncentiveDataProvider is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(userRewardInformation.rewardTokenAddress).decimals();
           userRewardInformation.rewardTokenSymbol = IERC20Detailed(userRewardInformation.rewardTokenAddress).symbol();
 
-          // Get price of reward token from Aave Oracle registry
-          userRewardInformation.marketReferenceCurrencyUnit = oracle.BASE_CURRENCY_UNIT();
-          userRewardInformation.rewardPriceInMarketRef = oracle.getAssetPrice(userRewardInformation.rewardTokenAddress);
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(userRewardInformation.rewardTokenAddress);
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(userRewardInformation.rewardOracle).latestAnswer();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(userRewardInformation.rewardOracle).decimals();
         }
         
         userReservesIncentivesData[i].sTokenIncentivesUserData = UserIncentiveData(

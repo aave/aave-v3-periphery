@@ -19,12 +19,13 @@ interface IUiIncentiveDataProviderV3 {
 
   struct RewardInfo {
     address rewardTokenAddress;
+    address rewardOracleAddress;
     uint256 emissionPerSecond;
     uint256 incentivesLastUpdateTimestamp;
     uint256 tokenIncentivesIndex;
     uint256 emissionEndTimestamp;
-    uint256 rewardPriceInMarketRef;
-    uint256 marketReferenceCurrencyUnit;
+    int256 rewardPriceFeed;
+    uint256 priceFeedDecimals;
     string rewardTokenSymbol;
     uint8 rewardTokenDecimals;
     uint8 precision;
@@ -44,10 +45,11 @@ interface IUiIncentiveDataProviderV3 {
   }
   
   struct UserRewardInfo {
+    address rewardOracleAddress;
     uint256 userUnclaimedRewards;
     uint256 tokenIncentivesUserIndex;
-    uint256 marketReferenceCurrencyUnit;
-    uint256 rewardPriceInMarketRef;
+    int256 rewardPriceFeed;
+    uint256 priceFeedDecimals;
     address rewardTokenAddress;
     string rewardTokenSymbol;
     uint8 rewardTokenDecimals;

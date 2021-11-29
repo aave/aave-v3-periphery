@@ -93,6 +93,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
             {
               asset: underlyingAsset,
               reward,
+              rewardOracle: testEnv.aavePriceAggregator,
               emissionPerSecond,
               distributionEnd,
               totalSupply,

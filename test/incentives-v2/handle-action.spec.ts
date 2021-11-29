@@ -1,3 +1,4 @@
+import hre from 'hardhat';
 import { fail } from 'assert';
 import { increaseTime, waitForTx, getBlockTimestamp } from '@aave/deploy-v3';
 import { makeSuite } from '../helpers/make-suite';
@@ -8,6 +9,7 @@ import {
   assetDataComparator,
 } from './helpers/DistributionManagerV2/data-helpers/asset-data';
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+
 const { expect } = require('chai');
 
 type ScenarioAction = {
@@ -79,6 +81,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
             {
               asset: underlyingAsset,
               reward,
+              rewardOracle: testEnv.aavePriceAggregator,
               emissionPerSecond: emissionPerSecond,
               distributionEnd,
               totalSupply: '0',

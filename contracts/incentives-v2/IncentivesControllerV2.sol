@@ -352,6 +352,6 @@ contract IncentivesControllerV2 is
   function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
     require(rewardOracle.latestAnswer() > 0, 'Oracle must return price');
     _rewardOracle[reward] = rewardOracle;
-    emit RewardOracleUpdated(address(rewardOracle));
+    emit RewardOracleUpdated(reward, address(rewardOracle));
   }
 }

@@ -10,6 +10,7 @@ export type AssetUpdateDataV2 = {
   distributionEnd: BigNumberish;
   asset: string;
   reward: string;
+  rewardOracle: string;
   transferStrategy: string;
   transferStrategyParams: BytesLike;
 };

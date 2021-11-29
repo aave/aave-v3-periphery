@@ -92,6 +92,7 @@ export interface TestEnv {
   stakedTokenStrategy: StakedTokenTransferStrategy;
   rewardToken: MintableERC20;
   distributionEnd: number;
+  aavePriceAggregator: tEthereumAddress;
 }
 
 let hardhatevmSnapshotId: string = '0x1';
@@ -131,6 +132,7 @@ const testEnv: TestEnv = {
   stakedTokenStrategy: {} as StakedTokenTransferStrategy,
   rewardToken: {} as MintableERC20,
   distributionEnd: 0,
+  aavePriceAggregator: '',
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -206,7 +208,7 @@ export async function initializeMakeSuite() {
 
   // incentives-v2 setup
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
-  const incentivesControllerV2 = (await getIncentivesV2()) as IncentivesControllerV2;
+  const incentivesControllerV2 = ((await getIncentivesV2()) as any) as IncentivesControllerV2;
   testEnv.incentivesControllerV2 = incentivesControllerV2;
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();
@@ -217,7 +219,9 @@ export async function initializeMakeSuite() {
   testEnv.stakedTokenStrategy = (await getStakedRewardsStrategy()) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
   testEnv.distributionEnd = (await getBlockTimestamp()) + 1000 * 60 * 60;
-
+  testEnv.aavePriceAggregator = (
+    await hre.deployments.get(`AAVE${TESTNET_PRICE_AGGR_PREFIX}`)
+  ).address;
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)
@@ -244,7 +248,7 @@ export async function initializeMakeSuite() {
   await waitForTx(
     await (await getAaveOracle()).setAssetSources(
       [testEnv.stakedAave.address],
-      [await (await hre.deployments.get(`AAVE${TESTNET_PRICE_AGGR_PREFIX}`)).address]
+      [await testEnv.aavePriceAggregator]
     )
   );
 }

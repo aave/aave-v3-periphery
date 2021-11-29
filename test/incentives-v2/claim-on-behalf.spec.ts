@@ -15,6 +15,7 @@ makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEn
           emissionPerSecond: '2000',
           totalSupply: '0',
           reward: stakedAave.address,
+          rewardOracle: testEnv.aavePriceAggregator,
           distributionEnd: distributionEndTimestamp,
           transferStrategy: stakedTokenStrategy.address,
           transferStrategyParams: '0x',

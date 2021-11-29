@@ -19,7 +19,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   event TransferStrategyInstalled(address indexed reward, address indexed transferStrategy);
 
-  event RewardOracleUpdated(address indexed rewardOracle);
+  event RewardOracleUpdated(address indexed reward, address indexed rewardOracle);
 
   /**
    * @dev Whitelists an address to claim the rewards on behalf of another address

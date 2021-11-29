@@ -61,7 +61,7 @@ contract IncentivesControllerV2 is
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
-  function getRewardOracle(address reward) external returns (address) {
+  function getRewardOracle(address reward) external view override returns (address) {
     return address(_rewardOracle[reward]);
   }
 

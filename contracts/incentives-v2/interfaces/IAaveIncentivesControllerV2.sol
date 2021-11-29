@@ -55,7 +55,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
    * @dev Get the price aggregator oracle address
    * @param reward The address of the reward
    */
-  function getRewardOracle(address reward) external returns (address);
+  function getRewardOracle(address reward) external view returns (address);
 
   /**
    * @dev Returns the whitelisted claimer for a certain address (0x0 if not set)

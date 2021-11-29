@@ -30,6 +30,8 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
+    "@aave/aave-stake-v2": "^1.0.4",
+    "@aave/aave-token": "^1.0.4",
     "@aave/deploy-v3": "^1.6.0-beta.7",
     "@ethersproject/abi": "^5.1.0",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.11",

@@ -36,7 +36,7 @@ ln -s "$PWD/package.json" node_modules/@aave/periphery-v3/package.json
 # Import external @aave/deploy artifacts
 mkdir -p temp-artifacts/deploy
 cp -r node_modules/@aave/deploy-v3/artifacts/contracts/* temp-artifacts/deploy
-cp -r node_modules/@aave/deploy-v3/artifacts/@aave/aave-stake/* temp-artifacts/aave-stake
+cp -r node_modules/@aave/deploy-v3/artifacts/@aave/aave-stake-v2/* temp-artifacts/aave-stake
 
 # Export MARKET_NAME variable to use Aave market as testnet deployment setup
 export MARKET_NAME="Aave"

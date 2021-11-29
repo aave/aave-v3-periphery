@@ -3,12 +3,12 @@ pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
-import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
 import {TransferStrategyStorage} from './transfer-strategies/TransferStrategyStorage.sol';
 import {DistributionManagerV2} from './DistributionManagerV2.sol';
 import {IAaveIncentivesControllerV2} from './interfaces/IAaveIncentivesControllerV2.sol';
 import {ITransferStrategy} from './interfaces/ITransferStrategy.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
+import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
 /**
  * @title IncentivesControllerV2
@@ -31,21 +31,17 @@ contract IncentivesControllerV2 is
   mapping(address => ITransferStrategy) internal _transferStrategy;
 
   // At the moment of reward configuration, the Incentives Controller performs
-  // a check to see if the reward asset is registered at Aave Oracle.
+  // a check to see if the provided reward oracle contains `latestAnswer`.
   // This check is enforced for integrators to be able to show incentives at
   // the current Aave UI without the need to setup an external price registry
-  IPriceOracleGetter internal _aaveOracle;
+  mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
   modifier onlyAuthorizedClaimers(address claimer, address user) {
     require(_authorizedClaimers[user] == claimer, 'CLAIMER_UNAUTHORIZED');
     _;
   }
 
-  constructor(address emissionManager, IPriceOracleGetter aaveOracle)
-    DistributionManagerV2(emissionManager)
-  {
-    _aaveOracle = aaveOracle;
-  }
+  constructor(address emissionManager) DistributionManagerV2(emissionManager) {}
 
   /**
    * @dev Empty initialize IncentivesControllerV2
@@ -65,8 +61,8 @@ contract IncentivesControllerV2 is
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
-  function getAaveOracle() external view override returns (address) {
-    return address(_aaveOracle);
+  function getRewardOracle(address reward) external returns (address) {
+    return address(_rewardOracle[reward]);
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
@@ -81,12 +77,6 @@ contract IncentivesControllerV2 is
     onlyEmissionManager
   {
     for (uint256 i = 0; i < config.length; i++) {
-      // Check if reward price source exists at Aave Oracle
-      require(
-        _aaveOracle.getAssetPrice(config[i].reward) > 0,
-        'Reward must be registered at Aave Oracle'
-      );
-
       // Get the current Scaled Total Supply of AToken or Debt token
       config[i].totalSupply = IScaledBalanceToken(config[i].asset).scaledTotalSupply();
 
@@ -96,6 +86,9 @@ contract IncentivesControllerV2 is
         config[i].transferStrategy,
         config[i].transferStrategyParams
       );
+
+      // Set reward oracle, enforces input oracle to have latestPrice function
+      _setRewardOracle(config[i].reward, config[i].rewardOracle);
     }
     _configureAssets(config);
   }
@@ -110,9 +103,11 @@ contract IncentivesControllerV2 is
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
-  function setAaveOracle(IPriceOracleGetter aaveOracle) external onlyEmissionManager {
-    _aaveOracle = aaveOracle;
-    emit AaveOracleUpdated(address(_aaveOracle));
+  function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
+    external
+    onlyEmissionManager
+  {
+    _setRewardOracle(reward, rewardOracle);
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
@@ -352,5 +347,11 @@ contract IncentivesControllerV2 is
     _transferStrategy[reward] = transferStrategy;
 
     emit TransferStrategyInstalled(reward, address(transferStrategy));
+  }
+
+  function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
+    require(rewardOracle.latestAnswer() > 0, 'Oracle must return price');
+    _rewardOracle[reward] = rewardOracle;
+    emit RewardOracleUpdated(address(rewardOracle));
   }
 }

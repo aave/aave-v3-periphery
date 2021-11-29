@@ -11,7 +11,7 @@
 # the deploy library to not find the external
 # artifacts. 
 
-echo "[BASH] Setting up testnet enviroment"
+echo "[BASH] Setting up testnet environment"
 
 if [ ! "$COVERAGE" = true ]; then
     # remove hardhat and artifacts cache
@@ -36,5 +36,9 @@ ln -s "$PWD/package.json" node_modules/@aave/periphery-v3/package.json
 # Import external @aave/deploy artifacts
 mkdir -p temp-artifacts/deploy
 cp -r node_modules/@aave/deploy-v3/artifacts/contracts/* temp-artifacts/deploy
+cp -r node_modules/@aave/deploy-v3/artifacts/@aave/aave-stake/* temp-artifacts/aave-stake
 
-echo "[BASH] Testnet enviroment ready"
+# Export MARKET_NAME variable to use Aave market as testnet deployment setup
+export MARKET_NAME="Aave"
+
+echo "[BASH] Testnet environment ready"

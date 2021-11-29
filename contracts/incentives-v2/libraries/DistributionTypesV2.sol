@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {ITransferStrategy} from '../interfaces/ITransferStrategy.sol';
+import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 
 library DistributionTypesV2 {
   struct RewardsConfigInput {
@@ -12,6 +13,7 @@ library DistributionTypesV2 {
     address reward;
     ITransferStrategy transferStrategy;
     bytes transferStrategyParams;
+    IEACAggregatorProxy rewardOracle;
   }
 
   struct UserStakeInput {

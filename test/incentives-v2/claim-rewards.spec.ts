@@ -1,17 +1,15 @@
-import { getBlockTimestamp } from './../../helpers/contracts-helpers';
-import { MAX_UINT_AMOUNT, RANDOM_ADDRESSES } from '../../helpers/constants';
-
 const { expect } = require('chai');
-
 import { makeSuite } from '../helpers/make-suite';
 import { BigNumber } from 'ethers';
-import { waitForTx, increaseTime } from '../../helpers/misc-utils';
-import { comparatorEngine, eventChecker } from '../helpers/comparator-engine';
-import { assetDataComparator } from '../DistributionManager/data-helpers/asset-data';
-import { getRewards } from '../DistributionManager/data-helpers/base-math';
-import { fail } from 'assert';
-import { getRewardsData } from '../DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from '../DistributionManagerV2/data-helpers/asset-user-data';
+import { waitForTx, getBlockTimestamp, increaseTime, MAX_UINT_AMOUNT } from '@aave/deploy-v3';
+import { RANDOM_ADDRESSES } from '../helpers/constants';
+import { comparatorEngine } from './helpers/comparator-engine';
+import {
+  assetDataComparator,
+  getRewards,
+  getRewardsData,
+} from './helpers/DistributionManagerV2/data-helpers/asset-data';
+import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
 
 type ScenarioAction = {
   caseName: string;
@@ -83,10 +81,10 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       const underlyingAsset = aDaiMockV2.address;
       const stakedByUser = 22 * caseName.length;
-      const totalStaked = 33 * caseName.length;
+      const totalSupply = 33 * caseName.length;
       const reward = stakedAave.address;
 
-      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalStaked);
+      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
 
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
@@ -97,7 +95,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
               reward,
               emissionPerSecond,
               distributionEnd,
-              totalStaked,
+              totalSupply,
               transferStrategy: stakedTokenStrategy.address,
               transferStrategyParams: '0x',
             },
@@ -108,7 +106,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const destinationAddress = to || userAddress;
 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
-      await aDaiMockV2.handleActionOnAic(userAddress, totalStaked, stakedByUser);
+      await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
       const unclaimedRewardsBefore = await incentivesControllerV2.getUserRewardsBalance(
         [underlyingAsset],
@@ -188,7 +186,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         );
         await comparatorEngine(
           ['emissionPerSecond', 'index', 'lastUpdateTimestamp'],
-          { underlyingAsset, totalStaked },
+          { underlyingAsset, totalSupply },
           assetDataBefore,
           assetDataAfter,
           actionBlockTimestamp,
@@ -200,7 +198,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       // ------- Distribution Manager tests START -----
       await assetDataComparator(
-        { underlyingAsset, totalStaked },
+        { underlyingAsset, totalSupply },
         assetDataBefore,
         assetDataAfter,
         unclaimedRewardsStorageBefore.gte(amountToClaim)

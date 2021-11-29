@@ -1,14 +1,14 @@
 import { fail } from 'assert';
-const { expect } = require('chai');
-
-import { waitForTx, increaseTime } from '../../helpers/misc-utils';
+import { increaseTime, waitForTx, getBlockTimestamp } from '@aave/deploy-v3';
 import { makeSuite } from '../helpers/make-suite';
-import { eventChecker, eventLogChecker } from '../helpers/comparator-engine';
-import { getBlockTimestamp } from '../../helpers/contracts-helpers';
-import { getUserIndex } from '../DistributionManagerV2/data-helpers/asset-user-data';
-import { getRewardsData } from '../DistributionManagerV2/data-helpers/asset-data';
-import { getRewards } from '../DistributionManager/data-helpers/base-math';
-import { assetDataComparator } from '../DistributionManager/data-helpers/asset-data';
+import { eventLogChecker } from './helpers/comparator-engine';
+import {
+  getRewardsData,
+  getRewards,
+  assetDataComparator,
+} from './helpers/DistributionManagerV2/data-helpers/asset-data';
+import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+const { expect } = require('chai');
 
 type ScenarioAction = {
   caseName: string;
@@ -81,7 +81,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
               reward,
               emissionPerSecond: emissionPerSecond,
               distributionEnd,
-              totalStaked: '0',
+              totalSupply: '0',
               transferStrategy: stakedTokenStrategy.address,
               transferStrategyParams: '0x',
             },
@@ -140,7 +140,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
 
       // ------- Distribution Manager tests START -----
       await assetDataComparator(
-        { underlyingAsset, totalStaked: totalSupply },
+        { underlyingAsset, totalSupply: totalSupply },
         assetDataBefore,
         assetDataAfter,
         actionBlockTimestamp,

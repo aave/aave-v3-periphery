@@ -1,16 +1,27 @@
-import { waitForTx } from '../../helpers/misc-utils';
-
+import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2.d';
+import { waitForTx, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { expect } from 'chai';
-
 import { makeSuite } from '../helpers/make-suite';
-import { deployAaveIncentivesControllerV2 } from '../../helpers/contracts-accessors';
-import { MAX_UINT_AMOUNT, RANDOM_ADDRESSES, ZERO_ADDRESS } from '../../helpers/constants';
+import { RANDOM_ADDRESSES } from '../helpers/constants';
+import hre from 'hardhat';
 
 makeSuite('AaveIncentivesController misc tests', (testEnv) => {
   it('constructor should assign correct params', async () => {
     const peiEmissionManager = RANDOM_ADDRESSES[1];
+    const { deployer } = await hre.getNamedAccounts();
 
-    const incentivesControllerV2 = await deployAaveIncentivesControllerV2([peiEmissionManager]);
+    if (process.env.COVERAGE === 'true') {
+      console.log('Skip due coverage loss of data');
+      return;
+    }
+    const artifact = await hre.deployments.deploy('IncentivesControllerV2', {
+      from: deployer,
+      args: [peiEmissionManager],
+    });
+    const incentivesControllerV2 = (await hre.ethers.getContractAt(
+      artifact.abi,
+      artifact.address
+    )) as IncentivesControllerV2;
     await expect((await incentivesControllerV2.EMISSION_MANAGER()).toString()).to.be.equal(
       peiEmissionManager
     );
@@ -32,7 +43,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           reward,
           emissionPerSecond: '100',
           distributionEnd,
-          totalStaked: '0',
+          totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
           transferStrategyParams: '0x',
         },
@@ -59,7 +70,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           reward,
           emissionPerSecond: MAX_104_UINT,
           distributionEnd,
-          totalStaked: '0',
+          totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
           transferStrategyParams: '0x',
         },
@@ -88,7 +99,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           reward,
           emissionPerSecond: '2000',
           distributionEnd,
-          totalStaked: '0',
+          totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
           transferStrategyParams: '0x',
         },

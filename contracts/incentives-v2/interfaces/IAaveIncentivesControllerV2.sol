@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {IAaveDistributionManagerV2} from './IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from '../libraries/DistributionTypesV2.sol';
 import {ITransferStrategy} from './ITransferStrategy.sol';
-import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 
 interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   event ClaimerSet(address indexed user, address indexed claimer);
@@ -19,7 +19,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   event TransferStrategyInstalled(address indexed reward, address indexed transferStrategy);
 
-  event AaveOracleUpdated(address indexed aaveOracle);
+  event RewardOracleUpdated(address indexed rewardOracle);
 
   /**
    * @dev Whitelists an address to claim the rewards on behalf of another address
@@ -43,12 +43,19 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
    * @notice At the moment of reward configuration, the Incentives Controller performs
-   * a check to see if the reward asset is registered at Aave Oracle.
+   * a check to see if the reward asset oracle is compatible with IEACAggregator proxy.
    * This check is enforced for integrators to be able to show incentives at
    * the current Aave UI without the need to setup an external price registry
-   * @param aaveOracle The address of the Aave Oracle
+   * @param reward The address of the reward to set the price aggregator
+   * @param rewardOracle The address of price aggregator that follows IEACAggregatorProxy interface
    */
-  function setAaveOracle(IPriceOracleGetter aaveOracle) external;
+  function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) external;
+
+  /**
+   * @dev Get the price aggregator oracle address
+   * @param reward The address of the reward
+   */
+  function getRewardOracle(address reward) external returns (address);
 
   /**
    * @dev Returns the whitelisted claimer for a certain address (0x0 if not set)
@@ -56,12 +63,6 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
    * @return The claimer address
    */
   function getClaimer(address user) external view returns (address);
-
-  /**
-   * @dev Returns the current Aave Oracle address
-   * @return The Aave Oracle contract address
-   */
-  function getAaveOracle() external view returns (address);
 
   /**
    * @dev Returns the Transfer Strategy implementation contract address being used for a reward address

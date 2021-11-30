@@ -12,6 +12,7 @@ import 'hardhat-dependency-compiler';
 import 'hardhat-deploy';
 
 import dotenv from 'dotenv';
+import { eArbitrumNetwork, getCommonNetworkConfig } from '@aave/deploy-v3';
 dotenv.config({ path: '../.env' });
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
@@ -56,6 +57,11 @@ const config: HardhatUserConfig = {
     coinmarketcap: process.env.COINMARKETCAP_API,
   },
   networks: {
+    [eArbitrumNetwork.arbitrumTestnet]: {
+      ...getCommonNetworkConfig(eArbitrumNetwork.arbitrumTestnet, 421611),
+      live: false,
+      gasPrice: undefined,
+    },
     hardhat: {
       hardfork: 'berlin',
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,

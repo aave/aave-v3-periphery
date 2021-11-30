@@ -214,7 +214,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     );
 
     if (newIndex != oldIndex) {
-      require(uint104(newIndex) == newIndex, 'Index overflow');
+      require(newIndex <= type(uint104).max, 'Index overflow');
       //optimization: storing one after another saves one SSTORE
       rewardConfig.index = uint104(newIndex);
       rewardConfig.lastUpdateTimestamp = uint40(block.timestamp);

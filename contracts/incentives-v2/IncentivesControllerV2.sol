@@ -209,7 +209,7 @@ contract IncentivesControllerV2 is
     override
     returns (DistributionTypesV2.UserAssetStatsInput[] memory userState)
   {
-    userState = new DistributionTypesV2.UserStakeInput[](assets.length);
+    userState = new DistributionTypesV2.UserAssetStatsInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])

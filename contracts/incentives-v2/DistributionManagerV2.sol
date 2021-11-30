@@ -286,17 +286,18 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Used by "frontend" stake contracts to update the data of an user when claiming rewards from there
    * @param user The address of the user
-   * @param stakes List of structs of the user data related with his stake
+   * @param userState List of structs of the user data related with his stake
    **/
-  function _distributeRewards(address user, DistributionTypesV2.UserStakeInput[] memory stakes)
-    internal
-  {
-    for (uint256 i = 0; i < stakes.length; i++) {
+  function _distributeRewards(
+    address user,
+    DistributionTypesV2.UserAssetStatsInput[] memory userState
+  ) internal {
+    for (uint256 i = 0; i < userState.length; i++) {
       _updateUserRewardsPerAssetInternal(
-        stakes[i].underlyingAsset,
+        userState[i].underlyingAsset,
         user,
-        stakes[i].userBalance,
-        stakes[i].totalSupply
+        userState[i].userBalance,
+        userState[i].totalSupply
       );
     }
   }
@@ -305,17 +306,17 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    * @dev Return the accrued unclaimed amount of a reward from an user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @param stakes List of structs of the user data related with his stake
+   * @param userState List of structs of the user data related with his stake
    * @return unclaimedRewards The accrued rewards for the user until the moment
    **/
   function _getUserReward(
     address user,
     address reward,
-    DistributionTypesV2.UserStakeInput[] memory stakes
+    DistributionTypesV2.UserAssetStatsInput[] memory userState
   ) internal view returns (uint256 unclaimedRewards) {
     // Add unrealized rewards
-    for (uint256 i = 0; i < stakes.length; i++) {
-      unclaimedRewards += _getUnrealizedRewardsFromStake(user, reward, stakes[i]);
+    for (uint256 i = 0; i < userState.length; i++) {
+      unclaimedRewards += _getUnrealizedRewardsFromStake(user, reward, userState[i]);
     }
 
     // Return unrealized rewards plus stored unclaimed rewardss
@@ -325,15 +326,14 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Return the accrued rewards for an user over a list of distribution
    * @param user The address of the user
-   * @param stakes List of structs of the user data related with his stake
+   * @param userState List of structs of the user data related with his stake
    * @return rewardsList List of reward token addresses
    * @return unclaimedRewards List of unclaimed + unrealized rewards, order matches "rewardsList" items
    **/
-  function _getAllUserRewards(address user, DistributionTypesV2.UserStakeInput[] memory stakes)
-    internal
-    view
-    returns (address[] memory rewardsList, uint256[] memory unclaimedRewards)
-  {
+  function _getAllUserRewards(
+    address user,
+    DistributionTypesV2.UserAssetStatsInput[] memory userState
+  ) internal view returns (address[] memory rewardsList, uint256[] memory unclaimedRewards) {
     rewardsList = new address[](_rewardsList.length);
     unclaimedRewards = new uint256[](_rewardsList.length);
 
@@ -344,9 +344,9 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     }
 
     // Add unrealized rewards from user to unclaimedRewards
-    for (uint256 i = 0; i < stakes.length; i++) {
+    for (uint256 i = 0; i < userState.length; i++) {
       for (uint256 r = 0; r < _rewardsList.length; r++) {
-        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, _rewardsList[r], stakes[i]);
+        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, _rewardsList[r], userState[i]);
       }
     }
     return (rewardsList, unclaimedRewards);
@@ -362,7 +362,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   function _getUnrealizedRewardsFromStake(
     address user,
     address reward,
-    DistributionTypesV2.UserStakeInput memory stake
+    DistributionTypesV2.UserAssetStatsInput memory stake
   ) internal view returns (uint256) {
     RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
 
@@ -433,5 +433,5 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     internal
     view
     virtual
-    returns (DistributionTypesV2.UserStakeInput[] memory userState);
+    returns (DistributionTypesV2.UserAssetStatsInput[] memory userState);
 }

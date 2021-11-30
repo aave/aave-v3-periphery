@@ -54,6 +54,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Get the price aggregator oracle address
    * @param reward The address of the reward
+   * @return The price oracle of the reward
    */
   function getRewardOracle(address reward) external view returns (address);
 
@@ -72,16 +73,25 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   function getTransferStrategy(address reward) external view returns (address);
 
   /**
-   * @dev Configure assets for a certain rewards emission
-   * @param config The assets configuration
+   * @dev Configure assets to incentivize with an emission of rewards per second until the end of distribution.
+   * @param config The assets configuration input, the list of structs contains the following fields:
+   *   uint104 emissionPerSecond: The emission per second following rewards unit decimals.
+   *   uint256 totalSupply: The total supply of the asset to incentivize
+   *   uint40 distributionEnd: The end of the distribution of the incentives for an asset
+   *   address asset: The asset address to incentivize
+   *   address reward: The reward token address
+   *   ITransferStrategy transferStrategy: The TransferStrategy address with the install hook and claim logic.
+   *   bytes transferStrategyParams: The TransferStrategy params for install hook
+   *   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
+   *                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
    */
   function configureAssets(DistributionTypesV2.RewardsConfigInput[] memory config) external;
 
   /**
    * @dev Called by the corresponding asset on any update that affects the rewards distribution
    * @param user The address of the user
-   * @param userBalance The balance of the user of the asset in the lending pool
-   * @param totalSupply The total supply of the asset in the lending pool
+   * @param userBalance The user balance of the asset
+   * @param totalSupply The total supply of the asset
    **/
   function handleAction(
     address user,
@@ -91,6 +101,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   /**
    * @dev Claims reward for an user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param to Address that will be receiving the rewards
    * @param reward Address of the reward token
@@ -106,6 +117,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Claims reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
    * be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param user Address to check and claim rewards
    * @param to Address that will be receiving the rewards
@@ -122,6 +134,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   /**
    * @dev Claims reward for msg.sender, on all the assets of the lending pool, accumulating the pending rewards
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param reward Address of the reward token
    * @return Rewards claimed
@@ -134,7 +147,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   /**
    * @dev Claims all rewards for an user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
-   * @param assets List of assets to check unrealized rewards
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param to Address that will be receiving the rewards
    * @return rewardsList List of addresses of the reward tokens and claimedAmounts, the list that contains the claimed amount per reward, following same order as "rewardList"
    * @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardList"
@@ -146,7 +159,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
   /**
    * @dev Claims all rewards for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
    * be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
-   * @param assets List of assets to check unrealized rewards
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param user Address to check and claim rewards
    * @param to Address that will be receiving the rewards
    * @return rewardsList List of addresses of the reward tokens and claimedAmounts, the list that contains the claimed amount per reward, following same order as "rewardList"
@@ -160,7 +173,7 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
 
   /**
    * @dev Claims all reward for msg.sender, on all the assets of the lending pool, accumulating the pending rewards
-   * @param assets List of assets to check unrealized rewards
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @return rewardsList List of addresses of the reward tokens and claimedAmounts, the list that contains the claimed amount per reward, following same order as "rewardList"
    * @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardsList"
    **/

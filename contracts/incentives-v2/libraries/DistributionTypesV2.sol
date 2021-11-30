@@ -16,7 +16,7 @@ library DistributionTypesV2 {
     IEACAggregatorProxy rewardOracle;
   }
 
-  struct UserStakeInput {
+  struct UserAssetStatsInput {
     address underlyingAsset;
     uint256 userBalance;
     uint256 totalSupply;

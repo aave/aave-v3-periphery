@@ -23,17 +23,20 @@ contract IncentivesControllerV2 is
 {
   uint256 public constant REVISION = 1;
 
-  // this mapping allows whitelisted addresses to claim on behalf of others
+  // This mapping allows whitelisted addresses to claim on behalf of others
   // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
   mapping(address => address) internal _authorizedClaimers;
 
   // reward => transfer strategy implementation contract
+  // The TransferStrategy contract abstracts the logic regarding
+  // the source of the reward and how to transfer it to the user.
   mapping(address => ITransferStrategy) internal _transferStrategy;
 
+  // This mapping contains the price oracle per reward.
+  // A price oracle is enforced for integrators to be able to show incentives at
+  // the current Aave UI without the need to setup an external price registry
   // At the moment of reward configuration, the Incentives Controller performs
   // a check to see if the provided reward oracle contains `latestAnswer`.
-  // This check is enforced for integrators to be able to show incentives at
-  // the current Aave UI without the need to setup an external price registry
   mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
   modifier onlyAuthorizedClaimers(address claimer, address user) {
@@ -44,7 +47,7 @@ contract IncentivesControllerV2 is
   constructor(address emissionManager) DistributionManagerV2(emissionManager) {}
 
   /**
-   * @dev Empty initialize IncentivesControllerV2
+   * @dev Empty initialize for IncentivesControllerV2
    **/
   function initialize() external initializer {}
 
@@ -54,7 +57,8 @@ contract IncentivesControllerV2 is
   }
 
   /**
-   * @dev returns the revision of the implementation contract
+   * @dev Returns the revision of the implementation contract
+   * @return uint256, current revision version
    */
   function getRevision() internal pure override returns (uint256) {
     return REVISION;
@@ -194,15 +198,16 @@ contract IncentivesControllerV2 is
   }
 
   /**
-   * @dev Get user staking distribution of a list of assets
-   * @param assets List of asset addresses of the user
+   * @dev Get usage statistics of a list of assets that supports IScaledBalanceToken interface
+   * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
+   * @return userState contains a list of usage statistics like user balance and total supply of the assets passed as argument
    */
   function _getUserStake(address[] calldata assets, address user)
     internal
     view
     override
-    returns (DistributionTypesV2.UserStakeInput[] memory userState)
+    returns (DistributionTypesV2.UserAssetStatsInput[] memory userState)
   {
     userState = new DistributionTypesV2.UserStakeInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
@@ -215,11 +220,12 @@ contract IncentivesControllerV2 is
 
   /**
    * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
-   * @param claimer Address of the claimer
+   * @param claimer Address of the claimer who claims rewards on behalf of user
    * @param user Address to check and claim rewards
    * @param to Address that will be receiving the rewards
-   * @param claimer Address of the reward
+   * @param reward Address of the reward token
    * @return Rewards claimed
    **/
   function _claimRewards(
@@ -255,7 +261,8 @@ contract IncentivesControllerV2 is
 
   /**
    * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
-   * @param claimer Address of the claimer
+   * @param assets List of assets to check eligible distributions before claiming rewards
+   * @param claimer Address of the claimer on behalf of user
    * @param user Address to check and claim rewards
    * @param to Address that will be receiving the rewards
    * @return
@@ -287,9 +294,9 @@ contract IncentivesControllerV2 is
   }
 
   /**
-   * @dev function to transfer rewards to the desired account using delegatecall and
-   * @param to Address of the reward ERC20 token
+   * @dev Function to transfer rewards to the desired account using delegatecall and
    * @param to Account address to send the rewards
+   * @param reward Address of the reward token
    * @param amount Amount of rewards to transfer
    */
   function _transferRewards(
@@ -312,6 +319,8 @@ contract IncentivesControllerV2 is
 
   /**
    * @dev Returns true if `account` is a contract.
+   * @param account The address of the account
+   * @return bool, true if contract, false otherwise
    */
   function _isContract(address account) internal view returns (bool) {
     // This method relies on extcodesize, which returns 0 for contracts in
@@ -326,6 +335,12 @@ contract IncentivesControllerV2 is
     return size > 0;
   }
 
+  /**
+   * @dev Internal function to call the optional install hook at the TransferStrategy
+   * @param reward The address of the reward token
+   * @param transferStrategy The address of the reward TransferStrategy
+   * @param params Extra optional parameters to be encoded at install hook
+   */
   function _installTransferStrategy(
     address reward,
     ITransferStrategy transferStrategy,
@@ -348,6 +363,13 @@ contract IncentivesControllerV2 is
 
     emit TransferStrategyInstalled(reward, address(transferStrategy));
   }
+
+  /**
+   * @dev internal function to update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
+   * @notice The Price Oracle of a reward is used for displaying correct data about the incentives at the UI frontend.
+   * @param reward The address of the reward token
+   * @param rewardOracle The address of the price oracle
+   */
 
   function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
     require(rewardOracle.latestAnswer() > 0, 'Oracle must return price');

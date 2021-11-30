@@ -50,8 +50,8 @@ interface IUiIncentiveDataProviderV3 {
     address rewardTokenAddress;
     uint256 userUnclaimedRewards;
     uint256 tokenIncentivesUserIndex;
-    uint256 priceFeedDecimals;
     int256 rewardPriceFeed;
+    uint8 priceFeedDecimals;
     uint8 rewardTokenDecimals;
 
   }

@@ -41,6 +41,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         {
           asset: aDaiMockV2.address,
           reward,
+          rewardOracle: testEnv.aavePriceAggregator,
           emissionPerSecond: '100',
           distributionEnd,
           totalSupply: '0',
@@ -68,6 +69,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         {
           asset: aDaiMockV2.address,
           reward,
+          rewardOracle: testEnv.aavePriceAggregator,
           emissionPerSecond: MAX_104_UINT,
           distributionEnd,
           totalSupply: '0',
@@ -97,6 +99,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         {
           asset: aDaiMockV2.address,
           reward,
+          rewardOracle: testEnv.aavePriceAggregator,
           emissionPerSecond: '2000',
           distributionEnd,
           totalSupply: '0',

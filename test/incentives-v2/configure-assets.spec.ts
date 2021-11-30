@@ -1,3 +1,4 @@
+import hre from 'hardhat';
 import { getBlockTimestamp, increaseTime, waitForTx } from '@aave/deploy-v3';
 import { BigNumberish } from 'ethers';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
@@ -221,6 +222,7 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
               emissionPerSecond,
               totalSupply,
               reward,
+              rewardOracle: testEnv.aavePriceAggregator,
               distributionEnd,
               asset: deployedAssets[i].address,
               transferStrategy: rewardStrategy[reward],
@@ -305,6 +307,12 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
                 assetConfigAfter.emissionPerSecond,
                 assetConfigAfter.distributionEnd
               );
+
+            eventArrayIndex += 1;
+
+            await expect(action)
+              .to.emit(incentivesControllerV2, 'RewardOracleUpdated')
+              .withArgs(assetConfigsUpdate[i].reward, assetConfigsUpdate[i].rewardOracle);
 
             eventArrayIndex += 1;
 

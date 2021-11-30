@@ -9,6 +9,7 @@ import {
 } from './helpers/DistributionManagerV2/data-helpers/asset-data';
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
 import { getNormalizedDistribution } from './helpers/ray-math';
+
 type ScenarioAction = {
   caseName: string;
   emissionPerSecond: string;
@@ -66,6 +67,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
             {
               asset: underlyingAsset,
               reward,
+              rewardOracle: testEnv.aavePriceAggregator,
               emissionPerSecond,
               distributionEnd,
               totalSupply,

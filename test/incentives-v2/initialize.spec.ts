@@ -6,6 +6,6 @@ const { expect } = require('chai');
 makeSuite('AaveIncentivesControllerV2 initialize', (testEnv: TestEnv) => {
   it('Tries to call initialize second time, should be reverted', async () => {
     const { incentivesControllerV2 } = testEnv;
-    await expect(incentivesControllerV2.initialize(ZERO_ADDRESS)).to.be.reverted;
+    await expect(incentivesControllerV2.initialize()).to.be.reverted;
   });
 });

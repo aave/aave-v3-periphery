@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
+    coinmarketcap: process.env.COINMARKETCAP_API,
   },
   networks: {
     hardhat: {

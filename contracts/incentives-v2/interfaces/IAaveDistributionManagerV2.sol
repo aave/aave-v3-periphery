@@ -22,7 +22,9 @@ interface IAaveDistributionManagerV2 {
 
   /**
    * @dev Sets the end date for the distribution
-   * @param distributionEnd The end date timestamp
+   * @param asset The asset to incentivize
+   * @param reward The reward token that incentives the asset
+   * @param distributionEnd The end date of the incentivization, in unix time format
    **/
   function setDistributionEnd(
     address asset,
@@ -32,15 +34,18 @@ interface IAaveDistributionManagerV2 {
 
   /**
    * @dev Gets the end date for the distribution
-   * @return The end of the distribution
+   * @param asset The incentivized asset
+   * @param reward The reward token of the incentivized asset
+   * @return The timestamp with the end of the distribution, in unix time format
    **/
   function getDistributionEnd(address asset, address reward) external view returns (uint256);
 
   /**
-   * @dev Returns the data of an user on a distribution
+   * @dev Returns the index of an user on a reward distribution
    * @param user Address of the user
-   * @param asset The address of the reference asset of the distribution
-   * @return The new index
+   * @param asset The incentivized asset
+   * @param reward The reward token of the incentivized asset
+   * @return The current user asset index in storage, not including new distributions
    **/
   function getUserAssetData(
     address user,
@@ -50,8 +55,9 @@ interface IAaveDistributionManagerV2 {
 
   /**
    * @dev Returns the configuration of the distribution for a certain asset
-   * @param asset The address of the reference asset of the distribution
-   * @return The asset index, the emission per second and the last updated timestamp
+   * @param asset The incentivized asset
+   * @param reward The reward token of the incentivized asset
+   * @return The asset index, the emission per second, the last updated timestamp and the distribution end timestamp
    **/
   function getRewardsData(address asset, address reward)
     external
@@ -64,8 +70,8 @@ interface IAaveDistributionManagerV2 {
     );
 
   /**
-   * @dev Returns the list of available reward addresses of an asset
-   * @param asset The address of the reference asset of the distribution
+   * @dev Returns the list of available reward token addresses of an incentivized asset
+   * @param asset The incentivized asset
    * @return List of rewards addresses of the input asset
    **/
   function getRewardsByAsset(address asset) external view returns (address[] memory);
@@ -80,7 +86,7 @@ interface IAaveDistributionManagerV2 {
    * @dev Returns a single rewards balance of an user from contract storage state, not including virtually accrued rewards since last distribution.
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @return Unclaimed rewards from storage
+   * @return Unclaimed rewards, from storage
    **/
   function getUserUnclaimedRewardsFromStorage(address user, address reward)
     external
@@ -89,10 +95,10 @@ interface IAaveDistributionManagerV2 {
 
   /**
    * @dev Returns a single rewards balance of an user, including virtually accrued and unrealized claimable rewards.
-   * @param assets The list of assets to retrieve rewards
+   * @param assets List of incentivized assets to check eligible distributions
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @return The rewards
+   * @return The rewards amount
    **/
   function getUserRewardsBalance(
     address[] calldata assets,
@@ -102,7 +108,7 @@ interface IAaveDistributionManagerV2 {
 
   /**
    * @dev Returns a list all rewards of an user, including already accrued and unrealized claimable rewards
-   * @param assets The list of assets to retrieve rewards
+   * @param assets List of incentivized assets to check eligible distributions
    * @param user The address of the user
    * @return The function returns a Tuple of rewards list and the unclaimed rewards list
    **/

@@ -18,10 +18,9 @@ contract StakedTokenTransferStrategy is TransferStrategyStorage, ITransferStrate
   IStakedToken public immutable STAKE_CONTRACT;
   address public immutable UNDERLYING_TOKEN;
 
-  constructor(IStakedToken stakeToken) {
+  constructor(IStakedToken stakeToken) TransferStrategyStorage() {
     STAKE_CONTRACT = stakeToken;
     UNDERLYING_TOKEN = STAKE_CONTRACT.STAKED_TOKEN();
-    isTransferStrategy = true;
   }
 
   /// @inheritdoc ITransferStrategy

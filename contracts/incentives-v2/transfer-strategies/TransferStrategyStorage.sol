@@ -7,6 +7,10 @@ pragma solidity 0.8.10;
 contract TransferStrategyStorage {
   bool internal isTransferStrategy;
 
+  constructor() {
+    isTransferStrategy = true;
+  }
+
   /**
    * @dev Modifier to prevent direct calls to this logic contract
    */

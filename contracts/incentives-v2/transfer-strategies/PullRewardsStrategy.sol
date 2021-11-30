@@ -16,9 +16,8 @@ contract PullRewardsTransferStrategy is TransferStrategyStorage, ITransferStrate
 
   address internal immutable REWARDS_VAULT;
 
-  constructor(address rewardsVault) {
+  constructor(address rewardsVault) TransferStrategyStorage() {
     REWARDS_VAULT = rewardsVault;
-    isTransferStrategy = true;
   }
 
   /// @inheritdoc ITransferStrategy

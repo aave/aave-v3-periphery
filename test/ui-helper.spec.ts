@@ -12,8 +12,9 @@ import { makeSuite } from './helpers/make-suite';
 import { BigNumber } from 'ethers';
 import util from 'util';
 
-const debugLog = (response: any) => {
+const debugLog = (methodName: string, response: any) => {
   if (process.env.UI_TEST_DEBUG === 'true') {
+    console.log('Method: ', methodName);
     console.log(util.inspect(response, false, null, true));
   }
 };
@@ -35,8 +36,6 @@ makeSuite('UI Incentives Helper', (testEnv) => {
     const [reserve] = await getSubTokensByPrefix(TESTNET_TOKEN_PREFIX);
     const reserveToken = (await getMintableERC20(reserve.artifact.address)).connect(user1.signer);
     const depositAmount = BigNumber.from('100000000');
-    console.log('deposit');
-    debugLog(depositAmount);
     await waitForTx(
       await reserveToken['mint(address,uint256)'](user1.address, depositAmount.mul(2))
     );
@@ -59,7 +58,7 @@ makeSuite('UI Incentives Helper', (testEnv) => {
     const response = await uiHelper.getReservesIncentivesData(addressesProvider.address, {
       gasLimit: '12000000',
     });
-    debugLog(response);
+    debugLog('getReservesIncentivesData', response);
   });
 
   it('Call "getFullReservesIncentiveData"', async () => {
@@ -74,7 +73,7 @@ makeSuite('UI Incentives Helper', (testEnv) => {
         gasLimit: '12000000',
       }
     );
-    debugLog(response);
+    debugLog('getFullReservesIncentiveData', response);
   });
 
   it('Call "getUserReservesIncentivesData"', async () => {
@@ -90,6 +89,6 @@ makeSuite('UI Incentives Helper', (testEnv) => {
         gasLimit: '12000000',
       }
     );
-    debugLog(response);
+    debugLog('getUserReservesIncentivesData', response);
   });
 });

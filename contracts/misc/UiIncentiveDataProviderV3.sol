@@ -140,9 +140,9 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           rewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(
             rewardInformation.rewardTokenAddress
           );
-          // rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-          //   rewardInformation.rewardOracleAddress
-          // ).decimals();
+          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).decimals();
           rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             rewardInformation.rewardOracleAddress
           ).latestAnswer();
@@ -193,9 +193,9 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           rewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(
             rewardInformation.rewardTokenAddress
           );
-          // rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-          //   rewardInformation.rewardOracleAddress
-          // ).decimals();
+          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).decimals();
           rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             rewardInformation.rewardOracleAddress
           ).latestAnswer();
@@ -276,9 +276,9 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(
             userRewardInformation.rewardTokenAddress
           );
-          // userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-          //   userRewardInformation.rewardOracleAddress
-          // ).decimals();
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).decimals();
           userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             userRewardInformation.rewardOracleAddress
           ).latestAnswer();

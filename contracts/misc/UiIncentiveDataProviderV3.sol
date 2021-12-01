@@ -10,6 +10,7 @@ import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/conf
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
+import 'hardhat/console.sol';
 
 contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -43,7 +44,6 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
     address[] memory reserves = lendingPool.getReservesList();
     AggregatedReserveIncentiveData[]
       memory reservesIncentiveData = new AggregatedReserveIncentiveData[](reserves.length);
-
     // Iterate through the reserves to get all the information from the (a/s/v) Tokens
     for (uint256 i = 0; i < reserves.length; i++) {
       AggregatedReserveIncentiveData memory reserveIncentiveData = reservesIncentiveData[i];
@@ -65,7 +65,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         aRewardsInformation = new RewardInfo[](aTokenRewardAddresses.length);
         for (uint256 j = 0; j < aTokenRewardAddresses.length; ++j) {
           RewardInfo memory rewardInformation;
-          rewardInformation.rewardTokenAddress = aTokenRewardAddresses[i];
+          rewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
           (
             rewardInformation.tokenIncentivesIndex,
@@ -88,17 +88,18 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           rewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(
             rewardInformation.rewardTokenAddress
           );
-          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            rewardInformation.rewardOracleAddress
-          ).decimals();
+          // rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   rewardInformation.rewardOracleAddress
+          // ).decimals();
           rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             rewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          aRewardsInformation[i] = rewardInformation;
+          aRewardsInformation[j] = rewardInformation;
         }
       }
 
+      console.log('4');
       reserveIncentiveData.aIncentiveData = IncentiveData(
         baseData.aTokenAddress,
         address(aTokenIncentiveController),
@@ -118,7 +119,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         vRewardsInformation = new RewardInfo[](vTokenRewardAddresses.length);
         for (uint256 j = 0; j < vTokenRewardAddresses.length; ++j) {
           RewardInfo memory rewardInformation;
-          rewardInformation.rewardTokenAddress = vTokenRewardAddresses[i];
+          rewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
 
           (
             rewardInformation.tokenIncentivesIndex,
@@ -141,14 +142,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           rewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(
             rewardInformation.rewardTokenAddress
           );
-          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            rewardInformation.rewardOracleAddress
-          ).decimals();
+          // rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   rewardInformation.rewardOracleAddress
+          // ).decimals();
           rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             rewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          vRewardsInformation[i] = rewardInformation;
+          vRewardsInformation[j] = rewardInformation;
         }
       }
 
@@ -171,7 +172,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         sRewardsInformation = new RewardInfo[](sTokenRewardAddresses.length);
         for (uint256 j = 0; j < sTokenRewardAddresses.length; ++j) {
           RewardInfo memory rewardInformation;
-          rewardInformation.rewardTokenAddress = sTokenRewardAddresses[i];
+          rewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
 
           (
             rewardInformation.tokenIncentivesIndex,
@@ -194,14 +195,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           rewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(
             rewardInformation.rewardTokenAddress
           );
-          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            rewardInformation.rewardOracleAddress
-          ).decimals();
+          // rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   rewardInformation.rewardOracleAddress
+          // ).decimals();
           rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             rewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          sRewardsInformation[i] = rewardInformation;
+          sRewardsInformation[j] = rewardInformation;
         }
       }
 
@@ -212,6 +213,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
       );
     }
 
+      console.log('last');
     return (reservesIncentiveData);
   }
 
@@ -255,7 +257,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         );
         for (uint256 j = 0; j < aTokenRewardAddresses.length; ++j) {
           UserRewardInfo memory userRewardInformation;
-          userRewardInformation.rewardTokenAddress = aTokenRewardAddresses[i];
+          userRewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = aTokenIncentiveController
             .getUserAssetData(
@@ -277,14 +279,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(
             userRewardInformation.rewardTokenAddress
           );
-          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            userRewardInformation.rewardOracleAddress
-          ).decimals();
+          // userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   userRewardInformation.rewardOracleAddress
+          // ).decimals();
           userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             userRewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          aUserRewardsInformation[i] = userRewardInformation;
+          aUserRewardsInformation[j] = userRewardInformation;
         }
 
         userReservesIncentivesData[i].aTokenIncentivesUserData = UserIncentiveData(
@@ -308,7 +310,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         );
         for (uint256 j = 0; j < vTokenRewardAddresses.length; ++j) {
           UserRewardInfo memory userRewardInformation;
-          userRewardInformation.rewardTokenAddress = vTokenRewardAddresses[i];
+          userRewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = vTokenIncentiveController
             .getUserAssetData(
@@ -330,14 +332,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(
             userRewardInformation.rewardTokenAddress
           );
-          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            userRewardInformation.rewardOracleAddress
-          ).decimals();
+          // userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   userRewardInformation.rewardOracleAddress
+          // ).decimals();
           userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             userRewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          vUserRewardsInformation[i] = userRewardInformation;
+          vUserRewardsInformation[j] = userRewardInformation;
         }
 
         userReservesIncentivesData[i].vTokenIncentivesUserData = UserIncentiveData(
@@ -361,7 +363,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         );
         for (uint256 j = 0; j < sTokenRewardAddresses.length; ++j) {
           UserRewardInfo memory userRewardInformation;
-          userRewardInformation.rewardTokenAddress = sTokenRewardAddresses[i];
+          userRewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = sTokenIncentiveController
             .getUserAssetData(
@@ -383,14 +385,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(
             userRewardInformation.rewardTokenAddress
           );
-          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
-            userRewardInformation.rewardOracleAddress
-          ).decimals();
+          // userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+          //   userRewardInformation.rewardOracleAddress
+          // ).decimals();
           userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
             userRewardInformation.rewardOracleAddress
           ).latestAnswer();
 
-          sUserRewardsInformation[i] = userRewardInformation;
+          sUserRewardsInformation[j] = userRewardInformation;
         }
 
         userReservesIncentivesData[i].sTokenIncentivesUserData = UserIncentiveData(

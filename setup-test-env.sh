@@ -17,12 +17,10 @@ if [ ! "$COVERAGE" = true ]; then
     # remove hardhat and artifacts cache
     npm run ci:clean
 
-    # compile @aave/core-v3 contracts
     npm run compile
 else
     echo "[BASH] Skipping compilation to keep coverage artifacts"
 fi
-
 # Copy artifacts into separate directory to allow
 # the hardhat-deploy library load all artifacts without duplicates 
 mkdir -p temp-artifacts/
@@ -31,7 +29,7 @@ cp -r artifacts/* temp-artifacts/
 # Create a symbolic link to reference @aave/periphery-v3 package.json at node_modules
 # required by @aave/deploy-v3 hardhat plugin due hardhat package.json resolution
 mkdir -p node_modules/@aave/periphery-v3
-ln -s "$PWD/package.json" node_modules/@aave/periphery-v3/package.json
+cp "package.json" node_modules/@aave/periphery-v3/package.json
 
 # Import external @aave/deploy artifacts
 mkdir -p temp-artifacts/deploy

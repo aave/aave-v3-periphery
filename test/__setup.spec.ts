@@ -3,10 +3,10 @@ import { initializeMakeSuite } from './helpers/make-suite';
 
 before(async () => {
   if (process.env.EMPTY_RUN === 'true') {
-    console.log('Skipping due empty test run.')
+    console.log('Skipping due empty test run.');
     return;
   }
-  await hre.deployments.fixture(['market']);
+  await hre.deployments.fixture(['market', 'after-deploy']);
 
   console.log('-> Deployed market');
 

@@ -2,6 +2,7 @@ import { HardhatUserConfig } from 'hardhat/types';
 import { accounts } from './helpers/test-wallets';
 import { NETWORKS_RPC_URL } from './helper-hardhat-config';
 
+import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import '@typechain/hardhat';
@@ -20,7 +21,7 @@ const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || '';
 const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || '';
 const TENDERLY_FORK_NETWORK_ID = process.env.TENDERLY_FORK_NETWORK_ID || '1';
 const REPORT_GAS = process.env.REPORT_GAS === 'true';
-
+const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
 const mainnetFork = MAINNET_FORK
   ? {
       blockNumber: 12012081,
@@ -28,6 +29,9 @@ const mainnetFork = MAINNET_FORK
     }
   : undefined;
 
+if (!SKIP_LOAD) {
+  require('@aave/deploy-v3');
+}
 // export hardhat config
 const config: HardhatUserConfig = {
   solidity: {

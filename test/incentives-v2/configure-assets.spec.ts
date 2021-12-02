@@ -257,22 +257,6 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
 
           // Check installation events
           for (let i = 0; i < assetsConfigBefore.length; i++) {
-            // Check ERC20 approval installHook if stake transfer strategy
-            if (assetConfigsUpdate[i].reward == stakedAave.address) {
-              // Check Approve 0 amount of AAVE to StakeAave
-              await expect(eventsEmitted[0].address).to.equal(aaveToken.address);
-              await expect(eventsEmitted[0].data).to.equal(
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-              );
-              // Check Approve MAX_UINT amount of AAVE to StakeAave
-              await expect(eventsEmitted[1].address).to.equal(aaveToken.address);
-              await expect(eventsEmitted[1].data).to.equal(
-                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-              );
-
-              eventArrayIndex += 2;
-            }
-
             // Check TransferStrategy installation event
             await expect(action)
               .to.emit(incentivesControllerV2, 'TransferStrategyInstalled')

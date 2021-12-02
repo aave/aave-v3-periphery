@@ -254,20 +254,7 @@ export async function initializeMakeSuite() {
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)
-      .transfer(incentivesControllerV2.address, parseEther('1000000'))
-  );
-
-  await waitForTx(
-    await testEnv.rewardToken
-      .connect(rewardsVault.signer)
-      .approve(incentivesControllerV2.address, MAX_UINT_AMOUNT)
-  );
-
-  await waitForTx(
-    await (await getAaveOracle()).setAssetSources(
-      [testEnv.stakedAave.address],
-      [await testEnv.aavePriceAggregator]
-    )
+      .transfer(testEnv.stakedTokenStrategy.address, parseEther('1000000'))
   );
 }
 

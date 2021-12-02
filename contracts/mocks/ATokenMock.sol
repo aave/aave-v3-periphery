@@ -42,7 +42,7 @@ contract ATokenMock {
     _totalSupply = totalSupply;
   }
 
-  function getScaledUserBalanceAndSupply(address user) external view returns (uint256, uint256) {
+  function getScaledUserBalanceAndSupply(address) external view returns (uint256, uint256) {
     return (_userBalance, _totalSupply);
   }
 

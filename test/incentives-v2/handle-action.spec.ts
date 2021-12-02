@@ -86,7 +86,6 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
               distributionEnd,
               totalSupply: '0',
               transferStrategy: stakedTokenStrategy.address,
-              transferStrategyParams: '0x',
             },
           ])
         );

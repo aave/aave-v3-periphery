@@ -12,7 +12,6 @@ export type AssetUpdateDataV2 = {
   reward: string;
   rewardOracle: string;
   transferStrategy: string;
-  transferStrategyParams: BytesLike;
 };
 
 export type RewardData = {

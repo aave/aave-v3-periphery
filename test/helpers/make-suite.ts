@@ -4,6 +4,7 @@ import { ATokenMock } from './../../types/ATokenMock.d';
 import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2';
 import hre from 'hardhat';
 import { Signer } from 'ethers';
+import bluebird from 'bluebird';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
 import bignumberChai from 'chai-bignumber';
@@ -91,8 +92,11 @@ export interface TestEnv {
   pullRewardsStrategy: PullRewardsTransferStrategy;
   stakedTokenStrategy: StakedTokenTransferStrategy;
   rewardToken: MintableERC20;
+  rewardTokens: MintableERC20[];
   distributionEnd: number;
   aavePriceAggregator: tEthereumAddress;
+  rewardPriceAggregator: tEthereumAddress;
+  rewardsPriceAggregators: tEthereumAddress[];
 }
 
 let hardhatevmSnapshotId: string = '0x1';
@@ -131,8 +135,11 @@ const testEnv: TestEnv = {
   pullRewardsStrategy: {} as PullRewardsTransferStrategy,
   stakedTokenStrategy: {} as StakedTokenTransferStrategy,
   rewardToken: {} as MintableERC20,
+  rewardTokens: [],
   distributionEnd: 0,
   aavePriceAggregator: '',
+  rewardPriceAggregator: '',
+  rewardsPriceAggregators: [],
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -218,10 +225,21 @@ export async function initializeMakeSuite() {
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
   testEnv.stakedTokenStrategy = (await getStakedRewardsStrategy()) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
+  testEnv.rewardTokens = await bluebird.map(rewardTokens, ({ artifact }) =>
+    getMintableERC20(artifact.address)
+  );
   testEnv.distributionEnd = (await getBlockTimestamp()) + 1000 * 60 * 60;
   testEnv.aavePriceAggregator = (
     await hre.deployments.get(`AAVE${TESTNET_PRICE_AGGR_PREFIX}`)
   ).address;
+  testEnv.rewardPriceAggregator = (
+    await hre.deployments.get(`${rewardTokens[0].symbol}${TESTNET_PRICE_AGGR_PREFIX}`)
+  ).address;
+  testEnv.rewardsPriceAggregators = await bluebird.map(
+    rewardTokens,
+    async ({ symbol }) =>
+      (await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)).address
+  );
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)

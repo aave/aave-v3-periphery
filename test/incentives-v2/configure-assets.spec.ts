@@ -227,7 +227,6 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
               distributionEnd,
               asset: deployedAssets[i].address,
               transferStrategy: rewardStrategy[reward],
-              transferStrategyParams: '0x',
             });
           }
 

@@ -1,12 +1,10 @@
-// SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
-import {TransferStrategyStorage} from './transfer-strategies/TransferStrategyStorage.sol';
 import {DistributionManagerV2} from './DistributionManagerV2.sol';
 import {IAaveIncentivesControllerV2} from './interfaces/IAaveIncentivesControllerV2.sol';
-import {ITransferStrategy} from './interfaces/ITransferStrategy.sol';
+import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
@@ -16,7 +14,6 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
  * @author Aave
  **/
 contract IncentivesControllerV2 is
-  TransferStrategyStorage,
   DistributionManagerV2,
   VersionedInitializable,
   IAaveIncentivesControllerV2
@@ -30,7 +27,7 @@ contract IncentivesControllerV2 is
   // reward => transfer strategy implementation contract
   // The TransferStrategy contract abstracts the logic regarding
   // the source of the reward and how to transfer it to the user.
-  mapping(address => ITransferStrategy) internal _transferStrategy;
+  mapping(address => ITransferStrategyBase) internal _transferStrategy;
 
   // This mapping contains the price oracle per reward.
   // A price oracle is enforced for integrators to be able to show incentives at
@@ -85,11 +82,7 @@ contract IncentivesControllerV2 is
       config[i].totalSupply = IScaledBalanceToken(config[i].asset).scaledTotalSupply();
 
       // Install TransferStrategy logic at IncentivesController
-      _installTransferStrategy(
-        config[i].reward,
-        config[i].transferStrategy,
-        config[i].transferStrategyParams
-      );
+      _installTransferStrategy(config[i].reward, config[i].transferStrategy);
 
       // Set reward oracle, enforces input oracle to have latestPrice function
       _setRewardOracle(config[i].reward, config[i].rewardOracle);
@@ -98,12 +91,11 @@ contract IncentivesControllerV2 is
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
-  function setTransferStrategy(
-    address reward,
-    ITransferStrategy transferStrategy,
-    bytes memory params
-  ) external onlyEmissionManager {
-    _installTransferStrategy(reward, transferStrategy, params);
+  function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
+    external
+    onlyEmissionManager
+  {
+    _installTransferStrategy(reward, transferStrategy);
   }
 
   /// @inheritdoc IAaveIncentivesControllerV2
@@ -304,13 +296,11 @@ contract IncentivesControllerV2 is
     address reward,
     uint256 amount
   ) internal {
-    require(
-      address(_transferStrategy[reward]) != address(0),
-      'Transfer implementation can not be empty'
-    );
-    ITransferStrategy transferStrategy = _transferStrategy[reward];
+    ITransferStrategyBase transferStrategy = _transferStrategy[reward];
 
-    (bool success, bytes memory returnData) = address(transferStrategy).delegatecall(
+    require(address(transferStrategy) != address(0), 'Transfer implementation can not be empty');
+
+    (bool success, bytes memory returnData) = address(transferStrategy).call(
       abi.encodeWithSelector(transferStrategy.performTransfer.selector, to, reward, amount)
     );
 
@@ -339,24 +329,13 @@ contract IncentivesControllerV2 is
    * @dev Internal function to call the optional install hook at the TransferStrategy
    * @param reward The address of the reward token
    * @param transferStrategy The address of the reward TransferStrategy
-   * @param params Extra optional parameters to be encoded at install hook
    */
-  function _installTransferStrategy(
-    address reward,
-    ITransferStrategy transferStrategy,
-    bytes memory params
-  ) internal {
+  function _installTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
+    internal
+  {
     require(
       _isContract(address(transferStrategy)) == true,
       'TransferStrategy Logic address must be a contract'
-    );
-    // Call to installHook to external contract
-    (bool success, bytes memory returnData) = address(transferStrategy).delegatecall(
-      abi.encodeWithSelector(transferStrategy.installHook.selector, params)
-    );
-    require(
-      success == true && abi.decode(returnData, (bool)) == true,
-      'Error at installation hook of TransferStrategy'
     );
 
     _transferStrategy[reward] = transferStrategy;

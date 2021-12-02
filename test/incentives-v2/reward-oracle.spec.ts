@@ -25,7 +25,6 @@ makeSuite('AaveIncentivesControllerV2 reward oracle tests', (testEnv: TestEnv) =
           distributionEnd,
           totalSupply: '0',
           transferStrategy: pullRewardsStrategy.address,
-          transferStrategyParams: '0x',
         },
       ])
     );

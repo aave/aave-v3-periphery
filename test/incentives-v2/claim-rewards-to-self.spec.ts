@@ -83,7 +83,6 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
               rewardOracle: testEnv.aavePriceAggregator,
               distributionEnd,
               transferStrategy: stakedTokenStrategy.address,
-              transferStrategyParams: '0x',
             },
           ])
         );

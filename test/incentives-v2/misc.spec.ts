@@ -46,7 +46,6 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           distributionEnd,
           totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
-          transferStrategyParams: '0x',
         },
       ])
     );
@@ -74,7 +73,6 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           distributionEnd,
           totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
-          transferStrategyParams: '0x',
         },
       ])
     );
@@ -105,7 +103,6 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           distributionEnd,
           totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
-          transferStrategyParams: '0x',
         },
       ])
     );

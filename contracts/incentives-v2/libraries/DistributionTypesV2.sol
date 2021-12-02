@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {ITransferStrategy} from '../interfaces/ITransferStrategy.sol';
+import {ITransferStrategyBase} from '../interfaces/ITransferStrategyBase.sol';
 import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 
 library DistributionTypesV2 {
@@ -11,8 +11,7 @@ library DistributionTypesV2 {
     uint32 distributionEnd;
     address asset;
     address reward;
-    ITransferStrategy transferStrategy;
-    bytes transferStrategyParams;
+    ITransferStrategyBase transferStrategy;
     IEACAggregatorProxy rewardOracle;
   }
 

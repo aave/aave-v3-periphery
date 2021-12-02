@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {IAaveDistributionManagerV2} from './IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from '../libraries/DistributionTypesV2.sol';
-import {ITransferStrategy} from './ITransferStrategy.sol';
+import {ITransferStrategyBase} from './ITransferStrategyBase.sol';
 import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 
 interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
@@ -32,13 +32,8 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
    * @dev Sets a TransferStrategy logic contract that determines the logic of the rewards transfer
    * @param reward The address of the reward token
    * @param transferStrategy The address of the TransferStrategy logic contract
-   * @param params Extra parameters encoded in bytes to pass to TransferStrategy install hook function
    */
-  function setTransferStrategy(
-    address reward,
-    ITransferStrategy transferStrategy,
-    bytes memory params
-  ) external;
+  function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy) external;
 
   /**
    * @dev Sets an Aave Oracle contract to enforce rewards with a source of value.
@@ -81,7 +76,6 @@ interface IAaveIncentivesControllerV2 is IAaveDistributionManagerV2 {
    *   address asset: The asset address to incentivize
    *   address reward: The reward token address
    *   ITransferStrategy transferStrategy: The TransferStrategy address with the install hook and claim logic.
-   *   bytes transferStrategyParams: The TransferStrategy params for install hook
    *   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
    *                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
    */

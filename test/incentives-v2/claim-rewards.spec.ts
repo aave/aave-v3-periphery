@@ -98,7 +98,6 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
               distributionEnd,
               totalSupply,
               transferStrategy: stakedTokenStrategy.address,
-              transferStrategyParams: '0x',
             },
           ])
         );

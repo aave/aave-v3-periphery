@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import {IAaveDistributionManagerV2} from './interfaces/IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
-import {SafeTransferLib, ERC20} from '@rari-capital/solmate/src/utils/SafeTransferLib.sol';
 
 /**
  * @title DistributionManagerV2
@@ -12,10 +11,10 @@ import {SafeTransferLib, ERC20} from '@rari-capital/solmate/src/utils/SafeTransf
  **/
 abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   struct RewardData {
-    uint104 emissionPerSecond;
+    uint88 emissionPerSecond;
     uint104 index;
-    uint40 lastUpdateTimestamp;
-    uint40 distributionEnd;
+    uint32 lastUpdateTimestamp;
+    uint32 distributionEnd;
     mapping(address => uint256) usersIndex;
   }
 
@@ -132,7 +131,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   function setDistributionEnd(
     address asset,
     address reward,
-    uint40 distributionEnd
+    uint32 distributionEnd
   ) external override onlyEmissionManager {
     _assets[asset].rewards[reward].distributionEnd = distributionEnd;
 
@@ -218,10 +217,10 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
       require(newIndex <= type(uint104).max, 'Index overflow');
       //optimization: storing one after another saves one SSTORE
       rewardConfig.index = uint104(newIndex);
-      rewardConfig.lastUpdateTimestamp = uint40(block.timestamp);
+      rewardConfig.lastUpdateTimestamp = uint32(block.timestamp);
       emit AssetIndexUpdated(asset, reward, newIndex);
     } else {
-      rewardConfig.lastUpdateTimestamp = uint40(block.timestamp);
+      rewardConfig.lastUpdateTimestamp = uint32(block.timestamp);
     }
 
     return newIndex;

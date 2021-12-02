@@ -1,3 +1,4 @@
+import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2.d';
 import hre from 'hardhat';
 import { getBlockTimestamp, increaseTime, waitForTx } from '@aave/deploy-v3';
 import { BigNumberish } from 'ethers';
@@ -213,7 +214,7 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             }
 
             // Change current supply
-            await deployedAssets[i].setUserBalanceAndSupply('0', totalSupply);
+            await waitForTx(await deployedAssets[i].setUserBalanceAndSupply('0', totalSupply));
 
             // Push configs
             assets.push(deployedAssets[i].address);
@@ -299,6 +300,13 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             }
 
             // Check Asset Configuration
+            await expect(
+              await incentivesControllerV2.getDistributionEnd(
+                assetConfigAfter.underlyingAsset,
+                assetConfigsUpdate[i].reward
+              )
+            ).to.be.eq(assetsConfig[i].distributionEnd);
+
             await expect(action)
               .to.emit(incentivesControllerV2, 'AssetConfigUpdated')
               .withArgs(

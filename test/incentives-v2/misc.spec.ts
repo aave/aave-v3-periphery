@@ -62,7 +62,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
       stakedAave: { address: reward },
       stakedTokenStrategy,
     } = testEnv;
-    const MAX_104_UINT = '20282409603651670423947251286015';
+    const MAX_88_UINT = '309485009821345068724781055';
 
     await waitForTx(
       await incentivesControllerV2.configureAssets([
@@ -70,7 +70,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
           asset: aDaiMockV2.address,
           reward,
           rewardOracle: testEnv.aavePriceAggregator,
-          emissionPerSecond: MAX_104_UINT,
+          emissionPerSecond: MAX_88_UINT,
           distributionEnd,
           totalSupply: '0',
           transferStrategy: stakedTokenStrategy.address,
@@ -78,6 +78,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         },
       ])
     );
+
     await expect(
       aDaiMockV2.doubleHandleActionOnAic(users[1].address, '2000', '100')
     ).to.be.revertedWith('Index overflow');

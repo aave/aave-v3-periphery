@@ -29,7 +29,7 @@ interface IAaveDistributionManagerV2 {
   function setDistributionEnd(
     address asset,
     address reward,
-    uint40 distributionEnd
+    uint32 distributionEnd
   ) external;
 
   /**

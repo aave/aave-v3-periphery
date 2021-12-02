@@ -6,9 +6,9 @@ import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol
 
 library DistributionTypesV2 {
   struct RewardsConfigInput {
-    uint104 emissionPerSecond;
+    uint88 emissionPerSecond;
     uint256 totalSupply;
-    uint40 distributionEnd;
+    uint32 distributionEnd;
     address asset;
     address reward;
     ITransferStrategy transferStrategy;

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStakedToken} from '../interfaces/IStakedToken.sol';
 import {ITransferStrategy} from '../interfaces/ITransferStrategy.sol';
 import {TransferStrategyStorage} from './TransferStrategyStorage.sol';
+import {SafeTransferLib, ERC20} from '@rari-capital/solmate/src/utils/SafeTransferLib.sol';
 
 /**
  * @title StakedTokenTransferStrategy
@@ -13,7 +12,7 @@ import {TransferStrategyStorage} from './TransferStrategyStorage.sol';
  * @author Aave
  **/
 contract StakedTokenTransferStrategy is TransferStrategyStorage, ITransferStrategy {
-  using SafeERC20 for IERC20;
+  using SafeTransferLib for ERC20;
 
   IStakedToken public immutable STAKE_CONTRACT;
   address public immutable UNDERLYING_TOKEN;
@@ -25,8 +24,8 @@ contract StakedTokenTransferStrategy is TransferStrategyStorage, ITransferStrate
 
   /// @inheritdoc ITransferStrategy
   function installHook(bytes memory) external override onlyDelegateCall returns (bool) {
-    IERC20(UNDERLYING_TOKEN).safeApprove(address(STAKE_CONTRACT), 0);
-    IERC20(UNDERLYING_TOKEN).safeApprove(address(STAKE_CONTRACT), type(uint256).max);
+    ERC20(UNDERLYING_TOKEN).safeApprove(address(STAKE_CONTRACT), 0);
+    ERC20(UNDERLYING_TOKEN).safeApprove(address(STAKE_CONTRACT), type(uint256).max);
 
     return true;
   }

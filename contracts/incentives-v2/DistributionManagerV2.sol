@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {IAaveDistributionManagerV2} from './interfaces/IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
+import {SafeTransferLib, ERC20} from '@rari-capital/solmate/src/utils/SafeTransferLib.sol';
 
 /**
  * @title DistributionManagerV2
@@ -139,7 +140,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
       asset,
       reward,
       _assets[asset].rewards[reward].emissionPerSecond,
-      _assets[asset].rewards[reward].distributionEnd
+      distributionEnd
     );
   }
 
@@ -316,6 +317,9 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   ) internal view returns (uint256 unclaimedRewards) {
     // Add unrealized rewards
     for (uint256 i = 0; i < userState.length; i++) {
+      if (userState[i].userBalance == 0) {
+        continue;
+      }
       unclaimedRewards += _getUnrealizedRewardsFromStake(user, reward, userState[i]);
     }
 
@@ -335,18 +339,21 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     DistributionTypesV2.UserAssetStatsInput[] memory userState
   ) internal view returns (address[] memory rewardsList, uint256[] memory unclaimedRewards) {
     rewardsList = new address[](_rewardsList.length);
-    unclaimedRewards = new uint256[](_rewardsList.length);
+    unclaimedRewards = new uint256[](rewardsList.length);
 
     // Add stored rewards from user to unclaimedRewards
-    for (uint256 y = 0; y < _rewardsList.length; y++) {
+    for (uint256 y = 0; y < rewardsList.length; y++) {
       rewardsList[y] = _rewardsList[y];
-      unclaimedRewards[y] = _usersUnclaimedRewards[user][_rewardsList[y]];
+      unclaimedRewards[y] = _usersUnclaimedRewards[user][rewardsList[y]];
     }
 
     // Add unrealized rewards from user to unclaimedRewards
     for (uint256 i = 0; i < userState.length; i++) {
-      for (uint256 r = 0; r < _rewardsList.length; r++) {
-        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, _rewardsList[r], userState[i]);
+      if (userState[i].userBalance == 0) {
+        continue;
+      }
+      for (uint256 r = 0; r < rewardsList.length; r++) {
+        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, rewardsList[r], userState[i]);
       }
     }
     return (rewardsList, unclaimedRewards);

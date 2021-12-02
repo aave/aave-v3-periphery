@@ -300,11 +300,9 @@ contract IncentivesControllerV2 is
 
     require(address(transferStrategy) != address(0), 'Transfer implementation can not be empty');
 
-    (bool success, bytes memory returnData) = address(transferStrategy).call(
-      abi.encodeWithSelector(transferStrategy.performTransfer.selector, to, reward, amount)
-    );
+    bool success = transferStrategy.performTransfer(to, reward, amount);
 
-    require(abi.decode(returnData, (bool)) == true && success == true, 'Transfer error');
+    require(success == true, 'Transfer error');
   }
 
   /**

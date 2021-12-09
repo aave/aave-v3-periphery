@@ -89,6 +89,7 @@ export interface TestEnv {
   aaveToken: MintableERC20;
   aDaiMockV2: ATokenMock;
   aWethMockV2: ATokenMock;
+  aAaveMockV2: ATokenMock;
   pullRewardsStrategy: PullRewardsTransferStrategy;
   stakedTokenStrategy: StakedTokenTransferStrategy;
   rewardToken: MintableERC20;
@@ -132,6 +133,7 @@ const testEnv: TestEnv = {
   aaveToken: {} as MintableERC20,
   aDaiMockV2: {} as ATokenMock,
   aWethMockV2: {} as ATokenMock,
+  aAaveMockV2: {} as ATokenMock,
   pullRewardsStrategy: {} as PullRewardsTransferStrategy,
   stakedTokenStrategy: {} as StakedTokenTransferStrategy,
   rewardToken: {} as MintableERC20,
@@ -222,6 +224,7 @@ export async function initializeMakeSuite() {
   testEnv.aaveToken = testEnv.aave;
   testEnv.aDaiMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aDaiV2');
   testEnv.aWethMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aWethV2');
+  testEnv.aAaveMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aAaveV2');
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
   testEnv.stakedTokenStrategy = (await getStakedRewardsStrategy()) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);

@@ -7,6 +7,7 @@ import {IAaveIncentivesControllerV2} from './interfaces/IAaveIncentivesControlle
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title IncentivesControllerV2
@@ -268,6 +269,9 @@ contract IncentivesControllerV2 is
     address to
   ) internal returns (address[] memory rewardsList, uint256[] memory claimedAmounts) {
     _distributeRewards(user, _getUserStake(assets, user));
+
+    rewardsList = new address[](_rewardsList.length);
+    claimedAmounts = new uint256[](_rewardsList.length);
 
     for (uint256 i = 0; i < _rewardsList.length; i++) {
       address reward = _rewardsList[i];

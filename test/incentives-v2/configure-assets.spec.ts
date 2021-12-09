@@ -324,6 +324,16 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             );
           }
           expect(eventsEmitted[eventArrayIndex]).to.be.equal(undefined, 'Too many events emitted');
+
+          // Check Rewards config
+          for (let i = 0; i < allRewards.length; i++) {
+            const contractReward = allRewards[i];
+            const oracle = await incentivesControllerV2.getRewardOracle(allRewards[i]);
+            const strategy = await incentivesControllerV2.getTransferStrategy(allRewards[i]);
+
+            expect(oracle).to.be.eq(testEnv.aavePriceAggregator);
+            expect(strategy).to.be.eq(rewardStrategy[contractReward]);
+          }
         });
       }
     });

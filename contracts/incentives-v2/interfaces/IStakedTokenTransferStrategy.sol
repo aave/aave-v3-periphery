@@ -18,4 +18,14 @@ interface IStakedTokenTransferStrategy is ITransferStrategyBase {
    * @dev Drop approval of AAVE to the Staked Aave contract in case of emergency.
    */
   function dropApproval() external;
+
+  /**
+   * @return Staked Token contract address
+   */
+  function getStakeContract() external view returns (address);
+
+  /**
+   * @return Underlying token address from the stake contract
+   */
+  function getUnderlyingToken() external view returns (address);
 }

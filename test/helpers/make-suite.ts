@@ -226,7 +226,7 @@ export async function initializeMakeSuite() {
   testEnv.aWethMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aWethV2');
   testEnv.aAaveMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aAaveV2');
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
-  testEnv.stakedTokenStrategy = (await getStakedRewardsStrategy()) as StakedTokenTransferStrategy;
+  testEnv.stakedTokenStrategy = ((await getStakedRewardsStrategy()) as any) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
   testEnv.rewardTokens = await bluebird.map(rewardTokens, ({ artifact }) =>
     getMintableERC20(artifact.address)

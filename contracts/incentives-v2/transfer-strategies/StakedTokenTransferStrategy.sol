@@ -17,8 +17,8 @@ import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contract
 contract StakedTokenTransferStrategy is TransferStrategyBase, IStakedTokenTransferStrategy {
   using SafeERC20 for IERC20;
 
-  IStakedToken public immutable STAKE_CONTRACT;
-  address public immutable UNDERLYING_TOKEN;
+  IStakedToken internal immutable STAKE_CONTRACT;
+  address internal immutable UNDERLYING_TOKEN;
 
   constructor(
     address incentivesController,
@@ -59,5 +59,15 @@ contract StakedTokenTransferStrategy is TransferStrategyBase, IStakedTokenTransf
   /// @inheritdoc IStakedTokenTransferStrategy
   function dropApproval() external onlyRewardsAdmin {
     IERC20(UNDERLYING_TOKEN).safeApprove(address(STAKE_CONTRACT), 0);
+  }
+
+  /// @inheritdoc IStakedTokenTransferStrategy
+  function getStakeContract() external view returns (address) {
+    return address(STAKE_CONTRACT);
+  }
+
+  /// @inheritdoc IStakedTokenTransferStrategy
+  function getUnderlyingToken() external view returns (address) {
+    return UNDERLYING_TOKEN;
   }
 }

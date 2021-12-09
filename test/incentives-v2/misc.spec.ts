@@ -1,5 +1,10 @@
 import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2.d';
-import { waitForTx, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '@aave/deploy-v3';
+import {
+  waitForTx,
+  MAX_UINT_AMOUNT,
+  ZERO_ADDRESS,
+  deployReservesSetupHelper,
+} from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { makeSuite } from '../helpers/make-suite';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
@@ -148,5 +153,43 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         .connect(userWithRewards.signer)
         .claimAllRewards([aDaiMockV2.address], ZERO_ADDRESS)
     ).to.be.revertedWith('INVALID_TO_ADDRESS');
+  });
+
+  it('Should claimRewards revert if performTransfer strategy call returns false', async () => {
+    const {
+      aDaiMockV2,
+      users,
+      incentivesControllerV2,
+      distributionEnd,
+      rewardToken: { address: reward },
+      deployer,
+    } = testEnv;
+    const [userWithRewards] = users;
+
+    const mockStrategy = await hre.deployments.deploy('MockBadTransferStrategy', {
+      from: deployer.address,
+      args: [incentivesControllerV2.address, deployer.address],
+    });
+
+    await waitForTx(
+      await incentivesControllerV2.configureAssets([
+        {
+          asset: aDaiMockV2.address,
+          reward,
+          rewardOracle: testEnv.aavePriceAggregator,
+          emissionPerSecond: '2000',
+          distributionEnd,
+          totalSupply: '0',
+          transferStrategy: mockStrategy.address,
+        },
+      ])
+    );
+    await waitForTx(await aDaiMockV2.setUserBalanceAndSupply('300000', '30000'));
+
+    await expect(
+      incentivesControllerV2
+        .connect(userWithRewards.signer)
+        .claimAllRewardsToSelf([aDaiMockV2.address])
+    ).to.be.revertedWith('TRANSFER_ERROR');
   });
 });

@@ -43,7 +43,7 @@ contract StakedTokenTransferStrategy is TransferStrategyBase, IStakedTokenTransf
     onlyIncentivesController
     returns (bool)
   {
-    require(reward == address(STAKE_CONTRACT), 'Reward token is not the staked token');
+    require(reward == address(STAKE_CONTRACT), 'REWARD_TOKEN_NOT_STAKE_CONTRACT');
 
     STAKE_CONTRACT.stake(to, amount);
 

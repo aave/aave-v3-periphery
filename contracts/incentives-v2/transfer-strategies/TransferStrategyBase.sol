@@ -23,7 +23,7 @@ abstract contract TransferStrategyBase is ITransferStrategyBase {
    * @dev Modifier for incentives controller only functions
    */
   modifier onlyIncentivesController() {
-    require(INCENTIVES_CONTROLLER == msg.sender, 'Caller must be Incentives Controller');
+    require(INCENTIVES_CONTROLLER == msg.sender, 'CALLER_NOT_INCENTIVES_CONTROLLER');
     _;
   }
 

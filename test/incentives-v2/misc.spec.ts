@@ -115,4 +115,38 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
         .claimRewards([aDaiMockV2.address], MAX_UINT_AMOUNT, ZERO_ADDRESS, reward)
     ).to.be.revertedWith('INVALID_TO_ADDRESS');
   });
+
+  it('Should claimRewards revert if to argument is ZERO_ADDRESS', async () => {
+    const {
+      aDaiMockV2,
+      users,
+      incentivesControllerV2,
+      distributionEnd,
+      stakedAave: { address: reward },
+      stakedTokenStrategy,
+    } = testEnv;
+    const [userWithRewards] = users;
+
+    await waitForTx(
+      await incentivesControllerV2.configureAssets([
+        {
+          asset: aDaiMockV2.address,
+          reward,
+          rewardOracle: testEnv.aavePriceAggregator,
+          emissionPerSecond: '2000',
+          distributionEnd,
+          totalSupply: '0',
+          transferStrategy: stakedTokenStrategy.address,
+        },
+      ])
+    );
+    await waitForTx(await aDaiMockV2.setUserBalanceAndSupply('300000', '30000'));
+
+    // Claim from third party claimer
+    await expect(
+      incentivesControllerV2
+        .connect(userWithRewards.signer)
+        .claimAllRewards([aDaiMockV2.address], ZERO_ADDRESS)
+    ).to.be.revertedWith('INVALID_TO_ADDRESS');
+  });
 });

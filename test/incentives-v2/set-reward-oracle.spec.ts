@@ -32,7 +32,7 @@ makeSuite('AaveIncentivesControllerV2 setRewardOracle', (testEnv: TestEnv) => {
       incentivesControllerV2
         .connect(deployer.signer)
         .setRewardOracle(aaveToken.address, zeroPriceOracle.address)
-    ).to.be.revertedWith('Oracle must return price');
+    ).to.be.revertedWith('ORACLE_MUST_RETURN_PRICE');
   });
   it('Update oracle of a incentivized asset', async () => {
     const { incentivesControllerV2, deployer, stakedAave } = testEnv;

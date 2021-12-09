@@ -16,11 +16,22 @@ makeSuite('AaveIncentivesControllerV2 setTransferStrategy', (testEnv: TestEnv) =
     ).to.be.revertedWith('ONLY_EMISSION_MANAGER');
   });
   it('Revert at setTransferStrategy if transfer strategy address is not a contract', async () => {
+    const {
+      incentivesControllerV2,
+      users: [user1],
+    } = testEnv;
+
+    await expect(
+      incentivesControllerV2.setTransferStrategy(ZERO_ADDRESS, user1.address)
+    ).to.be.revertedWith('STRATEGY_MUST_BE_CONTRACT');
+  });
+
+  it('Revert at setTransferStrategy if transfer strategy address is zero', async () => {
     const { incentivesControllerV2 } = testEnv;
 
     await expect(
       incentivesControllerV2.setTransferStrategy(ZERO_ADDRESS, ZERO_ADDRESS)
-    ).to.be.revertedWith('TransferStrategy Logic address must be a contract');
+    ).to.be.revertedWith('STRATEGY_CAN_NOT_BE_ZERO');
   });
 
   it('Update transfer strategy of a incentivized asset', async () => {

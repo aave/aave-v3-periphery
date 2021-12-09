@@ -8,7 +8,6 @@ import {
   MAX_UINT_AMOUNT,
   ERC20__factory,
 } from '@aave/deploy-v3';
-import { RANDOM_ADDRESSES } from '../helpers/constants';
 import {
   assetDataComparator,
   getRewards,
@@ -23,7 +22,6 @@ type ScenarioAction = {
   caseName: string;
   emissionsPerSecond: string[];
   zeroBalance: boolean[];
-  to?: string;
   toStake?: boolean;
 };
 
@@ -61,19 +59,16 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   {
     caseName: 'Should withdraw to another user',
     emissionsPerSecond: ['2314', '3331', '421512'],
-    to: RANDOM_ADDRESSES[5],
     zeroBalance: [false, false, false],
   },
   {
     caseName: 'Should withdraw to another user',
     emissionsPerSecond: ['2314', '3331', '421512'],
-    to: RANDOM_ADDRESSES[3],
     zeroBalance: [false, false, false],
   },
   {
     caseName: 'Should not claim due emissions are zero',
     emissionsPerSecond: ['0', '0', '0'],
-    to: RANDOM_ADDRESSES[3],
     zeroBalance: [false, false, false],
   },
 ];
@@ -90,7 +85,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         .approve(pullRewardsStrategy.address, MAX_UINT_AMOUNT);
     });
   });
-  for (const { caseName, to, emissionsPerSecond, zeroBalance } of getRewardsBalanceScenarios) {
+  for (const { caseName, emissionsPerSecond, zeroBalance } of getRewardsBalanceScenarios) {
     it(caseName, async () => {
       await increaseTime(100);
       const {
@@ -140,7 +135,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         )
       );
 
-      const destinationAddress = to || userAddress;
+      const destinationAddress = userAddress;
 
       const destinationAddressBalanceBefore = await Bluebird.map(
         rewards,
@@ -155,6 +150,10 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           totalSupply[index]
         );
       });
+
+      const unclaimedRewardsBefore = await Bluebird.map(rewards, (reward) =>
+        incentivesControllerV2.getUserRewardsBalance(assets, userAddress, reward)
+      );
 
       const unclaimedRewardsStorageBefore = await Bluebird.map(rewards, (reward) =>
         incentivesControllerV2.getUserUnclaimedRewardsFromStorage(userAddress, reward)
@@ -172,7 +171,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           (await getRewardsData(incentivesControllerV2, [assets[index]], [reward]))[0]
       );
 
-      const action = await incentivesControllerV2.claimAllRewards(assets, destinationAddress);
+      const action = await incentivesControllerV2.claimAllRewardsToSelf(assets);
 
       const claimRewardsReceipt = await waitForTx(action);
 

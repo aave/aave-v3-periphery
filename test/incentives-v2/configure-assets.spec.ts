@@ -245,6 +245,7 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
           const txReceipt = await waitForTx(action);
 
           // Assert action output
+          const allRewards = await incentivesControllerV2.getRewardsList();
           const configsUpdateBlockTimestamp = await getBlockTimestamp(txReceipt.blockNumber);
           const assetsConfigAfter = await getRewardsData(
             incentivesControllerV2,
@@ -255,6 +256,8 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
 
           let eventArrayIndex = 0;
 
+          expect(allRewards.length).to.gte(0);
+          expect(allRewards).to.have.members(assetConfigsUpdate.map(({ reward }) => reward));
           // Check installation events
           for (let i = 0; i < assetsConfigBefore.length; i++) {
             // Check TransferStrategy installation event
@@ -270,6 +273,11 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             const assetConfigUpdateInput = assetConfigsUpdate[i];
             const assetConfigAfter = assetsConfigAfter[i];
 
+            const rewardsList = await incentivesControllerV2.getRewardsByAsset(
+              assetConfigUpdateInput.asset
+            );
+            expect(rewardsList.length).to.gte(0);
+            expect(rewardsList).to.include(assetConfigUpdateInput.reward);
             // Check AssetIndexUpdate if asset already configured and index moved
             if (!assetConfigAfter.index.eq(assetConfigBefore.index)) {
               await expect(action)

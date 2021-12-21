@@ -1,5 +1,10 @@
+import { StakedTokenTransferStrategy } from './../../types/StakedTokenTransferStrategy';
+import { PullRewardsTransferStrategy } from './../../types/PullRewardsTransferStrategy';
+import { ATokenMock } from './../../types/ATokenMock.d';
+import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2';
 import hre from 'hardhat';
 import { Signer } from 'ethers';
+import bluebird from 'bluebird';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
 import bignumberChai from 'chai-bignumber';
@@ -33,7 +38,20 @@ import {
   tEthereumAddress,
   getEthersSigners,
   getAaveOracle,
+  getIncentivesV2,
+  getBlockTimestamp,
+  TESTNET_REWARD_TOKEN_PREFIX,
+  getSubTokensByPrefix,
+  getPullRewardsStrategy,
+  getStakedRewardsStrategy,
+  StakedAaveV3,
+  getStakeAave,
+  waitForTx,
+  MAX_UINT_AMOUNT,
+  TESTNET_PRICE_AGGR_PREFIX,
 } from '@aave/deploy-v3';
+import { deployATokenMock } from '../incentives-v2/helpers/deploy';
+import { parseEther } from 'ethers/lib/utils';
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -65,6 +83,21 @@ export interface TestEnv {
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
+  incentivesControllerV2: IncentivesControllerV2;
+  rewardsVault: SignerWithAddress;
+  stakedAave: StakedAaveV3;
+  aaveToken: MintableERC20;
+  aDaiMockV2: ATokenMock;
+  aWethMockV2: ATokenMock;
+  aAaveMockV2: ATokenMock;
+  pullRewardsStrategy: PullRewardsTransferStrategy;
+  stakedTokenStrategy: StakedTokenTransferStrategy;
+  rewardToken: MintableERC20;
+  rewardTokens: MintableERC20[];
+  distributionEnd: number;
+  aavePriceAggregator: tEthereumAddress;
+  rewardPriceAggregator: tEthereumAddress;
+  rewardsPriceAggregators: tEthereumAddress[];
 }
 
 let hardhatevmSnapshotId: string = '0x1';
@@ -94,13 +127,34 @@ const testEnv: TestEnv = {
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
+  incentivesControllerV2: {} as IncentivesControllerV2,
+  rewardsVault: {} as SignerWithAddress,
+  stakedAave: {} as StakedAaveV3,
+  aaveToken: {} as MintableERC20,
+  aDaiMockV2: {} as ATokenMock,
+  aWethMockV2: {} as ATokenMock,
+  aAaveMockV2: {} as ATokenMock,
+  pullRewardsStrategy: {} as PullRewardsTransferStrategy,
+  stakedTokenStrategy: {} as StakedTokenTransferStrategy,
+  rewardToken: {} as MintableERC20,
+  rewardTokens: [],
+  distributionEnd: 0,
+  aavePriceAggregator: '',
+  rewardPriceAggregator: '',
+  rewardsPriceAggregators: [],
 } as TestEnv;
 
 export async function initializeMakeSuite() {
-  const [_deployer, ...restSigners] = await getEthersSigners();
+  const [_deployer, , , ...restSigners] = await getEthersSigners();
+  const { incentivesRewardsVault } = await hre.getNamedAccounts();
   const deployer: SignerWithAddress = {
     address: await _deployer.getAddress(),
     signer: _deployer,
+  };
+
+  const rewardsVault: SignerWithAddress = {
+    address: incentivesRewardsVault,
+    signer: await hre.ethers.getSigner(incentivesRewardsVault),
   };
 
   for (const signer of restSigners) {
@@ -160,6 +214,51 @@ export async function initializeMakeSuite() {
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.wethGateway = await getWETHGateway();
+
+  // incentives-v2 setup
+  const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
+  const incentivesControllerV2 = ((await getIncentivesV2()) as any) as IncentivesControllerV2;
+  testEnv.incentivesControllerV2 = incentivesControllerV2;
+  testEnv.rewardsVault = rewardsVault;
+  testEnv.stakedAave = await getStakeAave();
+  testEnv.aaveToken = testEnv.aave;
+  testEnv.aDaiMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aDaiV2');
+  testEnv.aWethMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aWethV2');
+  testEnv.aAaveMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aAaveV2');
+  testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
+  testEnv.stakedTokenStrategy = ((await getStakedRewardsStrategy()) as any) as StakedTokenTransferStrategy;
+  testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
+  testEnv.rewardTokens = await bluebird.map(rewardTokens, ({ artifact }) =>
+    getMintableERC20(artifact.address)
+  );
+  testEnv.distributionEnd = (await getBlockTimestamp()) + 1000 * 60 * 60;
+  testEnv.aavePriceAggregator = (
+    await hre.deployments.get(`AAVE${TESTNET_PRICE_AGGR_PREFIX}`)
+  ).address;
+  testEnv.rewardPriceAggregator = (
+    await hre.deployments.get(`${rewardTokens[0].symbol}${TESTNET_PRICE_AGGR_PREFIX}`)
+  ).address;
+  testEnv.rewardsPriceAggregators = await bluebird.map(
+    rewardTokens,
+    async ({ symbol }) =>
+      (await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)).address
+  );
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('3000000'))
+  );
+  await waitForTx(
+    await testEnv.rewardToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('2000000'))
+  );
+
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      .transfer(testEnv.stakedTokenStrategy.address, parseEther('1000000'))
+  );
 }
 
 const setSnapshot = async () => {

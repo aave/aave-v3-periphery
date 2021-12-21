@@ -1,8 +1,11 @@
 import hre from 'hardhat';
-
 import { initializeMakeSuite } from './helpers/make-suite';
 
 before(async () => {
+  if (process.env.EMPTY_RUN === 'true') {
+    console.log('Skipping due empty test run.')
+    return;
+  }
   await hre.deployments.fixture(['market']);
 
   console.log('-> Deployed market');

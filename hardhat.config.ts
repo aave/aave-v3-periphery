@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: REPORT_GAS ? true : false,
+    coinmarketcap: process.env.COINMARKETCAP_API,
   },
   networks: {
     hardhat: {
@@ -104,6 +105,12 @@ const config: HardhatUserConfig = {
       default: 1,
     },
     incentivesProxyAdmin: {
+      default: 1,
+    },
+    incentivesEmissionManager: {
+      default: 0,
+    },
+    incentivesRewardsVault: {
       default: 2,
     },
   },
@@ -128,6 +135,7 @@ const config: HardhatUserConfig = {
       '@aave/core-v3/contracts/protocol/pool/Pool.sol',
       '@aave/core-v3/contracts/protocol/pool/PoolConfigurator.sol',
       '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol',
+      '@aave/core-v3/contracts/dependencies/openzeppelin/upgradeability/InitializableAdminUpgradeabilityProxy.sol',
       '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol',
       '@aave/core-v3/contracts/deployments/ReservesSetupHelper.sol',
       '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol',

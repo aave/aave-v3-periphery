@@ -36,8 +36,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
       - name: Test
         run: npm run test
-      # - name: Coverage
-      #   run: npm run coverage
-      # - uses: codecov/codecov-action@v1
-      #   with:
-      #     fail_ci_if_error: true
+      - name: Coverage
+        run: npm run coverage
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}

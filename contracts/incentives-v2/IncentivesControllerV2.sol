@@ -269,6 +269,9 @@ contract IncentivesControllerV2 is
   ) internal returns (address[] memory rewardsList, uint256[] memory claimedAmounts) {
     _distributeRewards(user, _getUserStake(assets, user));
 
+    rewardsList = new address[](_rewardsList.length);
+    claimedAmounts = new uint256[](_rewardsList.length);
+
     for (uint256 i = 0; i < _rewardsList.length; i++) {
       address reward = _rewardsList[i];
       uint256 rewardAmount = _usersUnclaimedRewards[user][reward];
@@ -298,11 +301,9 @@ contract IncentivesControllerV2 is
   ) internal {
     ITransferStrategyBase transferStrategy = _transferStrategy[reward];
 
-    require(address(transferStrategy) != address(0), 'Transfer implementation can not be empty');
-
     bool success = transferStrategy.performTransfer(to, reward, amount);
 
-    require(success == true, 'Transfer error');
+    require(success == true, 'TRANSFER_ERROR');
   }
 
   /**
@@ -331,10 +332,8 @@ contract IncentivesControllerV2 is
   function _installTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
     internal
   {
-    require(
-      _isContract(address(transferStrategy)) == true,
-      'TransferStrategy Logic address must be a contract'
-    );
+    require(address(transferStrategy) != address(0), 'STRATEGY_CAN_NOT_BE_ZERO');
+    require(_isContract(address(transferStrategy)) == true, 'STRATEGY_MUST_BE_CONTRACT');
 
     _transferStrategy[reward] = transferStrategy;
 
@@ -349,7 +348,7 @@ contract IncentivesControllerV2 is
    */
 
   function _setRewardOracle(address reward, IEACAggregatorProxy rewardOracle) internal {
-    require(rewardOracle.latestAnswer() > 0, 'Oracle must return price');
+    require(rewardOracle.latestAnswer() > 0, 'ORACLE_MUST_RETURN_PRICE');
     _rewardOracle[reward] = rewardOracle;
     emit RewardOracleUpdated(reward, address(rewardOracle));
   }

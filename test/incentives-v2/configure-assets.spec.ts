@@ -245,6 +245,7 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
           const txReceipt = await waitForTx(action);
 
           // Assert action output
+          const allRewards = await incentivesControllerV2.getRewardsList();
           const configsUpdateBlockTimestamp = await getBlockTimestamp(txReceipt.blockNumber);
           const assetsConfigAfter = await getRewardsData(
             incentivesControllerV2,
@@ -255,24 +256,10 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
 
           let eventArrayIndex = 0;
 
+          expect(allRewards.length).to.gte(0);
+          expect(allRewards).to.have.members(assetConfigsUpdate.map(({ reward }) => reward));
           // Check installation events
           for (let i = 0; i < assetsConfigBefore.length; i++) {
-            // Check ERC20 approval installHook if stake transfer strategy
-            if (assetConfigsUpdate[i].reward == stakedAave.address) {
-              // Check Approve 0 amount of AAVE to StakeAave
-              await expect(eventsEmitted[0].address).to.equal(aaveToken.address);
-              await expect(eventsEmitted[0].data).to.equal(
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-              );
-              // Check Approve MAX_UINT amount of AAVE to StakeAave
-              await expect(eventsEmitted[1].address).to.equal(aaveToken.address);
-              await expect(eventsEmitted[1].data).to.equal(
-                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-              );
-
-              eventArrayIndex += 2;
-            }
-
             // Check TransferStrategy installation event
             await expect(action)
               .to.emit(incentivesControllerV2, 'TransferStrategyInstalled')
@@ -286,6 +273,11 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             const assetConfigUpdateInput = assetConfigsUpdate[i];
             const assetConfigAfter = assetsConfigAfter[i];
 
+            const rewardsList = await incentivesControllerV2.getRewardsByAsset(
+              assetConfigUpdateInput.asset
+            );
+            expect(rewardsList.length).to.gte(0);
+            expect(rewardsList).to.include(assetConfigUpdateInput.reward);
             // Check AssetIndexUpdate if asset already configured and index moved
             if (!assetConfigAfter.index.eq(assetConfigBefore.index)) {
               await expect(action)
@@ -332,6 +324,16 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             );
           }
           expect(eventsEmitted[eventArrayIndex]).to.be.equal(undefined, 'Too many events emitted');
+
+          // Check Rewards config
+          for (let i = 0; i < allRewards.length; i++) {
+            const contractReward = allRewards[i];
+            const oracle = await incentivesControllerV2.getRewardOracle(allRewards[i]);
+            const strategy = await incentivesControllerV2.getTransferStrategy(allRewards[i]);
+
+            expect(oracle).to.be.eq(testEnv.aavePriceAggregator);
+            expect(strategy).to.be.eq(rewardStrategy[contractReward]);
+          }
         });
       }
     });

@@ -44,11 +44,11 @@ import {
   getSubTokensByPrefix,
   getPullRewardsStrategy,
   getStakedRewardsStrategy,
-  StakedAaveV3,
   getStakeAave,
   waitForTx,
   MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
+  StakedTokenV2Rev3,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../incentives-v2/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -85,7 +85,7 @@ export interface TestEnv {
   wethGateway: WETHGateway;
   incentivesControllerV2: IncentivesControllerV2;
   rewardsVault: SignerWithAddress;
-  stakedAave: StakedAaveV3;
+  stakedAave: StakedTokenV2Rev3;
   aaveToken: MintableERC20;
   aDaiMockV2: ATokenMock;
   aWethMockV2: ATokenMock;
@@ -129,7 +129,7 @@ const testEnv: TestEnv = {
   wethGateway: {} as WETHGateway,
   incentivesControllerV2: {} as IncentivesControllerV2,
   rewardsVault: {} as SignerWithAddress,
-  stakedAave: {} as StakedAaveV3,
+  stakedAave: {} as StakedTokenV2Rev3,
   aaveToken: {} as MintableERC20,
   aDaiMockV2: {} as ATokenMock,
   aWethMockV2: {} as ATokenMock,

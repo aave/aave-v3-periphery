@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.6.2-beta.10",
+  "version": "1.6.2-beta.11",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -20,6 +20,7 @@
     "compile": "SKIP_LOAD=true hardhat compile",
     "console:fork": "MAINNET_FORK=true hardhat console",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/incentives-v2/**/*.spec.ts",
+    "test-ui-helper": ". ./setup-test-env.sh && UI_TEST_DEBUG=true TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  test/ui-helper.spec.ts",
     "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/incentives-v2/**/.spec.ts",
     "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/incentives-v2/strategies/*.spec.ts",
     "coverage": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true EMPTY_RUN=true npx hardhat coverage --temp temp-artifacts --testfiles test/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test/**/*.spec.ts'",
@@ -85,6 +86,6 @@
     "url": "git://github.com/aave/aave-v3-periphery"
   },
   "dependencies": {
-    "@aave/core-v3": "^1.6.0"
+    "@aave/core-v3": "^1.8.0"
   }
 }

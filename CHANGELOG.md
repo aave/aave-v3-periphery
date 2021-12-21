@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.6.1...v1.7.0) (2021-12-21)
+
+
+### Features
+
+* add reward price oracle mechanism ([ab001e7](https://www.github.com/aave/aave-v3-periphery/commit/ab001e71e789e75326cbeb77c1d50de7deadbfdd))
+* Added gas optimizations and replace SafeERC20 to SafeTransferLib ([2d13589](https://www.github.com/aave/aave-v3-periphery/commit/2d13589e0570f96b3cfbc4624001416f09acdcaf))
+* Added getTransferStrategy getter to Incentives Controller V2 ([104cf60](https://www.github.com/aave/aave-v3-periphery/commit/104cf607f1db4dbb64c29ce204abd8d2926fc45f))
+* added PRECISION getter to IAaveDistributionManagerV2 interface ([a2c3136](https://www.github.com/aave/aave-v3-periphery/commit/a2c3136713767e8d4276f14409856d5a52aedfef))
+* added price oracle mapping for easier rewards integration ([3ee5bd2](https://www.github.com/aave/aave-v3-periphery/commit/3ee5bd27a6c4e7f2a4022cf462a8a96ab85ddad7))
+* change storage size for reward data, claim rewards and reward oracle tests ([c8ca14c](https://www.github.com/aave/aave-v3-periphery/commit/c8ca14c874abf328a120ba77ec369abbdecb7237))
+* enforce source of value when adding rewards at Incentives Controller V2 ([17a8195](https://www.github.com/aave/aave-v3-periphery/commit/17a8195ec56406d071925f761ef39c816aa4ea4f))
+* fix new setup for transfer strategy ([5fa7ce2](https://www.github.com/aave/aave-v3-periphery/commit/5fa7ce2e533c03708def497fe5ed4a0d5ea23964))
+* move isTransferStrategy constructor to TransferStrategyStorage ([6e1a42d](https://www.github.com/aave/aave-v3-periphery/commit/6e1a42d7c50377ab97b37588055502208c3eea68))
+* Perform call to TransferStrategy instead of delegate calls. Added reward admin, emergency withdraw, and approval admin methods to TransferStrategyBase. ([5bf4977](https://www.github.com/aave/aave-v3-periphery/commit/5bf497760be8648d5ff3adfb234d9c56d9f95870))
+* perform normal call ([90c9909](https://www.github.com/aave/aave-v3-periphery/commit/90c99093293f9722dc1b34572f1e8ceb8bf5b6b0))
+* use github packages for aave-token and stake-v2 ([57d3a5d](https://www.github.com/aave/aave-v3-periphery/commit/57d3a5d3542743df710be1e6194d648a671b280b))
+* use max pattern to detect overflow intead of casting ([8dfa261](https://www.github.com/aave/aave-v3-periphery/commit/8dfa261c2dc8069296daa8c9b652a856c7c7760b))
+* use TransferStrategyStorage constructor at staked token strategy ([ac04c12](https://www.github.com/aave/aave-v3-periphery/commit/ac04c12532f7741af16b24a8c11ce69d9b7ef262))
+
+
+### Bug Fixes
+
+* convert interface to address at event emit ([a3ddb57](https://www.github.com/aave/aave-v3-periphery/commit/a3ddb5741305f6ec0603d02bfd0575b397fbb245))
+* initialize return arrays at _claimAllRewards function. Add tests for IncentivesControllerV2. ([61e7456](https://www.github.com/aave/aave-v3-periphery/commit/61e74564a2eaf2df9e4d6d02e120d9225677d27f))
+* missing view function ([5ee0776](https://www.github.com/aave/aave-v3-periphery/commit/5ee0776cc8387783a75fb6ab5fa3fc6d4d82cca4))
+* remove aaveoracle from constructor and move it at initialize ([6514ecb](https://www.github.com/aave/aave-v3-periphery/commit/6514ecbbb3629959d895bfb1480bf7fe735f74ef))
+* reset IEACAggregatorProxy interface ([69ac51e](https://www.github.com/aave/aave-v3-periphery/commit/69ac51ee67f04147a628c6654afed858812546e2))
+
 ### [1.6.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.6.0...v1.6.1) (2021-11-22)
 
 

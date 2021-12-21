@@ -4,9 +4,9 @@ import { BigNumber } from 'ethers';
 import {
   waitForTx,
   getBlockTimestamp,
-  increaseTime,
   MAX_UINT_AMOUNT,
   ERC20__factory,
+  advanceTimeAndBlock,
 } from '@aave/deploy-v3';
 import {
   assetDataComparator,
@@ -17,6 +17,7 @@ import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset
 import { parseEther } from '@ethersproject/units';
 import Bluebird from 'bluebird';
 import { ATokenMock__factory } from '../../types';
+import hre from 'hardhat';
 
 type ScenarioAction = {
   caseName: string;
@@ -87,14 +88,16 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
   });
   for (const { caseName, emissionsPerSecond, zeroBalance } of getRewardsBalanceScenarios) {
     it(caseName, async () => {
-      await increaseTime(100);
+      const { timestamp } = await hre.ethers.provider.getBlock('latest');
+      const timePerTest = 31536000;
+      const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
+      await advanceTimeAndBlock(timePerTest);
       const {
         incentivesControllerV2,
         aDaiMockV2,
         aAaveMockV2,
         aWethMockV2,
         pullRewardsStrategy,
-        distributionEnd,
         rewardTokens,
         deployer,
       } = testEnv;

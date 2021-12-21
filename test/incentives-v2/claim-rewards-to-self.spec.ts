@@ -1,4 +1,10 @@
-import { getBlockTimestamp, increaseTime, waitForTx, MAX_UINT_AMOUNT } from '@aave/deploy-v3';
+import {
+  getBlockTimestamp,
+  increaseTime,
+  waitForTx,
+  MAX_UINT_AMOUNT,
+  advanceTimeAndBlock,
+} from '@aave/deploy-v3';
 import { BigNumber } from 'ethers';
 import { makeSuite } from '../helpers/make-suite';
 import { comparatorEngine } from './helpers/comparator-engine';
@@ -8,6 +14,7 @@ import {
   getRewardsData,
 } from './helpers/DistributionManagerV2/data-helpers/asset-data';
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+import hre from 'hardhat';
 
 const { expect } = require('chai');
 
@@ -53,14 +60,11 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
   } of getRewardsBalanceScenarios) {
     let amountToClaim = _amountToClaim;
     it(caseName, async () => {
-      await increaseTime(100);
-      const {
-        incentivesControllerV2,
-        stakedAave,
-        aDaiMockV2,
-        distributionEnd,
-        stakedTokenStrategy,
-      } = testEnv;
+      const { timestamp } = await hre.ethers.provider.getBlock('latest');
+      const timePerTest = 31536000;
+      const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
+      await advanceTimeAndBlock(timePerTest);
+      const { incentivesControllerV2, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
 
       const userAddress = await incentivesControllerV2.signer.getAddress();
 

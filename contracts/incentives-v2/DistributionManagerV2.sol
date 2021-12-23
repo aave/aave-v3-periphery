@@ -277,7 +277,6 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    * @param user The user address
    * @param userBalance The current user asset balance
    * @param totalSupply Total supply of the asset
-   * @return The accrued rewards for the user until the moment
    **/
   function _updateUserRewardsPerAssetInternal(
     address asset,

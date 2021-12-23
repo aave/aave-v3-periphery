@@ -192,7 +192,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    * @param asset The address of the asset being updated
    * @param reward The address of the reward being updated
    * @param rewardConfig Storage pointer to the distribution's reward config
-   * @param totalSupply Current total of staked _assets for this distribution
+   * @param totalSupply Current total of underlying assets for this distribution
+   * @param decimals The decimals of the underlying asset
    * @return The new distribution index
    **/
   function _updateAssetStateInternal(
@@ -270,6 +271,14 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return accruedRewards;
   }
 
+  /**
+   * @dev Iterates and updates all rewards of an asset that belongs to an user
+   * @param asset The address of the reference asset of the distribution
+   * @param user The user address
+   * @param userBalance The current user asset balance
+   * @param totalSupply Total supply of the asset
+   * @return The accrued rewards for the user until the moment
+   **/
   function _updateUserRewardsPerAssetInternal(
     address asset,
     address user,
@@ -396,9 +405,10 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
 
   /**
    * @dev Internal function for the calculation of user's rewards on a distribution
-   * @param principalUserBalance Amount staked by the user on a distribution
+   * @param principalUserBalance Balance of the user asset on a distribution
    * @param reserveIndex Current index of the distribution
    * @param userIndex Index stored for the user, representation his staking moment
+   * @param decimals The decimals of the underlying asset
    * @return The rewards
    **/
   function _getRewards(
@@ -416,6 +426,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    * @param emissionPerSecond Representing the total rewards distributed per second per asset unit, on the distribution
    * @param lastUpdateTimestamp Last moment this distribution was updated
    * @param totalBalance of tokens considered for the distribution
+   * @param decimals The decimals of the underlying asset
    * @return The new index.
    **/
   function _getAssetIndex(

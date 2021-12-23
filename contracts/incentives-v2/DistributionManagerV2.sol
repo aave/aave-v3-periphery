@@ -2,6 +2,7 @@ pragma solidity 0.8.10;
 
 import {IAaveDistributionManagerV2} from './interfaces/IAaveDistributionManagerV2.sol';
 import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
+import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 
 /**
  * @title DistributionManagerV2
@@ -20,12 +21,11 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   struct AssetData {
     mapping(address => RewardData) rewards;
     address[] availableRewards;
+    uint256 decimals;
   }
 
   // manager of incentives
   address public immutable EMISSION_MANAGER;
-
-  uint8 public constant PRECISION = 18;
 
   // asset => AssetData
   mapping(address => AssetData) internal _assets;
@@ -148,6 +148,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    **/
   function _configureAssets(DistributionTypesV2.RewardsConfigInput[] memory rewardsInput) internal {
     for (uint256 i = 0; i < rewardsInput.length; i++) {
+      _assets[rewardsInput[i].asset].decimals = IERC20Detailed(rewardsInput[i].asset).decimals();
+
       RewardData storage rewardConfig = _assets[rewardsInput[i].asset].rewards[
         rewardsInput[i].reward
       ];
@@ -168,7 +170,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
         rewardsInput[i].asset,
         rewardsInput[i].reward,
         rewardConfig,
-        rewardsInput[i].totalSupply
+        rewardsInput[i].totalSupply,
+        _assets[rewardsInput[i].asset].decimals
       );
 
       // Configure emission and distribution end of the reward per asset
@@ -196,7 +199,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     address asset,
     address reward,
     RewardData storage rewardConfig,
-    uint256 totalSupply
+    uint256 totalSupply,
+    uint256 decimals
   ) internal returns (uint256) {
     uint256 oldIndex = rewardConfig.index;
 
@@ -209,7 +213,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
       rewardConfig.emissionPerSecond,
       rewardConfig.lastUpdateTimestamp,
       rewardConfig.distributionEnd,
-      totalSupply
+      totalSupply,
+      decimals
     );
 
     if (newIndex != oldIndex) {
@@ -245,11 +250,17 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     uint256 userIndex = rewardData.usersIndex[user];
     uint256 accruedRewards = 0;
 
-    uint256 newIndex = _updateAssetStateInternal(asset, reward, rewardData, totalSupply);
+    uint256 newIndex = _updateAssetStateInternal(
+      asset,
+      reward,
+      rewardData,
+      totalSupply,
+      _assets[asset].decimals
+    );
 
     if (userIndex != newIndex) {
       if (userBalance != 0) {
-        accruedRewards = _getRewards(userBalance, newIndex, userIndex);
+        accruedRewards = _getRewards(userBalance, newIndex, userIndex, _assets[asset].decimals);
       }
 
       rewardData.usersIndex[user] = newIndex;
@@ -370,16 +381,17 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     DistributionTypesV2.UserAssetStatsInput memory stake
   ) internal view returns (uint256) {
     RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
-
+    uint256 assetDecimals = _assets[stake.underlyingAsset].decimals;
     uint256 assetIndex = _getAssetIndex(
       rewardData.index,
       rewardData.emissionPerSecond,
       rewardData.lastUpdateTimestamp,
       rewardData.distributionEnd,
-      stake.totalSupply
+      stake.totalSupply,
+      assetDecimals
     );
 
-    return _getRewards(stake.userBalance, assetIndex, rewardData.usersIndex[user]);
+    return _getRewards(stake.userBalance, assetIndex, rewardData.usersIndex[user], assetDecimals);
   }
 
   /**
@@ -392,9 +404,10 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   function _getRewards(
     uint256 principalUserBalance,
     uint256 reserveIndex,
-    uint256 userIndex
+    uint256 userIndex,
+    uint256 decimals
   ) internal pure returns (uint256) {
-    return (principalUserBalance * (reserveIndex - userIndex)) / 10**uint256(PRECISION);
+    return (principalUserBalance * (reserveIndex - userIndex)) / 10**decimals;
   }
 
   /**
@@ -410,7 +423,8 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     uint256 emissionPerSecond,
     uint128 lastUpdateTimestamp,
     uint256 distributionEnd,
-    uint256 totalBalance
+    uint256 totalBalance,
+    uint256 decimals
   ) internal view returns (uint256) {
     if (
       emissionPerSecond == 0 ||
@@ -425,7 +439,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
       ? distributionEnd
       : block.timestamp;
     uint256 timeDelta = currentTimestamp - lastUpdateTimestamp;
-    return (emissionPerSecond * timeDelta * (10**uint256(PRECISION))) / totalBalance + currentIndex;
+    return (emissionPerSecond * timeDelta * (10**decimals)) / totalBalance + currentIndex;
   }
 
   /**
@@ -439,4 +453,9 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     view
     virtual
     returns (DistributionTypesV2.UserAssetStatsInput[] memory userState);
+
+  /// @inheritdoc IAaveDistributionManagerV2
+  function getAssetDecimals(address asset) external view returns (uint256) {
+    return _assets[asset].decimals;
+  }
 }

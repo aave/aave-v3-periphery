@@ -74,10 +74,10 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   },
 ];
 
-makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
   before(async () => {
     const { rewardTokens, rewardsVault, pullRewardsStrategy } = testEnv;
-    const rewards = rewardTokens.slice(0, 4);
+    const rewards = rewardTokens.slice(0, 3);
 
     await Bluebird.each(rewards, async (reward, index) => {
       await reward.connect(rewardsVault.signer)['mint(uint256)'](parseEther('1000000000'));
@@ -113,7 +113,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const totalSupply = assets.map((_, index) =>
         BigNumber.from(parseEther('100000')).mul(caseName.length).mul(index)
       );
-      const rewards = rewardTokens.slice(0, 4).map(({ address }) => address);
+      const rewards = rewardTokens.slice(0, 3).map(({ address }) => address);
 
       await Bluebird.each(assets, async (asset, index) => {
         await ATokenMock__factory.connect(asset, deployer.signer).setUserBalanceAndSupply(

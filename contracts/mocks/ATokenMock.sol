@@ -7,6 +7,7 @@ contract ATokenMock {
   IAaveIncentivesControllerV2 public _aic;
   uint256 internal _userBalance;
   uint256 internal _totalSupply;
+  uint256 internal immutable _decimals;
 
   // hack to be able to test event from EI properly
   event RewardsAccrued(address indexed user, uint256 amount);
@@ -16,8 +17,9 @@ contract ATokenMock {
   event AssetIndexUpdated(address indexed asset, uint256 index);
   event UserIndexUpdated(address indexed user, address indexed asset, uint256 index);
 
-  constructor(IAaveIncentivesControllerV2 aic) {
+  constructor(IAaveIncentivesControllerV2 aic, uint256 decimals) {
     _aic = aic;
+    _decimals = decimals;
   }
 
   function handleActionOnAic(
@@ -53,5 +55,9 @@ contract ATokenMock {
   function cleanUserState() external {
     _userBalance = 0;
     _totalSupply = 0;
+  }
+
+  function decimals() external view returns (uint256) {
+    return _decimals;
   }
 }

@@ -109,7 +109,8 @@ export function assetDataComparator<
   assetConfigAfter: State,
   actionBlockTimestamp: number,
   emissionEndTimestamp: number,
-  compareRules: CompareRules<Input, State>
+  compareRules: CompareRules<Input, State>,
+  decimals = 18
 ) {
   return comparatorEngine(
     ['emissionPerSecond', 'index', 'lastUpdateTimestamp'],
@@ -134,7 +135,8 @@ export function assetDataComparator<
               stateBefore.emissionPerSecond,
               stateBefore.lastUpdateTimestamp,
               txTimestamp,
-              emissionEndTimestamp
+              emissionEndTimestamp,
+              decimals
             ).toString(10);
           },
         },

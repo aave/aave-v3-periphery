@@ -241,7 +241,7 @@ export async function initializeMakeSuite() {
   testEnv.aDaiMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aDaiV2');
   testEnv.aWethMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aWethV2');
   testEnv.aAaveMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aAaveV2');
-  testEnv.aEursMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aEursV2');
+  testEnv.aEursMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aEursV2', 2);
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
   testEnv.stakedTokenStrategy = ((await getStakedRewardsStrategy()) as any) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
@@ -263,18 +263,18 @@ export async function initializeMakeSuite() {
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)
-      ['mint(address,uint256)'](rewardsVault.address, parseEther('3000000'))
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('60000000000'))
   );
   await waitForTx(
     await testEnv.rewardToken
       .connect(rewardsVault.signer)
-      ['mint(address,uint256)'](rewardsVault.address, parseEther('2000000'))
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('200000000'))
   );
 
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)
-      .transfer(testEnv.stakedTokenStrategy.address, parseEther('1000000'))
+      .transfer(testEnv.stakedTokenStrategy.address, parseEther('30000000000'))
   );
 }
 

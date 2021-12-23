@@ -80,7 +80,7 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   },
 ];
 
-makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
   before(async () => {
     const { rewardTokens, rewardsVault, pullRewardsStrategy } = testEnv;
     const rewards = rewardTokens.slice(0, 4);
@@ -117,6 +117,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const assets = [aDaiMockV2, aAaveMockV2, aWethMockV2, aEursMockV2].map(
         ({ address }) => address
       );
+
       const stakedByUser = assets.map((_, index) =>
         zeroBalance[index]
           ? BigNumber.from('0')
@@ -129,10 +130,6 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           .mul(index)
           .mul(caseIndex)
       );
-      console.log(
-        'deposits',
-        stakedByUser.map((x) => x.toString())
-      );
       const rewards = rewardTokens.slice(0, 4).map(({ address }) => address);
 
       await Bluebird.each(assets, async (asset, index) => {
@@ -140,18 +137,9 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           stakedByUser[index],
           totalSupply[index]
         );
-        console.log(
-          'setBalances',
-          (await ATokenMock__factory.connect(asset, deployer.signer)).getScaledUserBalanceAndSupply(
-            deployer.address
-          )
-        );
       });
 
       // update emissionPerSecond in advance to not affect user calculations
-
-      console.log(stakedByUser.map((x) => x.toString()));
-      console.log(totalSupply.map((x) => x.toString()));
       await waitForTx(
         await incentivesControllerV2.configureAssets(
           emissionsPerSecond.map((emissionPerSecond, index) => ({
@@ -209,10 +197,6 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         async (reward, index) =>
           await getUserIndex(incentivesControllerV2, userAddress, assets[index], reward)
       );
-      console.log(
-        'index',
-        userIndexesAfter.map((x) => x.toString())
-      );
 
       const assetDataAfter = await Bluebird.map(
         rewards,
@@ -233,18 +217,12 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const claimedAmounts = await Bluebird.map(destinationAddressBalanceAfter, (balance, index) =>
         balance.sub(destinationAddressBalanceBefore[index])
       );
-      console.log(
-        'claimed',
-        claimedAmounts.map((x) => x.toString())
-      );
-
-      await aDaiMockV2.cleanUserState();
-
       const expectedAccruedRewards = await Bluebird.map(rewards, (_, index) =>
         getRewards(
           stakedByUser[index],
           userIndexesAfter[index],
-          userIndexesBefore[index]
+          userIndexesBefore[index],
+          index > 2 ? 2 : 18
         ).toString()
       );
 
@@ -255,7 +233,8 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           assetDataAfter[i],
           actionBlockTimestamp,
           distributionEnd,
-          {}
+          {},
+          i > 2 ? 2 : 18
         );
 
         expect(userIndexesAfter[i].toString()).to.be.equal(

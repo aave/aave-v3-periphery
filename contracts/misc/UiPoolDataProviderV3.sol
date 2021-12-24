@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
+import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
@@ -20,7 +20,7 @@ import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
 import {AaveProtocolDataProvider} from '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
 
-contract UiPoolDataProvider is IUiPoolDataProvider {
+contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
   using WadRayMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;

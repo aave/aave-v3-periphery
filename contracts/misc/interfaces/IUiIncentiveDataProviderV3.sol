@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 
-interface IUiIncentiveDataProvider {
+interface IUiIncentiveDataProviderV3 {
   struct AggregatedReserveIncentiveData {
     address underlyingAsset;
     IncentiveData aIncentiveData;
@@ -12,15 +12,23 @@ interface IUiIncentiveDataProvider {
   }
 
   struct IncentiveData {
+    address tokenAddress;
+    address incentiveControllerAddress;
+    RewardInfo[] rewardsTokenInformation;
+  }
+
+  struct RewardInfo {
+    string rewardTokenSymbol;
+    address rewardTokenAddress;
+    address rewardOracleAddress;
     uint256 emissionPerSecond;
     uint256 incentivesLastUpdateTimestamp;
     uint256 tokenIncentivesIndex;
     uint256 emissionEndTimestamp;
-    address tokenAddress;
-    address rewardTokenAddress;
-    address incentiveControllerAddress;
+    int256 rewardPriceFeed;
     uint8 rewardTokenDecimals;
     uint8 precision;
+    uint8 priceFeedDecimals;
   }
 
   struct UserReserveIncentiveData {
@@ -29,14 +37,23 @@ interface IUiIncentiveDataProvider {
     UserIncentiveData vTokenIncentivesUserData;
     UserIncentiveData sTokenIncentivesUserData;
   }
-
+  
   struct UserIncentiveData {
-    uint256 tokenincentivesUserIndex;
-    uint256 userUnclaimedRewards;
     address tokenAddress;
-    address rewardTokenAddress;
     address incentiveControllerAddress;
+    UserRewardInfo[] userRewardsInformation;
+  }
+  
+  struct UserRewardInfo {
+    string rewardTokenSymbol;
+    address rewardOracleAddress;
+    address rewardTokenAddress;
+    uint256 userUnclaimedRewards;
+    uint256 tokenIncentivesUserIndex;
+    int256 rewardPriceFeed;
+    uint8 priceFeedDecimals;
     uint8 rewardTokenDecimals;
+
   }
 
   function getReservesIncentivesData(IPoolAddressesProvider provider)

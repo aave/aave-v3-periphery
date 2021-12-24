@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
-interface IUiPoolDataProvider {
+interface IUiPoolDataProviderV3 {
   struct AggregatedReserveData {
     address underlyingAsset;
     string name;

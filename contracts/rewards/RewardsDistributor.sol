@@ -1,15 +1,15 @@
 pragma solidity 0.8.10;
 
-import {IAaveDistributionManagerV2} from './interfaces/IAaveDistributionManagerV2.sol';
-import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
+import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
+import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 
 /**
- * @title DistributionManagerV2
+ * @title RewardsDistributor
  * @notice Accounting contract to manage multiple staking distributions with multiple rewards
  * @author Aave
  **/
-abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
+abstract contract RewardsDistributor is IRewardsDistributor {
   struct RewardData {
     uint88 emissionPerSecond;
     uint104 index;
@@ -48,7 +48,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     EMISSION_MANAGER = emissionManager;
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getRewardsData(address asset, address reward)
     public
     view
@@ -68,7 +68,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     );
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getDistributionEnd(address asset, address reward)
     external
     view
@@ -78,17 +78,17 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return _assets[asset].rewards[reward].distributionEnd;
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getRewardsByAsset(address asset) external view override returns (address[] memory) {
     return _assets[asset].availableRewards;
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getRewardsList() external view override returns (address[] memory) {
     return _rewardsList;
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getUserAssetData(
     address user,
     address asset,
@@ -97,7 +97,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return _assets[asset].rewards[reward].usersIndex[user];
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getUserUnclaimedRewardsFromStorage(address user, address reward)
     external
     view
@@ -107,7 +107,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return _usersUnclaimedRewards[user][reward];
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getUserRewardsBalance(
     address[] calldata assets,
     address user,
@@ -116,7 +116,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return _getUserReward(user, reward, _getUserStake(assets, user));
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getAllUserRewardsBalance(address[] calldata assets, address user)
     external
     view
@@ -126,7 +126,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     return _getAllUserRewards(user, _getUserStake(assets, user));
   }
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function setDistributionEnd(
     address asset,
     address reward,
@@ -146,7 +146,9 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    * @dev Configure the _assets for a specific emission
    * @param rewardsInput The array of each asset configuration
    **/
-  function _configureAssets(DistributionTypesV2.RewardsConfigInput[] memory rewardsInput) internal {
+  function _configureAssets(RewardsDistributorTypes.RewardsConfigInput[] memory rewardsInput)
+    internal
+  {
     for (uint256 i = 0; i < rewardsInput.length; i++) {
       _assets[rewardsInput[i].asset].decimals = IERC20Detailed(rewardsInput[i].asset).decimals();
 
@@ -308,7 +310,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    **/
   function _distributeRewards(
     address user,
-    DistributionTypesV2.UserAssetStatsInput[] memory userState
+    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
   ) internal {
     for (uint256 i = 0; i < userState.length; i++) {
       _updateUserRewardsPerAssetInternal(
@@ -330,7 +332,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   function _getUserReward(
     address user,
     address reward,
-    DistributionTypesV2.UserAssetStatsInput[] memory userState
+    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
   ) internal view returns (uint256 unclaimedRewards) {
     // Add unrealized rewards
     for (uint256 i = 0; i < userState.length; i++) {
@@ -353,7 +355,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
    **/
   function _getAllUserRewards(
     address user,
-    DistributionTypesV2.UserAssetStatsInput[] memory userState
+    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
   ) internal view returns (address[] memory rewardsList, uint256[] memory unclaimedRewards) {
     rewardsList = new address[](_rewardsList.length);
     unclaimedRewards = new uint256[](rewardsList.length);
@@ -386,7 +388,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   function _getUnrealizedRewardsFromStake(
     address user,
     address reward,
-    DistributionTypesV2.UserAssetStatsInput memory stake
+    RewardsDistributorTypes.UserAssetStatsInput memory stake
   ) internal view returns (uint256) {
     RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
     uint8 assetDecimals = _assets[stake.underlyingAsset].decimals;
@@ -462,9 +464,9 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     internal
     view
     virtual
-    returns (DistributionTypesV2.UserAssetStatsInput[] memory userState);
+    returns (RewardsDistributorTypes.UserAssetStatsInput[] memory userState);
 
-  /// @inheritdoc IAaveDistributionManagerV2
+  /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {
     return _assets[asset].decimals;
   }

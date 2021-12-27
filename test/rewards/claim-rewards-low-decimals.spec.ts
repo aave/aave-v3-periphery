@@ -14,8 +14,8 @@ import {
   assetDataComparator,
   getRewards,
   getRewardsData,
-} from './helpers/DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+} from './helpers/RewardsDistributor/data-helpers/asset-data';
+import { getUserIndex } from './helpers/RewardsDistributor/data-helpers/asset-user-data';
 import hre from 'hardhat';
 
 type ScenarioAction = {
@@ -39,34 +39,34 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   },
   {
     caseName: 'Accrued rewards are not 0',
-    emissionPerSecond: '2432424',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '10',
   },
   {
     caseName: 'Should allow -1',
-    emissionPerSecond: '2432424',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: MAX_UINT_AMOUNT,
   },
   {
     caseName: 'Should withdraw everything if amountToClaim more then rewards balance',
-    emissionPerSecond: '100',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '1034',
   },
   {
     caseName: 'Should withdraw to another user',
-    emissionPerSecond: '100',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '1034',
     to: RANDOM_ADDRESSES[5],
   },
   {
     caseName: 'Should withdraw to another user and stake',
-    emissionPerSecond: '100',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '1034',
     to: RANDOM_ADDRESSES[5],
   },
 ];
 
-makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => {
   for (const {
     caseName,
     amountToClaim: _amountToClaim,
@@ -79,21 +79,21 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const timePerTest = 31536000;
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
       await advanceTimeAndBlock(timePerTest);
-      const { incentivesControllerV2, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
+      const { rewardsController, stakedAave, aEursMockV2, stakedTokenStrategy } = testEnv;
 
-      const userAddress = await incentivesControllerV2.signer.getAddress();
+      const userAddress = await rewardsController.signer.getAddress();
 
-      const underlyingAsset = aDaiMockV2.address;
+      const underlyingAsset = aEursMockV2.address;
       const stakedByUser = 22 * caseName.length;
       const totalSupply = 33 * caseName.length;
       const reward = stakedAave.address;
 
-      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
+      await aEursMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
 
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
         await waitForTx(
-          await incentivesControllerV2.configureAssets([
+          await rewardsController.configureAssets([
             {
               asset: underlyingAsset,
               reward,
@@ -110,29 +110,29 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const destinationAddress = to || userAddress;
 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
-      await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
+      await aEursMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
-      const unclaimedRewardsBefore = await incentivesControllerV2.getUserRewardsBalance(
+      const unclaimedRewardsBefore = await rewardsController.getUserRewardsBalance(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageBefore = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         reward
       );
 
       const userIndexBefore = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
       const assetDataBefore = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const action = await incentivesControllerV2.claimRewards(
+      const action = await rewardsController.claimRewards(
         [underlyingAsset],
         amountToClaim,
         destinationAddress,
@@ -144,21 +144,21 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const actionBlockTimestamp = await getBlockTimestamp(claimRewardsReceipt.blockNumber);
 
       const userIndexAfter = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
       const assetDataAfter = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const unclaimedRewardsAfter = await incentivesControllerV2.getUserRewardsBalance(
+      const unclaimedRewardsAfter = await rewardsController.getUserRewardsBalance(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageAfter = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageAfter = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         reward
       );
@@ -169,10 +169,10 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       // Only calculate expected accrued rewards if unclaimedRewards is below the amount to claim due gas optimization
       const expectedAccruedRewards = unclaimedRewardsStorageBefore.lt(amountToClaim)
-        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore).toString()
+        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore, 2).toString()
         : '0';
 
-      await aDaiMockV2.cleanUserState();
+      await aEursMockV2.cleanUserState();
 
       if (amountToClaim === '0') {
         // state should not change
@@ -209,7 +209,8 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           ? Number(assetDataBefore.lastUpdateTimestamp.toString())
           : actionBlockTimestamp,
         distributionEnd,
-        {}
+        {},
+        2
       );
       expect(userIndexAfter.toString()).to.be.equal(
         unclaimedRewardsStorageBefore.gte(amountToClaim)
@@ -219,10 +220,10 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       );
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'AssetIndexUpdated')
+          .to.emit(rewardsController, 'AssetIndexUpdated')
           .withArgs(assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
         await expect(action)
-          .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+          .to.emit(rewardsController, 'UserIndexUpdated')
           .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
       }
       // ------- Distribution Manager tests END -----
@@ -250,15 +251,15 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       );
       if (expectedAccruedRewards !== '0') {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'RewardsAccrued')
+          .to.emit(rewardsController, 'RewardsAccrued')
           .withArgs(userAddress, reward, expectedAccruedRewards);
         await expect(action)
-          .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+          .to.emit(rewardsController, 'UserIndexUpdated')
           .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
       }
       if (expectedClaimedAmount.gt(0)) {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'RewardsClaimed')
+          .to.emit(rewardsController, 'RewardsClaimed')
           .withArgs(userAddress, reward, destinationAddress, userAddress, expectedClaimedAmount);
       }
     });

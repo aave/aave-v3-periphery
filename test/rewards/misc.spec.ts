@@ -1,4 +1,4 @@
-import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2.d';
+import { RewardsController } from './../../types/RewardsController.d';
 import {
   waitForTx,
   MAX_UINT_AMOUNT,
@@ -19,15 +19,15 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
       console.log('Skip due coverage loss of data');
       return;
     }
-    const artifact = await hre.deployments.deploy('IncentivesControllerV2', {
+    const artifact = await hre.deployments.deploy('RewardsController', {
       from: deployer,
       args: [peiEmissionManager],
     });
-    const incentivesControllerV2 = (await hre.ethers.getContractAt(
+    const rewardsController = (await hre.ethers.getContractAt(
       artifact.abi,
       artifact.address
-    )) as IncentivesControllerV2;
-    await expect((await incentivesControllerV2.EMISSION_MANAGER()).toString()).to.be.equal(
+    )) as RewardsController;
+    await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(
       peiEmissionManager
     );
   });
@@ -35,14 +35,14 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
   it('Should return same index while multiple asset index updates', async () => {
     const {
       aDaiMockV2,
-      incentivesControllerV2,
+      rewardsController,
       users,
       stakedAave: { address: reward },
       distributionEnd,
       stakedTokenStrategy,
     } = testEnv;
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward,
@@ -60,7 +60,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
   it('Should overflow index if passed a large emission', async () => {
     const {
       aDaiMockV2,
-      incentivesControllerV2,
+      rewardsController,
       users,
       distributionEnd,
       stakedAave: { address: reward },
@@ -69,7 +69,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const MAX_88_UINT = '309485009821345068724781055';
 
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward,
@@ -91,7 +91,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const {
       aDaiMockV2,
       users,
-      incentivesControllerV2,
+      rewardsController,
       distributionEnd,
       stakedAave: { address: reward },
       stakedTokenStrategy,
@@ -99,7 +99,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const [userWithRewards] = users;
 
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward,
@@ -115,7 +115,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
 
     // Claim from third party claimer
     await expect(
-      incentivesControllerV2
+      rewardsController
         .connect(userWithRewards.signer)
         .claimRewards([aDaiMockV2.address], MAX_UINT_AMOUNT, ZERO_ADDRESS, reward)
     ).to.be.revertedWith('INVALID_TO_ADDRESS');
@@ -125,7 +125,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const {
       aDaiMockV2,
       users,
-      incentivesControllerV2,
+      rewardsController,
       distributionEnd,
       stakedAave: { address: reward },
       stakedTokenStrategy,
@@ -133,7 +133,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const [userWithRewards] = users;
 
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward,
@@ -149,7 +149,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
 
     // Claim from third party claimer
     await expect(
-      incentivesControllerV2
+      rewardsController
         .connect(userWithRewards.signer)
         .claimAllRewards([aDaiMockV2.address], ZERO_ADDRESS)
     ).to.be.revertedWith('INVALID_TO_ADDRESS');
@@ -159,7 +159,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     const {
       aDaiMockV2,
       users,
-      incentivesControllerV2,
+      rewardsController,
       distributionEnd,
       rewardToken: { address: reward },
       deployer,
@@ -168,11 +168,11 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
 
     const mockStrategy = await hre.deployments.deploy('MockBadTransferStrategy', {
       from: deployer.address,
-      args: [incentivesControllerV2.address, deployer.address],
+      args: [rewardsController.address, deployer.address],
     });
 
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward,
@@ -187,9 +187,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     await waitForTx(await aDaiMockV2.setUserBalanceAndSupply('300000', '30000'));
 
     await expect(
-      incentivesControllerV2
-        .connect(userWithRewards.signer)
-        .claimAllRewardsToSelf([aDaiMockV2.address])
+      rewardsController.connect(userWithRewards.signer).claimAllRewardsToSelf([aDaiMockV2.address])
     ).to.be.revertedWith('TRANSFER_ERROR');
   });
 });

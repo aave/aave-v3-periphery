@@ -4,11 +4,11 @@
 
 The Incentives Controller V2 and Distribution Manager V2 contracts are aimed to bootstrap and incentive liquidity in the different Aave Markets with support of multiple rewards instead of only one as the previous version.
 
-The `IncentivesControllerV2` contract is responsible of configuring the different rewards and the claim process. Inherits `DistributionManagerV2`.
+The `RewardsController` contract is responsible of configuring the different rewards and the claim process. Inherits `RewardsDistributor`.
 
-The `Transfer Strategies` are small implementation contracts that manages the procedure of the rewards transfer at claim. This allows the IncentivesControllerV2 to support many custom rewards, from Staked Aave incentives, common ERC20 transfers from vaults, or even NFT rewards.
+The `Transfer Strategies` are small implementation contracts that manages the procedure of the rewards transfer at claim. This allows the RewardsController to support many custom rewards, from Staked Aave incentives, common ERC20 transfers from vaults, or even NFT rewards.
 
-The `DistributionManagerV2` contract manages the distribution and accountability of the multiple rewards per asset over time.
+The `RewardsDistributor` contract manages the distribution and accountability of the multiple rewards per asset over time.
 
 ## Incentives Controller V2 [wip]
 
@@ -16,7 +16,7 @@ The Incentives Controller is the main contract and where the user interacts to c
 
 ## Transfer Strategies
 
-Transfer Strategies are implementation contracts to support different reward systems. Currently there is `StakedTokenStrategy` and `PullRewardsStrategy` to support StkAave rewards and common ERC20 incentives pulled from a external vault. The `IncentivesControllerV2` performs delegate calls to the transfer strategy contracts. The Transfer Strategies has two main functions:
+Transfer Strategies are implementation contracts to support different reward systems. Currently there is `StakedTokenStrategy` and `PullRewardsStrategy` to support StkAave rewards and common ERC20 incentives pulled from a external vault. The `RewardsController` performs delegate calls to the transfer strategy contracts. The Transfer Strategies has two main functions:
 
 - `installHook(bytes params)`
   The `installHook` function is called at the moment of configuring the IncentivesController assets. The function allows initial setups of one reward, for example perform `approve` to a staking contract that would save gas costs at claim. Contains optional `params` that can be parsed using `abi.decode` method.
@@ -43,4 +43,4 @@ At installation hook, the strategy sets MAX_UINT allowance approval to the Stake
 
 At transfer hook, stakes the AAVE rewards while transferring the obtained stkAAVE to the claiming user.
 
-## DistributionManagerV2 [wip]
+## RewardsDistributor [wip]

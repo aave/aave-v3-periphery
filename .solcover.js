@@ -6,7 +6,7 @@ module.exports = {
     './misc/UiIncentiveDataProvider.sol',
     './misc/UiPoolDataProvider.sol',
     './misc/WalletBalanceProvider.sol',
-    './incentives-v2/interfaces/',
+    './rewards/interfaces/',
     './misc/interfaces/',
   ],
   onCompileComplete: function () {

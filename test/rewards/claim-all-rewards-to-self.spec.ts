@@ -12,8 +12,8 @@ import {
   assetDataComparator,
   getRewards,
   getRewardsData,
-} from './helpers/DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+} from './helpers/RewardsDistributor/data-helpers/asset-data';
+import { getUserIndex } from './helpers/RewardsDistributor/data-helpers/asset-user-data';
 import { parseEther } from '@ethersproject/units';
 import Bluebird from 'bluebird';
 import { ATokenMock__factory } from '../../types';
@@ -93,7 +93,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
       await advanceTimeAndBlock(timePerTest);
       const {
-        incentivesControllerV2,
+        rewardsController,
         aDaiMockV2,
         aAaveMockV2,
         aWethMockV2,
@@ -102,7 +102,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
         deployer,
       } = testEnv;
 
-      const userAddress = await incentivesControllerV2.signer.getAddress();
+      const userAddress = await rewardsController.signer.getAddress();
 
       const assets = [aDaiMockV2, aAaveMockV2, aWethMockV2].map(({ address }) => address);
       const stakedByUser = assets.map((_, index) =>
@@ -125,7 +125,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       // update emissionPerSecond in advance to not affect user calculations
 
       await waitForTx(
-        await incentivesControllerV2.configureAssets(
+        await rewardsController.configureAssets(
           emissionsPerSecond.map((emissionPerSecond, index) => ({
             asset: assets[index],
             reward: rewards[index],
@@ -155,26 +155,26 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       });
 
       const unclaimedRewardsBefore = await Bluebird.map(rewards, (reward) =>
-        incentivesControllerV2.getUserRewardsBalance(assets, userAddress, reward)
+        rewardsController.getUserRewardsBalance(assets, userAddress, reward)
       );
 
       const unclaimedRewardsStorageBefore = await Bluebird.map(rewards, (reward) =>
-        incentivesControllerV2.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
       );
 
       const userIndexesBefore = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          await getUserIndex(incentivesControllerV2, userAddress, assets[index], reward)
+          await getUserIndex(rewardsController, userAddress, assets[index], reward)
       );
 
       const assetDataBefore = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(incentivesControllerV2, [assets[index]], [reward]))[0]
+          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
       );
 
-      const action = await incentivesControllerV2.claimAllRewardsToSelf(assets);
+      const action = await rewardsController.claimAllRewardsToSelf(assets);
 
       const claimRewardsReceipt = await waitForTx(action);
 
@@ -183,17 +183,17 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       const userIndexesAfter = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          await getUserIndex(incentivesControllerV2, userAddress, assets[index], reward)
+          await getUserIndex(rewardsController, userAddress, assets[index], reward)
       );
 
       const assetDataAfter = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(incentivesControllerV2, [assets[index]], [reward]))[0]
+          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
       );
 
       const unclaimedRewardsStorageAfter = await Bluebird.map(rewards, (reward) =>
-        incentivesControllerV2.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
       );
 
       const destinationAddressBalanceAfter = await Bluebird.map(
@@ -233,10 +233,10 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
 
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
-            .to.emit(incentivesControllerV2, 'AssetIndexUpdated')
+            .to.emit(rewardsController, 'AssetIndexUpdated')
             .withArgs(assetDataAfter[i].underlyingAsset, rewards[i], assetDataAfter[i].index);
           await expect(action)
-            .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+            .to.emit(rewardsController, 'UserIndexUpdated')
             .withArgs(
               userAddress,
               assetDataAfter[i].underlyingAsset,
@@ -259,10 +259,10 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
         );
         if (expectedAccruedRewards[i] !== '0') {
           await expect(action)
-            .to.emit(incentivesControllerV2, 'RewardsAccrued')
+            .to.emit(rewardsController, 'RewardsAccrued')
             .withArgs(userAddress, rewards[i], expectedAccruedRewards[i]);
           await expect(action)
-            .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+            .to.emit(rewardsController, 'UserIndexUpdated')
             .withArgs(
               userAddress,
               assetDataAfter[i].underlyingAsset,
@@ -272,7 +272,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
         }
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
-            .to.emit(incentivesControllerV2, 'RewardsClaimed')
+            .to.emit(rewardsController, 'RewardsClaimed')
             .withArgs(
               userAddress,
               rewards[i],

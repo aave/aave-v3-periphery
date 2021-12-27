@@ -7,8 +7,8 @@ import {
   getRewardsData,
   getRewards,
   assetDataComparator,
-} from './helpers/DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+} from './helpers/RewardsDistributor/data-helpers/asset-data';
+import { getUserIndex } from './helpers/RewardsDistributor/data-helpers/asset-user-data';
 
 const { expect } = require('chai');
 
@@ -64,7 +64,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
       await increaseTime(100);
 
       const {
-        incentivesControllerV2,
+        rewardsController,
         users,
         aDaiMockV2,
         stakedAave: { address: reward },
@@ -77,7 +77,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
         await waitForTx(
-          await incentivesControllerV2.configureAssets([
+          await rewardsController.configureAssets([
             {
               asset: underlyingAsset,
               reward,
@@ -91,18 +91,18 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         );
       }
 
-      const rewardsBalanceBefore = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const rewardsBalanceBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         reward
       );
       const userIndexBefore = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
       const assetDataBefore = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
       if (customTimeMovement) {
@@ -114,18 +114,18 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, userBalance)
       );
       const eventsEmitted =
-        handleActionReceipt.events?.map((e) => incentivesControllerV2.interface.parseLog(e)) || [];
+        handleActionReceipt.events?.map((e) => rewardsController.interface.parseLog(e)) || [];
       const actionBlockTimestamp = await getBlockTimestamp(handleActionReceipt.blockNumber);
 
       const userIndexAfter = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
 
       const assetDataAfter = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
       const expectedAccruedRewards = getRewards(
@@ -134,7 +134,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         userIndexBefore
       ).toString();
 
-      const rewardsBalanceAfter = await incentivesControllerV2.getUserRewardsBalance(
+      const rewardsBalanceAfter = await rewardsController.getUserRewardsBalance(
         [underlyingAsset],
         userAddress,
         reward

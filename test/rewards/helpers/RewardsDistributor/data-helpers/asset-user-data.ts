@@ -1,8 +1,8 @@
 import { BigNumber } from 'ethers';
-import { IncentivesControllerV2 } from '../../../../../types/IncentivesControllerV2';
+import { RewardsController } from '../../../../../types/RewardsController';
 
 export async function getUserIndex(
-  distributionManager: IncentivesControllerV2,
+  distributionManager: RewardsController,
   user: string,
   asset: string,
   reward: string

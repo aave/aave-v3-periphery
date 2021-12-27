@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {DistributionTypesV2} from '../libraries/DistributionTypesV2.sol';
+import {RewardsDistributorTypes} from '../libraries/RewardsDistributorTypes.sol';
 
-interface IAaveDistributionManagerV2 {
+interface IRewardsDistributor {
   event AssetConfigUpdated(
     address indexed asset,
     address indexed reward,

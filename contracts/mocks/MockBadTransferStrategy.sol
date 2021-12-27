@@ -2,7 +2,7 @@ pragma solidity 0.8.10;
 
 import {ITransferStrategyBase} from '../incentives-v2/interfaces/ITransferStrategyBase.sol';
 import {TransferStrategyBase} from '../incentives-v2/transfer-strategies/TransferStrategyBase.sol';
-import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 
 /**
@@ -11,7 +11,7 @@ import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contract
  * @author Aave
  **/
 contract MockBadTransferStrategy is TransferStrategyBase {
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
 
   // Added storage variable to prevent warnings at compilation for performTransfer
   uint256 ignoreWarning;

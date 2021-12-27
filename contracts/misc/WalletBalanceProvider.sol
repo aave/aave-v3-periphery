@@ -6,7 +6,7 @@ import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contract
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
@@ -20,7 +20,7 @@ import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTy
 contract WalletBalanceProvider {
   using Address for address payable;
   using Address for address;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   address constant MOCK_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -91,8 +91,9 @@ contract WalletBalanceProvider {
     uint256[] memory balances = new uint256[](reservesWithEth.length);
 
     for (uint256 j = 0; j < reserves.length; j++) {
-      DataTypes.ReserveConfigurationMap memory configuration =
-        pool.getConfiguration(reservesWithEth[j]);
+      DataTypes.ReserveConfigurationMap memory configuration = pool.getConfiguration(
+        reservesWithEth[j]
+      );
 
       (bool isActive, , , , ) = configuration.getFlags();
 

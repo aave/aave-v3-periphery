@@ -1,7 +1,7 @@
 pragma solidity 0.8.10;
 
-import {ITransferStrategyBase} from '../incentives-v2/interfaces/ITransferStrategyBase.sol';
-import {TransferStrategyBase} from '../incentives-v2/transfer-strategies/TransferStrategyBase.sol';
+import {ITransferStrategyBase} from '../rewards/interfaces/ITransferStrategyBase.sol';
+import {TransferStrategyBase} from '../rewards/transfer-strategies/TransferStrategyBase.sol';
 import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 

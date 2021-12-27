@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.9.0",
+  "version": "1.9.0-beta.0",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -19,9 +19,9 @@
     "hardhat:matic": "hardhat --network matic",
     "compile": "SKIP_LOAD=true hardhat compile",
     "console:fork": "MAINNET_FORK=true hardhat console",
-    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/incentives-v2/*.spec.ts ./test/incentives-v2/**/*.spec.ts",
-    "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/incentives-v2/*.spec.ts ./test/incentives-v2/**/*.spec.ts",
-    "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/incentives-v2/strategies/*.spec.ts",
+    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
+    "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
+    "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/rewards/strategies/*.spec.ts",
     "coverage": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true EMPTY_RUN=true npx hardhat coverage --temp temp-artifacts --testfiles test/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test/**/*.spec.ts'",
     "clean": "rm -rf artifacts cache",
     "format": "prettier --write .",
@@ -31,7 +31,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/deploy-v3": "^1.6.1-beta.5",
+    "@aave/deploy-v3": "^1.8.0-beta.2",
     "@ethersproject/abi": "^5.1.0",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.11",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",

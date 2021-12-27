@@ -12,8 +12,8 @@ import {
   assetDataComparator,
   getRewards,
   getRewardsData,
-} from './helpers/DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+} from './helpers/RewardsDistributor/data-helpers/asset-data';
+import { getUserIndex } from './helpers/RewardsDistributor/data-helpers/asset-user-data';
 import hre from 'hardhat';
 
 const { expect } = require('chai');
@@ -64,9 +64,9 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const timePerTest = 31536000;
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
       await advanceTimeAndBlock(timePerTest);
-      const { incentivesControllerV2, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
+      const { rewardsController, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
 
-      const userAddress = await incentivesControllerV2.signer.getAddress();
+      const userAddress = await rewardsController.signer.getAddress();
 
       const underlyingAsset = aDaiMockV2.address;
       const stakedByUser = 22 * caseName.length;
@@ -78,7 +78,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
         await waitForTx(
-          await incentivesControllerV2.configureAssets([
+          await rewardsController.configureAssets([
             {
               asset: aDaiMockV2.address,
               emissionPerSecond,
@@ -96,27 +96,27 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
       await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
-      const unclaimedRewardsBefore = await incentivesControllerV2.getUserRewardsBalance(
+      const unclaimedRewardsBefore = await rewardsController.getUserRewardsBalance(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageBefore = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         reward
       );
 
       const userIndexBefore = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
       const assetDataBefore = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const action = await incentivesControllerV2.claimRewardsToSelf(
+      const action = await rewardsController.claimRewardsToSelf(
         [underlyingAsset],
         amountToClaim,
         reward
@@ -127,21 +127,21 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const actionBlockTimestamp = await getBlockTimestamp(claimRewardsReceipt.blockNumber);
 
       const userIndexAfter = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         reward
       );
       const assetDataAfter = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
+        await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const unclaimedRewardsAfter = await incentivesControllerV2.getUserRewardsBalance(
+      const unclaimedRewardsAfter = await rewardsController.getUserRewardsBalance(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageAfter = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageAfter = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         reward
       );
@@ -202,10 +202,10 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       );
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'AssetIndexUpdated')
+          .to.emit(rewardsController, 'AssetIndexUpdated')
           .withArgs(assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
         await expect(action)
-          .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+          .to.emit(rewardsController, 'UserIndexUpdated')
           .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
       }
       // ------- Distribution Manager tests END -----
@@ -233,15 +233,15 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       );
       if (expectedAccruedRewards !== '0') {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'RewardsAccrued')
+          .to.emit(rewardsController, 'RewardsAccrued')
           .withArgs(userAddress, reward, expectedAccruedRewards);
         await expect(action)
-          .to.emit(incentivesControllerV2, 'UserIndexUpdated')
+          .to.emit(rewardsController, 'UserIndexUpdated')
           .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
       }
       if (expectedClaimedAmount.gt(0)) {
         await expect(action)
-          .to.emit(incentivesControllerV2, 'RewardsClaimed')
+          .to.emit(rewardsController, 'RewardsClaimed')
           .withArgs(userAddress, reward, destinationAddress, userAddress, expectedClaimedAmount);
       }
     });

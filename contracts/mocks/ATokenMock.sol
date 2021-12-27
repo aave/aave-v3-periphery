@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {IAaveIncentivesControllerV2} from '../incentives-v2/interfaces/IAaveIncentivesControllerV2.sol';
+import {IRewardsController} from '../rewards/interfaces/IRewardsController.sol';
 
 contract ATokenMock {
-  IAaveIncentivesControllerV2 public _aic;
+  IRewardsController public _aic;
   uint256 internal _userBalance;
   uint256 internal _totalSupply;
   uint256 internal immutable _decimals;
@@ -17,7 +17,7 @@ contract ATokenMock {
   event AssetIndexUpdated(address indexed asset, uint256 index);
   event UserIndexUpdated(address indexed user, address indexed asset, uint256 index);
 
-  constructor(IAaveIncentivesControllerV2 aic, uint256 decimals) {
+  constructor(IRewardsController aic, uint256 decimals) {
     _aic = aic;
     _decimals = decimals;
   }

@@ -2,22 +2,18 @@ pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
-import {DistributionManagerV2} from './DistributionManagerV2.sol';
-import {IAaveIncentivesControllerV2} from './interfaces/IAaveIncentivesControllerV2.sol';
+import {RewardsDistributor} from './RewardsDistributor.sol';
+import {IRewardsController} from './interfaces/IRewardsController.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
-import {DistributionTypesV2} from './libraries/DistributionTypesV2.sol';
+import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
 /**
- * @title IncentivesControllerV2
+ * @title RewardsController
  * @notice Abstract contract template to build Distributors contracts for ERC20 rewards to protocol participants
  * @author Aave
  **/
-contract IncentivesControllerV2 is
-  DistributionManagerV2,
-  VersionedInitializable,
-  IAaveIncentivesControllerV2
-{
+contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
   uint256 public constant REVISION = 1;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
@@ -41,14 +37,14 @@ contract IncentivesControllerV2 is
     _;
   }
 
-  constructor(address emissionManager) DistributionManagerV2(emissionManager) {}
+  constructor(address emissionManager) RewardsDistributor(emissionManager) {}
 
   /**
-   * @dev Empty initialize for IncentivesControllerV2
+   * @dev Empty initialize for RewardsController
    **/
   function initialize() external initializer {}
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {
     return _authorizedClaimers[user];
   }
@@ -61,18 +57,18 @@ contract IncentivesControllerV2 is
     return REVISION;
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function getRewardOracle(address reward) external view override returns (address) {
     return address(_rewardOracle[reward]);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function getTransferStrategy(address reward) external view override returns (address) {
     return address(_transferStrategy[reward]);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
-  function configureAssets(DistributionTypesV2.RewardsConfigInput[] memory config)
+  /// @inheritdoc IRewardsController
+  function configureAssets(RewardsDistributorTypes.RewardsConfigInput[] memory config)
     external
     override
     onlyEmissionManager
@@ -90,7 +86,7 @@ contract IncentivesControllerV2 is
     _configureAssets(config);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
     external
     onlyEmissionManager
@@ -98,7 +94,7 @@ contract IncentivesControllerV2 is
     _installTransferStrategy(reward, transferStrategy);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
     external
     onlyEmissionManager
@@ -106,7 +102,7 @@ contract IncentivesControllerV2 is
     _setRewardOracle(reward, rewardOracle);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function handleAction(
     address user,
     uint256 totalSupply,
@@ -115,7 +111,7 @@ contract IncentivesControllerV2 is
     _updateUserRewardsPerAssetInternal(msg.sender, user, userBalance, totalSupply);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimRewards(
     address[] calldata assets,
     uint256 amount,
@@ -126,7 +122,7 @@ contract IncentivesControllerV2 is
     return _claimRewards(assets, amount, msg.sender, msg.sender, to, reward);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimRewardsOnBehalf(
     address[] calldata assets,
     uint256 amount,
@@ -139,7 +135,7 @@ contract IncentivesControllerV2 is
     return _claimRewards(assets, amount, msg.sender, user, to, reward);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimRewardsToSelf(
     address[] calldata assets,
     uint256 amount,
@@ -148,7 +144,7 @@ contract IncentivesControllerV2 is
     return _claimRewards(assets, amount, msg.sender, msg.sender, msg.sender, reward);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimAllRewards(address[] calldata assets, address to)
     external
     override
@@ -158,7 +154,7 @@ contract IncentivesControllerV2 is
     return _claimAllRewards(assets, msg.sender, msg.sender, to);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimAllRewardsOnBehalf(
     address[] calldata assets,
     address user,
@@ -174,7 +170,7 @@ contract IncentivesControllerV2 is
     return _claimAllRewards(assets, msg.sender, user, to);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function claimAllRewardsToSelf(address[] calldata assets)
     external
     override
@@ -183,7 +179,7 @@ contract IncentivesControllerV2 is
     return _claimAllRewards(assets, msg.sender, msg.sender, msg.sender);
   }
 
-  /// @inheritdoc IAaveIncentivesControllerV2
+  /// @inheritdoc IRewardsController
   function setClaimer(address user, address caller) external override onlyEmissionManager {
     _authorizedClaimers[user] = caller;
     emit ClaimerSet(user, caller);
@@ -199,9 +195,9 @@ contract IncentivesControllerV2 is
     internal
     view
     override
-    returns (DistributionTypesV2.UserAssetStatsInput[] memory userState)
+    returns (RewardsDistributorTypes.UserAssetStatsInput[] memory userState)
   {
-    userState = new DistributionTypesV2.UserAssetStatsInput[](assets.length);
+    userState = new RewardsDistributorTypes.UserAssetStatsInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])

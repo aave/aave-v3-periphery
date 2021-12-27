@@ -4,11 +4,8 @@ const { expect } = require('chai');
 
 import { makeSuite } from '../helpers/make-suite';
 import { timeLatest } from '../helpers/utils';
-import {
-  getRewardsData,
-  getRewards,
-} from './helpers/DistributionManagerV2/data-helpers/asset-data';
-import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+import { getRewardsData, getRewards } from './helpers/RewardsDistributor/data-helpers/asset-data';
+import { getUserIndex } from './helpers/RewardsDistributor/data-helpers/asset-user-data';
 import { getNormalizedDistribution } from './helpers/ray-math';
 
 type ScenarioAction = {
@@ -74,7 +71,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       await increaseTime(100);
 
       const {
-        incentivesControllerV2,
+        rewardsController,
         users,
         aDaiMockV2,
         distributionEnd,
@@ -92,7 +89,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       await advanceBlock((await timeLatest()).add(100).toNumber());
       await aDaiMockV2.setUserBalanceAndSupply('0', totalSupply);
       await waitForTx(
-        await incentivesControllerV2.configureAssets(
+        await rewardsController.configureAssets(
           emissionPerSecond.map((eps, index) => ({
             asset: underlyingAsset,
             reward: rewards[index],
@@ -112,19 +109,19 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       );
       const lastTxTimestamp = await getBlockTimestamp(lastTxReceipt.blockNumber);
 
-      const unclaimedRewardsOneBefore = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsOneBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         rewards[0]
       );
 
-      const unclaimedRewardsTwoBefore = await incentivesControllerV2.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsTwoBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
         userAddress,
         rewards[1]
       );
 
       const allUnclaimedRewardsBefore = unclaimedRewardsOneBefore.add(unclaimedRewardsTwoBefore);
 
-      const [, unclaimedRewards] = await incentivesControllerV2.getAllUserRewardsBalance(
+      const [, unclaimedRewards] = await rewardsController.getAllUserRewardsBalance(
         [underlyingAsset],
         userAddress
       );
@@ -134,22 +131,22 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       );
 
       const userIndexOne = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         rewards[0]
       );
       const userIndexTwo = await getUserIndex(
-        incentivesControllerV2,
+        rewardsController,
         userAddress,
         underlyingAsset,
         rewards[1]
       );
       const assetDataOne = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [rewards[0]])
+        await getRewardsData(rewardsController, [underlyingAsset], [rewards[0]])
       )[0];
       const assetDataTwo = (
-        await getRewardsData(incentivesControllerV2, [underlyingAsset], [rewards[1]])
+        await getRewardsData(rewardsController, [underlyingAsset], [rewards[1]])
       )[0];
       await aDaiMockV2.cleanUserState();
 

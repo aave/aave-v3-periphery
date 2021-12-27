@@ -1,5 +1,5 @@
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
-import { IncentivesControllerV2 } from '../../../../../types/IncentivesControllerV2';
+import { RewardsController } from '../../../../../types/RewardsController';
 import { comparatorEngine, CompareRules } from '../../comparator-engine';
 import { getNormalizedDistribution } from '../../ray-math';
 import { BigNumberValue, valueToZDBigNumber } from '../../ray-math/bignumber';
@@ -28,7 +28,7 @@ export type AssetData = {
 };
 
 export async function getRewardsData(
-  peiContract: IncentivesControllerV2,
+  peiContract: RewardsController,
   assets: string[],
   rewards: string[]
 ) {

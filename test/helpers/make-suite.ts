@@ -1,7 +1,7 @@
 import { StakedTokenTransferStrategy } from './../../types/StakedTokenTransferStrategy';
 import { PullRewardsTransferStrategy } from './../../types/PullRewardsTransferStrategy';
 import { ATokenMock } from './../../types/ATokenMock.d';
-import { IncentivesControllerV2 } from './../../types/IncentivesControllerV2';
+import { RewardsController } from './../../types/RewardsController';
 import hre from 'hardhat';
 import { Signer } from 'ethers';
 import bluebird from 'bluebird';
@@ -51,7 +51,7 @@ import {
   TESTNET_PRICE_AGGR_PREFIX,
   deployMintableERC20,
 } from '@aave/deploy-v3';
-import { deployATokenMock } from '../incentives-v2/helpers/deploy';
+import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
 
 chai.use(bignumberChai());
@@ -84,7 +84,7 @@ export interface TestEnv {
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
-  incentivesControllerV2: IncentivesControllerV2;
+  rewardsController: RewardsController;
   rewardsVault: SignerWithAddress;
   stakedAave: StakedAaveV3;
   aaveToken: MintableERC20;
@@ -129,7 +129,7 @@ const testEnv: TestEnv = {
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
-  incentivesControllerV2: {} as IncentivesControllerV2,
+  rewardsController: {} as RewardsController,
   rewardsVault: {} as SignerWithAddress,
   stakedAave: {} as StakedAaveV3,
   aaveToken: {} as MintableERC20,
@@ -233,15 +233,15 @@ export async function initializeMakeSuite() {
   });
   // Setup Incentives V2 environment
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
-  const incentivesControllerV2 = ((await getIncentivesV2()) as any) as IncentivesControllerV2;
-  testEnv.incentivesControllerV2 = incentivesControllerV2;
+  const rewardsController = ((await getIncentivesV2()) as any) as RewardsController;
+  testEnv.rewardsController = rewardsController;
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();
   testEnv.aaveToken = testEnv.aave;
-  testEnv.aDaiMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aDaiV2');
-  testEnv.aWethMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aWethV2');
-  testEnv.aAaveMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aAaveV2');
-  testEnv.aEursMockV2 = await deployATokenMock(incentivesControllerV2.address, 'aEursV2', 2);
+  testEnv.aDaiMockV2 = await deployATokenMock(rewardsController.address, 'aDaiV2');
+  testEnv.aWethMockV2 = await deployATokenMock(rewardsController.address, 'aWethV2');
+  testEnv.aAaveMockV2 = await deployATokenMock(rewardsController.address, 'aAaveV2');
+  testEnv.aEursMockV2 = await deployATokenMock(rewardsController.address, 'aEursV2', 2);
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
   testEnv.stakedTokenStrategy = ((await getStakedRewardsStrategy()) as any) as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);

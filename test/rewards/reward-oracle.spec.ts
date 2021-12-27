@@ -6,7 +6,7 @@ const { expect } = require('chai');
 makeSuite('AaveIncentivesControllerV2 reward oracle tests', (testEnv: TestEnv) => {
   it('Gets the reward oracle from configureAssets', async () => {
     const {
-      incentivesControllerV2,
+      rewardsController,
       aDaiMockV2,
       rewardToken,
       distributionEnd,
@@ -16,7 +16,7 @@ makeSuite('AaveIncentivesControllerV2 reward oracle tests', (testEnv: TestEnv) =
 
     // Configure asset
     await waitForTx(
-      await incentivesControllerV2.configureAssets([
+      await rewardsController.configureAssets([
         {
           asset: aDaiMockV2.address,
           reward: rewardToken.address,
@@ -33,12 +33,12 @@ makeSuite('AaveIncentivesControllerV2 reward oracle tests', (testEnv: TestEnv) =
   });
 
   it('Update the reward oracle with emission manager', async () => {
-    const { incentivesControllerV2 } = testEnv;
-    await expect(incentivesControllerV2.initialize()).to.be.reverted;
+    const { rewardsController } = testEnv;
+    await expect(rewardsController.initialize()).to.be.reverted;
   });
 
   it('Revert due update the reward oracle from non admin account', async () => {
-    const { incentivesControllerV2 } = testEnv;
-    await expect(incentivesControllerV2.initialize()).to.be.reverted;
+    const { rewardsController } = testEnv;
+    await expect(rewardsController.initialize()).to.be.reverted;
   });
 });

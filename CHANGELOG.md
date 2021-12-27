@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.8.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.7.0...v1.8.0) (2021-12-27)
+
+
+### Features
+
+* updated helper contracts to v3 and added decimals to incentives helper. Updated distribution manager decimals to be in uint8 ([b6d7892](https://www.github.com/aave/aave-v3-periphery/commit/b6d7892b205a0e07ef081013f58ea798f46d3917))
+
+
+### Bug Fixes
+
+* replace Precision with Asset Decimals. Added test scenarios where underlying token has 2 decimals. ([a24240a](https://www.github.com/aave/aave-v3-periphery/commit/a24240a3f668a5632c2c4094ecd4bef6c8e597da))
+
 ## [1.7.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.6.1...v1.7.0) (2021-12-21)
 
 

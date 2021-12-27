@@ -122,5 +122,5 @@ interface IAaveDistributionManagerV2 {
    * @param asset The address to retrieve decimals saved at storage
    * @return The decimals of an underlying asset
    */
-  function getAssetDecimals(address asset) external view returns (uint256);
+  function getAssetDecimals(address asset) external view returns (uint8);
 }

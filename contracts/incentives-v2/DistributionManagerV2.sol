@@ -21,7 +21,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
   struct AssetData {
     mapping(address => RewardData) rewards;
     address[] availableRewards;
-    uint256 decimals;
+    uint8 decimals;
   }
 
   // manager of incentives
@@ -201,7 +201,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     address reward,
     RewardData storage rewardConfig,
     uint256 totalSupply,
-    uint256 decimals
+    uint8 decimals
   ) internal returns (uint256) {
     uint256 oldIndex = rewardConfig.index;
 
@@ -389,7 +389,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     DistributionTypesV2.UserAssetStatsInput memory stake
   ) internal view returns (uint256) {
     RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
-    uint256 assetDecimals = _assets[stake.underlyingAsset].decimals;
+    uint8 assetDecimals = _assets[stake.underlyingAsset].decimals;
     uint256 assetIndex = _getAssetIndex(
       rewardData.index,
       rewardData.emissionPerSecond,
@@ -414,7 +414,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     uint256 principalUserBalance,
     uint256 reserveIndex,
     uint256 userIndex,
-    uint256 decimals
+    uint8 decimals
   ) internal pure returns (uint256) {
     return (principalUserBalance * (reserveIndex - userIndex)) / 10**decimals;
   }
@@ -434,7 +434,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     uint128 lastUpdateTimestamp,
     uint256 distributionEnd,
     uint256 totalBalance,
-    uint256 decimals
+    uint8 decimals
   ) internal view returns (uint256) {
     if (
       emissionPerSecond == 0 ||
@@ -465,7 +465,7 @@ abstract contract DistributionManagerV2 is IAaveDistributionManagerV2 {
     returns (DistributionTypesV2.UserAssetStatsInput[] memory userState);
 
   /// @inheritdoc IAaveDistributionManagerV2
-  function getAssetDecimals(address asset) external view returns (uint256) {
+  function getAssetDecimals(address asset) external view returns (uint8) {
     return _assets[asset].decimals;
   }
 }

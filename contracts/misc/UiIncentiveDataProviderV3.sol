@@ -2,18 +2,19 @@
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IAaveIncentivesController} from '@aave/core-v3/contracts/interfaces/IAaveIncentivesController.sol';
-import {IUiIncentiveDataProvider} from './interfaces/IUiIncentiveDataProvider.sol';
+import {IAaveIncentivesControllerV2} from '../incentives-v2/interfaces/IAaveIncentivesControllerV2.sol';
+import {IUiIncentiveDataProviderV3} from './interfaces/IUiIncentiveDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IncentivizedERC20} from '@aave/core-v3/contracts/protocol/tokenization/IncentivizedERC20.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 
-contract UiIncentiveDataProviderV3 is IUiIncentiveDataProvider {
+contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  constructor() public {}
+  constructor() {}
 
   function getFullReservesIncentiveData(IPoolAddressesProvider provider, address user)
     external
@@ -42,162 +43,174 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProvider {
     address[] memory reserves = lendingPool.getReservesList();
     AggregatedReserveIncentiveData[]
       memory reservesIncentiveData = new AggregatedReserveIncentiveData[](reserves.length);
-
+    // Iterate through the reserves to get all the information from the (a/s/v) Tokens
     for (uint256 i = 0; i < reserves.length; i++) {
       AggregatedReserveIncentiveData memory reserveIncentiveData = reservesIncentiveData[i];
       reserveIncentiveData.underlyingAsset = reserves[i];
 
       DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
 
-      try IncentivizedERC20(baseData.aTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController aTokenIncentiveController
-      ) {
-        if (address(aTokenIncentiveController) != address(0)) {
-          address aRewardToken = aTokenIncentiveController.REWARD_TOKEN();
+      // Get aTokens rewards information
+      // TODO: check that this is deployed correctly on contract and remove casting
+      IAaveIncentivesControllerV2 aTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.aTokenAddress).getIncentivesController())
+      );
+      RewardInfo[] memory aRewardsInformation;
+      if (address(aTokenIncentiveController) != address(0)) {
+        address[] memory aTokenRewardAddresses = aTokenIncentiveController.getRewardsByAsset(
+          baseData.aTokenAddress
+        );
 
-          try aTokenIncentiveController.getAssetData(baseData.aTokenAddress) returns (
-            uint256 aTokenIncentivesIndex,
-            uint256 aEmissionPerSecond,
-            uint256 aIncentivesLastUpdateTimestamp
-          ) {
-            reserveIncentiveData.aIncentiveData = IncentiveData(
-              aEmissionPerSecond,
-              aIncentivesLastUpdateTimestamp,
-              aTokenIncentivesIndex,
-              aTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.aTokenAddress,
-              aRewardToken,
-              address(aTokenIncentiveController),
-              IERC20Detailed(aRewardToken).decimals(),
-              aTokenIncentiveController.PRECISION()
-            );
-          } catch (
-            bytes memory /*lowLevelData*/
-          ) {
-            (
-              uint256 aEmissionPerSecond,
-              uint256 aIncentivesLastUpdateTimestamp,
-              uint256 aTokenIncentivesIndex
-            ) = aTokenIncentiveController.assets(baseData.aTokenAddress);
+        aRewardsInformation = new RewardInfo[](aTokenRewardAddresses.length);
+        for (uint256 j = 0; j < aTokenRewardAddresses.length; ++j) {
+          RewardInfo memory rewardInformation;
+          rewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
-            reserveIncentiveData.aIncentiveData = IncentiveData(
-              aEmissionPerSecond,
-              aIncentivesLastUpdateTimestamp,
-              aTokenIncentivesIndex,
-              aTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.aTokenAddress,
-              aRewardToken,
-              address(aTokenIncentiveController),
-              IERC20Detailed(aRewardToken).decimals(),
-              aTokenIncentiveController.PRECISION()
-            );
-          }
+          (
+            rewardInformation.tokenIncentivesIndex,
+            rewardInformation.emissionPerSecond,
+            rewardInformation.incentivesLastUpdateTimestamp,
+            rewardInformation.emissionEndTimestamp
+          ) = aTokenIncentiveController.getRewardsData(
+            baseData.aTokenAddress,
+            rewardInformation.rewardTokenAddress
+          );
+
+          rewardInformation.precision = aTokenIncentiveController.getAssetDecimals(baseData.aTokenAddress);
+          rewardInformation.rewardTokenDecimals = IERC20Detailed(
+            rewardInformation.rewardTokenAddress
+          ).decimals();
+          rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress)
+            .symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          rewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(
+            rewardInformation.rewardTokenAddress
+          );
+          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).decimals();
+          rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).latestAnswer();
+
+          aRewardsInformation[j] = rewardInformation;
         }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {
-        // Will not get here
       }
 
-      try IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController sTokenIncentiveController
-      ) {
-        if (address(sTokenIncentiveController) != address(0)) {
-          address sRewardToken = sTokenIncentiveController.REWARD_TOKEN();
-          try sTokenIncentiveController.getAssetData(baseData.stableDebtTokenAddress) returns (
-            uint256 sTokenIncentivesIndex,
-            uint256 sEmissionPerSecond,
-            uint256 sIncentivesLastUpdateTimestamp
-          ) {
-            reserveIncentiveData.sIncentiveData = IncentiveData(
-              sEmissionPerSecond,
-              sIncentivesLastUpdateTimestamp,
-              sTokenIncentivesIndex,
-              sTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.stableDebtTokenAddress,
-              sRewardToken,
-              address(sTokenIncentiveController),
-              IERC20Detailed(sRewardToken).decimals(),
-              sTokenIncentiveController.PRECISION()
-            );
-          } catch (
-            bytes memory /*lowLevelData*/
-          ) {
-            (
-              uint256 sEmissionPerSecond,
-              uint256 sIncentivesLastUpdateTimestamp,
-              uint256 sTokenIncentivesIndex
-            ) = sTokenIncentiveController.assets(baseData.stableDebtTokenAddress);
+      reserveIncentiveData.aIncentiveData = IncentiveData(
+        baseData.aTokenAddress,
+        address(aTokenIncentiveController),
+        aRewardsInformation
+      );
 
-            reserveIncentiveData.sIncentiveData = IncentiveData(
-              sEmissionPerSecond,
-              sIncentivesLastUpdateTimestamp,
-              sTokenIncentivesIndex,
-              sTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.stableDebtTokenAddress,
-              sRewardToken,
-              address(sTokenIncentiveController),
-              IERC20Detailed(sRewardToken).decimals(),
-              sTokenIncentiveController.PRECISION()
-            );
-          }
+      // Get vTokens rewards information
+      IAaveIncentivesControllerV2 vTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController())
+      );
+      address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(
+        baseData.variableDebtTokenAddress
+      );
+      RewardInfo[] memory vRewardsInformation;
+
+      if (address(vTokenIncentiveController) != address(0)) {
+        vRewardsInformation = new RewardInfo[](vTokenRewardAddresses.length);
+        for (uint256 j = 0; j < vTokenRewardAddresses.length; ++j) {
+          RewardInfo memory rewardInformation;
+          rewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
+
+          (
+            rewardInformation.tokenIncentivesIndex,
+            rewardInformation.emissionPerSecond,
+            rewardInformation.incentivesLastUpdateTimestamp,
+            rewardInformation.emissionEndTimestamp
+          ) = vTokenIncentiveController.getRewardsData(
+            baseData.variableDebtTokenAddress,
+            rewardInformation.rewardTokenAddress
+          );
+
+          rewardInformation.precision = vTokenIncentiveController.getAssetDecimals(baseData.variableDebtTokenAddress);
+          rewardInformation.rewardTokenDecimals = IERC20Detailed(
+            rewardInformation.rewardTokenAddress
+          ).decimals();
+          rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress)
+            .symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          rewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(
+            rewardInformation.rewardTokenAddress
+          );
+          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).decimals();
+          rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).latestAnswer();
+
+          vRewardsInformation[j] = rewardInformation;
         }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {
-        // Will not get here
       }
 
-      try IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController vTokenIncentiveController
-      ) {
-        if (address(vTokenIncentiveController) != address(0)) {
-          address vRewardToken = vTokenIncentiveController.REWARD_TOKEN();
+      reserveIncentiveData.vIncentiveData = IncentiveData(
+        baseData.variableDebtTokenAddress,
+        address(vTokenIncentiveController),
+        vRewardsInformation
+      );
 
-          try vTokenIncentiveController.getAssetData(baseData.variableDebtTokenAddress) returns (
-            uint256 vTokenIncentivesIndex,
-            uint256 vEmissionPerSecond,
-            uint256 vIncentivesLastUpdateTimestamp
-          ) {
-            reserveIncentiveData.vIncentiveData = IncentiveData(
-              vEmissionPerSecond,
-              vIncentivesLastUpdateTimestamp,
-              vTokenIncentivesIndex,
-              vTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.variableDebtTokenAddress,
-              vRewardToken,
-              address(vTokenIncentiveController),
-              IERC20Detailed(vRewardToken).decimals(),
-              vTokenIncentiveController.PRECISION()
-            );
-          } catch (
-            bytes memory /*lowLevelData*/
-          ) {
-            (
-              uint256 vEmissionPerSecond,
-              uint256 vIncentivesLastUpdateTimestamp,
-              uint256 vTokenIncentivesIndex
-            ) = vTokenIncentiveController.assets(baseData.variableDebtTokenAddress);
+      // Get sTokens rewards information
+      IAaveIncentivesControllerV2 sTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController())
+      );
+      address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(
+        baseData.stableDebtTokenAddress
+      );
+      RewardInfo[] memory sRewardsInformation;
 
-            reserveIncentiveData.vIncentiveData = IncentiveData(
-              vEmissionPerSecond,
-              vIncentivesLastUpdateTimestamp,
-              vTokenIncentivesIndex,
-              vTokenIncentiveController.DISTRIBUTION_END(),
-              baseData.variableDebtTokenAddress,
-              vRewardToken,
-              address(vTokenIncentiveController),
-              IERC20Detailed(vRewardToken).decimals(),
-              vTokenIncentiveController.PRECISION()
-            );
-          }
+      if (address(sTokenIncentiveController) != address(0)) {
+        sRewardsInformation = new RewardInfo[](sTokenRewardAddresses.length);
+        for (uint256 j = 0; j < sTokenRewardAddresses.length; ++j) {
+          RewardInfo memory rewardInformation;
+          rewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
+
+          (
+            rewardInformation.tokenIncentivesIndex,
+            rewardInformation.emissionPerSecond,
+            rewardInformation.incentivesLastUpdateTimestamp,
+            rewardInformation.emissionEndTimestamp
+          ) = sTokenIncentiveController.getRewardsData(
+            baseData.stableDebtTokenAddress,
+            rewardInformation.rewardTokenAddress
+          );
+
+          rewardInformation.precision = sTokenIncentiveController.getAssetDecimals(baseData.stableDebtTokenAddress);
+          rewardInformation.rewardTokenDecimals = IERC20Detailed(
+            rewardInformation.rewardTokenAddress
+          ).decimals();
+          rewardInformation.rewardTokenSymbol = IERC20Detailed(rewardInformation.rewardTokenAddress)
+            .symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          rewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(
+            rewardInformation.rewardTokenAddress
+          );
+          rewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).decimals();
+          rewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            rewardInformation.rewardOracleAddress
+          ).latestAnswer();
+
+          sRewardsInformation[j] = rewardInformation;
         }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {
-        // Will not get here
       }
+
+      reserveIncentiveData.sIncentiveData = IncentiveData(
+        baseData.stableDebtTokenAddress,
+        address(sTokenIncentiveController),
+        sRewardsInformation
+      );
     }
+
     return (reservesIncentiveData);
   }
 
@@ -228,77 +241,163 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProvider {
       // user reserve data
       userReservesIncentivesData[i].underlyingAsset = reserves[i];
 
-      IUiIncentiveDataProvider.UserIncentiveData memory aUserIncentiveData;
+      IAaveIncentivesControllerV2 aTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.aTokenAddress).getIncentivesController())
+      );
+      if (address(aTokenIncentiveController) != address(0)) {
+        // get all rewards information from the asset
+        address[] memory aTokenRewardAddresses = aTokenIncentiveController.getRewardsByAsset(
+          baseData.aTokenAddress
+        );
+        UserRewardInfo[] memory aUserRewardsInformation = new UserRewardInfo[](
+          aTokenRewardAddresses.length
+        );
+        for (uint256 j = 0; j < aTokenRewardAddresses.length; ++j) {
+          UserRewardInfo memory userRewardInformation;
+          userRewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
-      try IncentivizedERC20(baseData.aTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController aTokenIncentiveController
-      ) {
-        if (address(aTokenIncentiveController) != address(0)) {
-          address aRewardToken = aTokenIncentiveController.REWARD_TOKEN();
-          aUserIncentiveData.tokenincentivesUserIndex = aTokenIncentiveController.getUserAssetData(
-            user,
-            baseData.aTokenAddress
+          userRewardInformation.tokenIncentivesUserIndex = aTokenIncentiveController
+            .getUserAssetData(
+              user,
+              baseData.aTokenAddress,
+              userRewardInformation.rewardTokenAddress
+            );
+
+          userRewardInformation.userUnclaimedRewards = aTokenIncentiveController
+            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+          userRewardInformation.rewardTokenDecimals = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).decimals();
+          userRewardInformation.rewardTokenSymbol = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = aTokenIncentiveController.getRewardOracle(
+            userRewardInformation.rewardTokenAddress
           );
-          aUserIncentiveData.userUnclaimedRewards = aTokenIncentiveController
-            .getUserUnclaimedRewards(user);
-          aUserIncentiveData.tokenAddress = baseData.aTokenAddress;
-          aUserIncentiveData.rewardTokenAddress = aRewardToken;
-          aUserIncentiveData.incentiveControllerAddress = address(aTokenIncentiveController);
-          aUserIncentiveData.rewardTokenDecimals = IERC20Detailed(aRewardToken).decimals();
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).decimals();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).latestAnswer();
+
+          aUserRewardsInformation[j] = userRewardInformation;
         }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {}
 
-      userReservesIncentivesData[i].aTokenIncentivesUserData = aUserIncentiveData;
+        userReservesIncentivesData[i].aTokenIncentivesUserData = UserIncentiveData(
+          baseData.aTokenAddress,
+          address(aTokenIncentiveController),
+          aUserRewardsInformation
+        );
+      }
 
-      UserIncentiveData memory vUserIncentiveData;
+      // variable debt token
+      IAaveIncentivesControllerV2 vTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController())
+      );
+      if (address(vTokenIncentiveController) != address(0)) {
+        // get all rewards information from the asset
+        address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(
+          baseData.variableDebtTokenAddress
+        );
+        UserRewardInfo[] memory vUserRewardsInformation = new UserRewardInfo[](
+          vTokenRewardAddresses.length
+        );
+        for (uint256 j = 0; j < vTokenRewardAddresses.length; ++j) {
+          UserRewardInfo memory userRewardInformation;
+          userRewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
 
-      try IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController vTokenIncentiveController
-      ) {
-        if (address(vTokenIncentiveController) != address(0)) {
-          address vRewardToken = vTokenIncentiveController.REWARD_TOKEN();
-          vUserIncentiveData.tokenincentivesUserIndex = vTokenIncentiveController.getUserAssetData(
-            user,
-            baseData.variableDebtTokenAddress
+          userRewardInformation.tokenIncentivesUserIndex = vTokenIncentiveController
+            .getUserAssetData(
+              user,
+              baseData.variableDebtTokenAddress,
+              userRewardInformation.rewardTokenAddress
+            );
+
+          userRewardInformation.userUnclaimedRewards = vTokenIncentiveController
+            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+          userRewardInformation.rewardTokenDecimals = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).decimals();
+          userRewardInformation.rewardTokenSymbol = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = vTokenIncentiveController.getRewardOracle(
+            userRewardInformation.rewardTokenAddress
           );
-          vUserIncentiveData.userUnclaimedRewards = vTokenIncentiveController
-            .getUserUnclaimedRewards(user);
-          vUserIncentiveData.tokenAddress = baseData.variableDebtTokenAddress;
-          vUserIncentiveData.rewardTokenAddress = vRewardToken;
-          vUserIncentiveData.incentiveControllerAddress = address(vTokenIncentiveController);
-          vUserIncentiveData.rewardTokenDecimals = IERC20Detailed(vRewardToken).decimals();
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).decimals();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).latestAnswer();
+
+          vUserRewardsInformation[j] = userRewardInformation;
         }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {}
 
-      userReservesIncentivesData[i].vTokenIncentivesUserData = vUserIncentiveData;
+        userReservesIncentivesData[i].vTokenIncentivesUserData = UserIncentiveData(
+          baseData.variableDebtTokenAddress,
+          address(aTokenIncentiveController),
+          vUserRewardsInformation
+        );
+      }
 
-      UserIncentiveData memory sUserIncentiveData;
+      // stable debt toekn
+      IAaveIncentivesControllerV2 sTokenIncentiveController = IAaveIncentivesControllerV2(
+        address(IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController())
+      );
+      if (address(sTokenIncentiveController) != address(0)) {
+        // get all rewards information from the asset
+        address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(
+          baseData.stableDebtTokenAddress
+        );
+        UserRewardInfo[] memory sUserRewardsInformation = new UserRewardInfo[](
+          sTokenRewardAddresses.length
+        );
+        for (uint256 j = 0; j < sTokenRewardAddresses.length; ++j) {
+          UserRewardInfo memory userRewardInformation;
+          userRewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
 
-      try IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController() returns (
-        IAaveIncentivesController sTokenIncentiveController
-      ) {
-        if (address(sTokenIncentiveController) != address(0)) {
-          address sRewardToken = sTokenIncentiveController.REWARD_TOKEN();
-          sUserIncentiveData.tokenincentivesUserIndex = sTokenIncentiveController.getUserAssetData(
-            user,
-            baseData.stableDebtTokenAddress
+          userRewardInformation.tokenIncentivesUserIndex = sTokenIncentiveController
+            .getUserAssetData(
+              user,
+              baseData.stableDebtTokenAddress,
+              userRewardInformation.rewardTokenAddress
+            );
+
+          userRewardInformation.userUnclaimedRewards = sTokenIncentiveController
+            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+          userRewardInformation.rewardTokenDecimals = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).decimals();
+          userRewardInformation.rewardTokenSymbol = IERC20Detailed(
+            userRewardInformation.rewardTokenAddress
+          ).symbol();
+
+          // Get price of reward token from Chainlink Proxy Oracle
+          userRewardInformation.rewardOracleAddress = sTokenIncentiveController.getRewardOracle(
+            userRewardInformation.rewardTokenAddress
           );
-          sUserIncentiveData.userUnclaimedRewards = sTokenIncentiveController
-            .getUserUnclaimedRewards(user);
-          sUserIncentiveData.tokenAddress = baseData.stableDebtTokenAddress;
-          sUserIncentiveData.rewardTokenAddress = sRewardToken;
-          sUserIncentiveData.incentiveControllerAddress = address(sTokenIncentiveController);
-          sUserIncentiveData.rewardTokenDecimals = IERC20Detailed(sRewardToken).decimals();
-        }
-      } catch (
-        bytes memory /*lowLevelData*/
-      ) {}
+          userRewardInformation.priceFeedDecimals = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).decimals();
+          userRewardInformation.rewardPriceFeed = IEACAggregatorProxy(
+            userRewardInformation.rewardOracleAddress
+          ).latestAnswer();
 
-      userReservesIncentivesData[i].sTokenIncentivesUserData = sUserIncentiveData;
+          sUserRewardsInformation[j] = userRewardInformation;
+        }
+
+        userReservesIncentivesData[i].sTokenIncentivesUserData = UserIncentiveData(
+          baseData.stableDebtTokenAddress,
+          address(aTokenIncentiveController),
+          sUserRewardsInformation
+        );
+      }
     }
 
     return (userReservesIncentivesData);

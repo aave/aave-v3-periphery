@@ -1,12 +1,14 @@
+const { expect } = require('chai');
+import { makeSuite } from '../helpers/make-suite';
+import { BigNumber } from 'ethers';
 import {
+  waitForTx,
   getBlockTimestamp,
   increaseTime,
-  waitForTx,
   MAX_UINT_AMOUNT,
   advanceTimeAndBlock,
 } from '@aave/deploy-v3';
-import { BigNumber } from 'ethers';
-import { makeSuite } from '../helpers/make-suite';
+import { RANDOM_ADDRESSES } from '../helpers/constants';
 import { comparatorEngine } from './helpers/comparator-engine';
 import {
   assetDataComparator,
@@ -16,12 +18,12 @@ import {
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
 import hre from 'hardhat';
 
-const { expect } = require('chai');
-
 type ScenarioAction = {
   caseName: string;
   emissionPerSecond?: string;
   amountToClaim: string;
+  to?: string;
+  toStake?: boolean;
 };
 
 const getRewardsBalanceScenarios: ScenarioAction[] = [
@@ -37,25 +39,38 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   },
   {
     caseName: 'Accrued rewards are not 0',
-    emissionPerSecond: '2432424',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '10',
   },
   {
     caseName: 'Should allow -1',
-    emissionPerSecond: '2432424',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: MAX_UINT_AMOUNT,
   },
   {
     caseName: 'Should withdraw everything if amountToClaim more then rewards balance',
-    emissionPerSecond: '100',
+    emissionPerSecond: '317097919837645865',
     amountToClaim: '1034',
+  },
+  {
+    caseName: 'Should withdraw to another user',
+    emissionPerSecond: '317097919837645865',
+    amountToClaim: '1034',
+    to: RANDOM_ADDRESSES[5],
+  },
+  {
+    caseName: 'Should withdraw to another user and stake',
+    emissionPerSecond: '317097919837645865',
+    amountToClaim: '1034',
+    to: RANDOM_ADDRESSES[5],
   },
 ];
 
-makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => {
   for (const {
     caseName,
     amountToClaim: _amountToClaim,
+    to,
     emissionPerSecond,
   } of getRewardsBalanceScenarios) {
     let amountToClaim = _amountToClaim;
@@ -64,37 +79,38 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const timePerTest = 31536000;
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
       await advanceTimeAndBlock(timePerTest);
-      const { incentivesControllerV2, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
+      const { incentivesControllerV2, stakedAave, aEursMockV2, stakedTokenStrategy } = testEnv;
 
       const userAddress = await incentivesControllerV2.signer.getAddress();
 
-      const underlyingAsset = aDaiMockV2.address;
+      const underlyingAsset = aEursMockV2.address;
       const stakedByUser = 22 * caseName.length;
       const totalSupply = 33 * caseName.length;
       const reward = stakedAave.address;
 
-      await aDaiMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
+      await aEursMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
 
       // update emissionPerSecond in advance to not affect user calculations
       if (emissionPerSecond) {
         await waitForTx(
           await incentivesControllerV2.configureAssets([
             {
-              asset: aDaiMockV2.address,
-              emissionPerSecond,
-              totalSupply,
+              asset: underlyingAsset,
               reward,
               rewardOracle: testEnv.aavePriceAggregator,
+              emissionPerSecond,
               distributionEnd,
+              totalSupply,
               transferStrategy: stakedTokenStrategy.address,
             },
           ])
         );
       }
-      const destinationAddress = userAddress;
+
+      const destinationAddress = to || userAddress;
 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
-      await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
+      await aEursMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
       const unclaimedRewardsBefore = await incentivesControllerV2.getUserRewardsBalance(
         [underlyingAsset],
@@ -116,9 +132,10 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         await getRewardsData(incentivesControllerV2, [underlyingAsset], [reward])
       )[0];
 
-      const action = await incentivesControllerV2.claimRewardsToSelf(
+      const action = await incentivesControllerV2.claimRewards(
         [underlyingAsset],
         amountToClaim,
+        destinationAddress,
         reward
       );
       const claimRewardsReceipt = await waitForTx(action);
@@ -152,10 +169,10 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
 
       // Only calculate expected accrued rewards if unclaimedRewards is below the amount to claim due gas optimization
       const expectedAccruedRewards = unclaimedRewardsStorageBefore.lt(amountToClaim)
-        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore).toString()
+        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore, 2).toString()
         : '0';
 
-      await aDaiMockV2.cleanUserState();
+      await aEursMockV2.cleanUserState();
 
       if (amountToClaim === '0') {
         // state should not change
@@ -192,7 +209,8 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
           ? Number(assetDataBefore.lastUpdateTimestamp.toString())
           : actionBlockTimestamp,
         distributionEnd,
-        {}
+        {},
+        2
       );
       expect(userIndexAfter.toString()).to.be.equal(
         unclaimedRewardsStorageBefore.gte(amountToClaim)

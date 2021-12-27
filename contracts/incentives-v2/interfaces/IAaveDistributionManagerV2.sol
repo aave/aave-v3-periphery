@@ -118,8 +118,9 @@ interface IAaveDistributionManagerV2 {
     returns (address[] memory, uint256[] memory);
 
   /**
-   * @dev Returns the precision to calculate the distribution delta
-   * @return The precision of the calculation
+   * @dev Returns the decimals of an asset to calculate the distribution delta
+   * @param asset The address to retrieve decimals saved at storage
+   * @return The decimals of an underlying asset
    */
-  function PRECISION() external view returns (uint8);
+  function getAssetDecimals(address asset) external view returns (uint8);
 }

@@ -7,6 +7,7 @@ import {
   increaseTime,
   MAX_UINT_AMOUNT,
   ERC20__factory,
+  advanceTimeAndBlock,
 } from '@aave/deploy-v3';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import {
@@ -15,9 +16,10 @@ import {
   getRewardsData,
 } from './helpers/DistributionManagerV2/data-helpers/asset-data';
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
-import { parseEther } from '@ethersproject/units';
+import { parseEther, parseUnits } from '@ethersproject/units';
 import Bluebird from 'bluebird';
 import { ATokenMock__factory } from '../../types';
+import hre from 'hardhat';
 
 type ScenarioAction = {
   caseName: string;
@@ -30,55 +32,55 @@ type ScenarioAction = {
 const getRewardsBalanceScenarios: ScenarioAction[] = [
   {
     caseName: 'Accrued rewards are 0',
-    emissionsPerSecond: ['0', '0', '0'],
-    zeroBalance: [false, false, false],
+    emissionsPerSecond: ['0', '0', '0', '0'],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Accrued rewards are not 0',
-    emissionsPerSecond: ['2432424', '4432424', '1234'],
-    zeroBalance: [false, false, false],
+    emissionsPerSecond: ['2432424', '4432424', '1234', '124231210000'],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Some rewards are not 0',
-    emissionsPerSecond: ['2432424', '0', '1234'],
-    zeroBalance: [false, false, false],
+    emissionsPerSecond: ['2432424', '0', '1234', '1242312100000'],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Some rewards are not 0',
-    emissionsPerSecond: ['0', '2432424', '1234'],
-    zeroBalance: [false, false, false],
+    emissionsPerSecond: ['0', '2432424', '1234', '1242312100000'],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Some user balances are not 0',
-    emissionsPerSecond: ['13412', '2432424', '0'],
-    zeroBalance: [false, true, true],
+    emissionsPerSecond: ['13412', '2432424', '0', '12423121000000'],
+    zeroBalance: [false, true, true, true],
   },
   {
     caseName: 'Some user balances are not 0',
-    emissionsPerSecond: ['13412', '2432424', '0'],
-    zeroBalance: [true, false, true],
+    emissionsPerSecond: ['13412', '2432424', '0', '12423121000000'],
+    zeroBalance: [true, false, true, true],
   },
   {
     caseName: 'Should withdraw to another user',
-    emissionsPerSecond: ['2314', '3331', '421512'],
+    emissionsPerSecond: ['2314', '3331', '421512', '42152'],
     to: RANDOM_ADDRESSES[5],
-    zeroBalance: [false, false, false],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Should withdraw to another user',
-    emissionsPerSecond: ['2314', '3331', '421512'],
+    emissionsPerSecond: ['2314', '3331', '421512', '2123'],
     to: RANDOM_ADDRESSES[3],
-    zeroBalance: [false, false, false],
+    zeroBalance: [false, false, false, false],
   },
   {
     caseName: 'Should not claim due emissions are zero',
-    emissionsPerSecond: ['0', '0', '0'],
+    emissionsPerSecond: ['0', '0', '0', '0'],
     to: RANDOM_ADDRESSES[3],
-    zeroBalance: [false, false, false],
+    zeroBalance: [false, false, false, false],
   },
 ];
 
-makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
   before(async () => {
     const { rewardTokens, rewardsVault, pullRewardsStrategy } = testEnv;
     const rewards = rewardTokens.slice(0, 4);
@@ -90,30 +92,43 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         .approve(pullRewardsStrategy.address, MAX_UINT_AMOUNT);
     });
   });
-  for (const { caseName, to, emissionsPerSecond, zeroBalance } of getRewardsBalanceScenarios) {
+  for (const [
+    caseIndex,
+    { caseName, to, emissionsPerSecond, zeroBalance },
+  ] of getRewardsBalanceScenarios.entries()) {
     it(caseName, async () => {
-      await increaseTime(100);
+      const { timestamp } = await hre.ethers.provider.getBlock('latest');
+      const timePerTest = 31536000;
+      const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
+      await advanceTimeAndBlock(timePerTest);
       const {
         incentivesControllerV2,
         aDaiMockV2,
         aAaveMockV2,
         aWethMockV2,
+        aEursMockV2,
         pullRewardsStrategy,
-        distributionEnd,
         rewardTokens,
         deployer,
       } = testEnv;
 
       const userAddress = await incentivesControllerV2.signer.getAddress();
 
-      const assets = [aDaiMockV2, aAaveMockV2, aWethMockV2].map(({ address }) => address);
+      const assets = [aDaiMockV2, aAaveMockV2, aWethMockV2, aEursMockV2].map(
+        ({ address }) => address
+      );
+
       const stakedByUser = assets.map((_, index) =>
         zeroBalance[index]
           ? BigNumber.from('0')
-          : BigNumber.from(parseEther('20000')).mul(caseName.length).mul(index)
+          : BigNumber.from(parseUnits('10000', index > 2 ? 2 : 18))
+              .mul(index)
+              .mul(caseIndex)
       );
       const totalSupply = assets.map((_, index) =>
-        BigNumber.from(parseEther('100000')).mul(caseName.length).mul(index)
+        BigNumber.from(parseUnits('10000', index > 2 ? 2 : 18))
+          .mul(index)
+          .mul(caseIndex)
       );
       const rewards = rewardTokens.slice(0, 4).map(({ address }) => address);
 
@@ -125,7 +140,6 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       });
 
       // update emissionPerSecond in advance to not affect user calculations
-
       await waitForTx(
         await incentivesControllerV2.configureAssets(
           emissionsPerSecond.map((emissionPerSecond, index) => ({
@@ -203,14 +217,12 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const claimedAmounts = await Bluebird.map(destinationAddressBalanceAfter, (balance, index) =>
         balance.sub(destinationAddressBalanceBefore[index])
       );
-
-      await aDaiMockV2.cleanUserState();
-
       const expectedAccruedRewards = await Bluebird.map(rewards, (_, index) =>
         getRewards(
           stakedByUser[index],
           userIndexesAfter[index],
-          userIndexesBefore[index]
+          userIndexesBefore[index],
+          index > 2 ? 2 : 18
         ).toString()
       );
 
@@ -221,7 +233,8 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
           assetDataAfter[i],
           actionBlockTimestamp,
           distributionEnd,
-          {}
+          {},
+          i > 2 ? 2 : 18
         );
 
         expect(userIndexesAfter[i].toString()).to.be.equal(

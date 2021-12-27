@@ -4,9 +4,9 @@ import { BigNumber } from 'ethers';
 import {
   waitForTx,
   getBlockTimestamp,
-  increaseTime,
   MAX_UINT_AMOUNT,
   ERC20__factory,
+  advanceTimeAndBlock,
 } from '@aave/deploy-v3';
 import {
   assetDataComparator,
@@ -17,6 +17,7 @@ import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset
 import { parseEther } from '@ethersproject/units';
 import Bluebird from 'bluebird';
 import { ATokenMock__factory } from '../../types';
+import hre from 'hardhat';
 
 type ScenarioAction = {
   caseName: string;
@@ -73,10 +74,10 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
   },
 ];
 
-makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
+makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
   before(async () => {
     const { rewardTokens, rewardsVault, pullRewardsStrategy } = testEnv;
-    const rewards = rewardTokens.slice(0, 4);
+    const rewards = rewardTokens.slice(0, 3);
 
     await Bluebird.each(rewards, async (reward, index) => {
       await reward.connect(rewardsVault.signer)['mint(uint256)'](parseEther('1000000000'));
@@ -87,14 +88,16 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
   });
   for (const { caseName, emissionsPerSecond, zeroBalance } of getRewardsBalanceScenarios) {
     it(caseName, async () => {
-      await increaseTime(100);
+      const { timestamp } = await hre.ethers.provider.getBlock('latest');
+      const timePerTest = 31536000;
+      const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
+      await advanceTimeAndBlock(timePerTest);
       const {
         incentivesControllerV2,
         aDaiMockV2,
         aAaveMockV2,
         aWethMockV2,
         pullRewardsStrategy,
-        distributionEnd,
         rewardTokens,
         deployer,
       } = testEnv;
@@ -110,7 +113,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const totalSupply = assets.map((_, index) =>
         BigNumber.from(parseEther('100000')).mul(caseName.length).mul(index)
       );
-      const rewards = rewardTokens.slice(0, 4).map(({ address }) => address);
+      const rewards = rewardTokens.slice(0, 3).map(({ address }) => address);
 
       await Bluebird.each(assets, async (asset, index) => {
         await ATokenMock__factory.connect(asset, deployer.signer).setUserBalanceAndSupply(

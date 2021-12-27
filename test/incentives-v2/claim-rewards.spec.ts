@@ -1,7 +1,13 @@
 const { expect } = require('chai');
 import { makeSuite } from '../helpers/make-suite';
 import { BigNumber } from 'ethers';
-import { waitForTx, getBlockTimestamp, increaseTime, MAX_UINT_AMOUNT } from '@aave/deploy-v3';
+import {
+  waitForTx,
+  getBlockTimestamp,
+  increaseTime,
+  MAX_UINT_AMOUNT,
+  advanceTimeAndBlock,
+} from '@aave/deploy-v3';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import { comparatorEngine } from './helpers/comparator-engine';
 import {
@@ -10,6 +16,7 @@ import {
   getRewardsData,
 } from './helpers/DistributionManagerV2/data-helpers/asset-data';
 import { getUserIndex } from './helpers/DistributionManagerV2/data-helpers/asset-user-data';
+import hre from 'hardhat';
 
 type ScenarioAction = {
   caseName: string;
@@ -68,14 +75,11 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
   } of getRewardsBalanceScenarios) {
     let amountToClaim = _amountToClaim;
     it(caseName, async () => {
-      await increaseTime(100);
-      const {
-        incentivesControllerV2,
-        stakedAave,
-        aDaiMockV2,
-        stakedTokenStrategy,
-        distributionEnd,
-      } = testEnv;
+      const { timestamp } = await hre.ethers.provider.getBlock('latest');
+      const timePerTest = 31536000;
+      const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
+      await advanceTimeAndBlock(timePerTest);
+      const { incentivesControllerV2, stakedAave, aDaiMockV2, stakedTokenStrategy } = testEnv;
 
       const userAddress = await incentivesControllerV2.signer.getAddress();
 

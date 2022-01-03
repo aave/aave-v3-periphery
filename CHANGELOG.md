@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.9.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.8.0...v1.9.0) (2021-12-27)
+
+
+### Features
+
+* rename IncentivesControllerV2 to RewardsController ([2a7fcbf](https://www.github.com/aave/aave-v3-periphery/commit/2a7fcbf1bb967fb9b815ddb84e14a13336089820))
+* use GPv2SafeERC20 instead of SafeERC20. ([bbd6131](https://www.github.com/aave/aave-v3-periphery/commit/bbd6131644465be00f209f43b0b9c2d11d2279eb))
+
+
+### Bug Fixes
+
+* package-lock ([0f1819a](https://www.github.com/aave/aave-v3-periphery/commit/0f1819a9c68f54ac00f1a8c268337cda4b5026ab))
+
 ## [1.8.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.7.0...v1.8.0) (2021-12-27)
 
 

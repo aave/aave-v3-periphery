@@ -6,7 +6,7 @@ The Rewards Controller and Rewards Distributor contracts are aimed to bootstrap 
 
 The `RewardsController` contract is responsible of configuring the different rewards and the claim process. Inherits `RewardsDistributor`.
 
-The `Transfer Strategies` are small implementation contracts that manages the procedure of the rewards transfer at claim. This allows the RewardsController to support any custom rewards, from Staked Aave incentives, common ERC20 transfers from vaults, or even NFT rewards.
+The `Transfer Strategies` are isolated contracts that manages the procedure of the rewards transfer at claim. This allows the RewardsController to support any custom rewards, from Staked Aave incentives, common ERC20 transfers from vaults, or even NFT rewards.
 
 The `RewardsDistributor` abstract contract manages the distribution and accountability logic of the multiple rewards per asset over time.
 

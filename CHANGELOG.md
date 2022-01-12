@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.9.1...v1.10.0) (2022-01-12)
+
+
+### Features
+
+* support @aave/core-v3@1.10.0 ([5426eab](https://www.github.com/aave/aave-v3-periphery/commit/5426eabd0300a0794f321e9817e6256f82939933))
+
 ### [1.9.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.9.0...v1.9.1) (2022-01-07)
 
 

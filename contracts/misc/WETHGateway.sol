@@ -9,8 +9,8 @@ import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
-import {Helpers} from '@aave/core-v3/contracts/protocol/libraries/helpers/Helpers.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {DataTypesHelper} from '../libraries/DataTypesHelper.sol';
 
 contract WETHGateway is IWETHGateway, Ownable {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -84,16 +84,15 @@ contract WETHGateway is IWETHGateway, Ownable {
     uint256 rateMode,
     address onBehalfOf
   ) external payable override {
-    (uint256 stableDebt, uint256 variableDebt) =
-      Helpers.getUserCurrentDebtMemory(
-        onBehalfOf,
-        IPool(pool).getReserveData(address(WETH))
-      );
+    (uint256 stableDebt, uint256 variableDebt) = DataTypesHelper.getUserCurrentDebt(
+      onBehalfOf,
+      IPool(pool).getReserveData(address(WETH))
+    );
 
-    uint256 paybackAmount =
-      DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE
-        ? stableDebt
-        : variableDebt;
+    uint256 paybackAmount = DataTypes.InterestRateMode(rateMode) ==
+      DataTypes.InterestRateMode.STABLE
+      ? stableDebt
+      : variableDebt;
 
     if (amount < paybackAmount) {
       paybackAmount = amount;
@@ -119,13 +118,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     uint256 interesRateMode,
     uint16 referralCode
   ) external override {
-    IPool(pool).borrow(
-      address(WETH),
-      amount,
-      interesRateMode,
-      referralCode,
-      msg.sender
-    );
+    IPool(pool).borrow(address(WETH), amount, interesRateMode, referralCode, msg.sender);
     WETH.withdraw(amount);
     _safeTransferETH(msg.sender, amount);
   }

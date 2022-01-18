@@ -16,8 +16,8 @@ At `_updateUserRewardsInternal`, the function first updates a global index based
 >
 > ```
 > Emission Per Second * Time Delta * (10 ** Asset Decimals)
-> ----------------------------------------------------------
->            Total Balance + Current Asset Index
+> ----------------------------------------------------------  + Current Asset Index
+>                       Total Balance 
 > ```
 >
 > Where time delta is `current block timestamp - last update timestamp`.

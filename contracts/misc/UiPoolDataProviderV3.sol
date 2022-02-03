@@ -5,7 +5,7 @@ import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {IAaveOracle} from '@aave/core-v3/contracts/interfaces/IAaveOracle.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {IVariableDebtToken} from '@aave/core-v3/contracts/interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '@aave/core-v3/contracts/interfaces/IStableDebtToken.sol';
@@ -46,6 +46,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       uint256,
       uint256,
       uint256,
+      uint256,
       uint256
     )
   {
@@ -53,7 +54,8 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       interestRateStrategy.getVariableRateSlope1(),
       interestRateStrategy.getVariableRateSlope2(),
       interestRateStrategy.getStableRateSlope1(),
-      interestRateStrategy.getStableRateSlope2()
+      interestRateStrategy.getStableRateSlope2(),
+      interestRateStrategy.OPTIMAL_USAGE_RATIO()
     );
   }
 
@@ -76,7 +78,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       BaseCurrencyInfo memory
     )
   {
-    IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
+    IAaveOracle oracle = IAaveOracle(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
     AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(provider.getPoolDataProvider());
 
@@ -107,7 +109,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
       reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
-
+      reserveData.priceOracle = oracle.getSourceOfAsset(reserveData.underlyingAsset);
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
       );
@@ -154,7 +156,8 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
         reserveData.variableRateSlope1,
         reserveData.variableRateSlope2,
         reserveData.stableRateSlope1,
-        reserveData.stableRateSlope2
+        reserveData.stableRateSlope2,
+        reserveData.optimalUsageRatio
       ) = getInterestRateStrategySlopes(
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );

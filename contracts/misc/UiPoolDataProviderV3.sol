@@ -43,20 +43,19 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     internal
     view
     returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256
+      InterestRates memory
     )
   {
-    return (
-      interestRateStrategy.getVariableRateSlope1(),
-      interestRateStrategy.getVariableRateSlope2(),
-      interestRateStrategy.getStableRateSlope1(),
-      interestRateStrategy.getStableRateSlope2(),
-      interestRateStrategy.OPTIMAL_USAGE_RATIO()
-    );
+    InterestRates memory interestRates;
+    interestRates.variableRateSlope1 = interestRateStrategy.getVariableRateSlope1();
+    interestRates.variableRateSlope2 = interestRateStrategy.getVariableRateSlope2();
+    interestRates.stableRateSlope1 = interestRateStrategy.getStableRateSlope1();
+    interestRates.stableRateSlope2 = interestRateStrategy.getStableRateSlope2();
+    interestRates.baseStableBorrowRate = interestRateStrategy.getBaseStableBorrowRate();
+    interestRates.baseVariableBorrowRate = interestRateStrategy.getBaseVariableBorrowRate();
+    interestRates.optimalUsageRatio = interestRateStrategy.OPTIMAL_USAGE_RATIO();
+
+    return interestRates;
   }
 
   function getReservesList(IPoolAddressesProvider provider)
@@ -152,16 +151,18 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
         isPaused
       ) = reserveConfigurationMap.getFlags();
 
-      (
-        reserveData.variableRateSlope1,
-        reserveData.variableRateSlope2,
-        reserveData.stableRateSlope1,
-        reserveData.stableRateSlope2,
-        reserveData.optimalUsageRatio
-      ) = getInterestRateStrategySlopes(
+      InterestRates memory interestRates = getInterestRateStrategySlopes(
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
 
+      reserveData.variableRateSlope1 = interestRates.variableRateSlope1;
+      reserveData.variableRateSlope2 = interestRates.variableRateSlope2;
+      reserveData.stableRateSlope1 = interestRates.stableRateSlope1;
+      reserveData.stableRateSlope2 = interestRates.stableRateSlope2;
+      reserveData.baseStableBorrowRate = interestRates.baseStableBorrowRate;
+      reserveData.baseVariableBorrowRate = interestRates.baseVariableBorrowRate;
+      reserveData.optimalUsageRatio = interestRates.optimalUsageRatio;
+     
       // v3 only
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();

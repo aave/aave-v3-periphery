@@ -227,24 +227,30 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     if (amount == 0) {
       return 0;
     }
-    uint256 unclaimedRewards = _usersUnclaimedRewards[user][reward];
+    uint256 totalRewards;
 
-    if (amount > unclaimedRewards) {
-      _distributeRewards(user, _getUserStake(assets, user));
-      unclaimedRewards = _usersUnclaimedRewards[user][reward];
+    _distributeRewards(user, _getUserStake(assets, user));
+    for (uint256 i = 0; i < assets.length; i++) {
+      address asset = assets[i];
+      totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
+
+      if (totalRewards <= amount) {
+        _assets[asset].rewards[reward].usersData[user].accrued = 0;
+      } else {
+        uint256 difference = totalRewards - amount;
+        _assets[asset].rewards[reward].usersData[user].accrued -= uint128(difference);
+        break;
+      }
     }
 
-    if (unclaimedRewards == 0) {
+    if (totalRewards == 0) {
       return 0;
     }
 
-    uint256 amountToClaim = amount > unclaimedRewards ? unclaimedRewards : amount;
-    _usersUnclaimedRewards[user][reward] = unclaimedRewards - amountToClaim; // Safe due to the previous line
+    _transferRewards(to, reward, totalRewards);
+    emit RewardsClaimed(user, reward, to, claimer, totalRewards);
 
-    _transferRewards(to, reward, amountToClaim);
-    emit RewardsClaimed(user, reward, to, claimer, amountToClaim);
-
-    return amountToClaim;
+    return totalRewards;
   }
 
   /**
@@ -263,24 +269,28 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     address user,
     address to
   ) internal returns (address[] memory rewardsList, uint256[] memory claimedAmounts) {
-    _distributeRewards(user, _getUserStake(assets, user));
-
     rewardsList = new address[](_rewardsList.length);
     claimedAmounts = new uint256[](_rewardsList.length);
 
-    for (uint256 i = 0; i < _rewardsList.length; i++) {
-      address reward = _rewardsList[i];
-      uint256 rewardAmount = _usersUnclaimedRewards[user][reward];
+    _distributeRewards(user, _getUserStake(assets, user));
 
-      rewardsList[i] = reward;
-      claimedAmounts[i] = rewardAmount;
-
-      if (rewardAmount != 0) {
-        _usersUnclaimedRewards[user][reward] = 0;
-        _transferRewards(to, reward, rewardAmount);
-        emit RewardsClaimed(user, reward, to, claimer, rewardAmount);
+    for (uint256 i = 0; i < assets.length; i++) {
+      address asset = assets[i];
+      for (uint256 j = 0; j < rewardsList.length; j++) {
+        if (rewardsList[j] == address(0)) {
+          rewardsList[j] = _rewardsList[j];
+        }
+        uint256 rewardAmount = _assets[asset].rewards[rewardsList[j]].usersData[user].accrued;
+        if (rewardAmount != 0) {
+          claimedAmounts[j] += rewardAmount;
+          _assets[asset].rewards[rewardsList[j]].usersData[user].accrued = 0;
+        }
       }
     }
+     for (uint256 i = 0; i < rewardsList.length; i++) {
+        _transferRewards(to, rewardsList[i], claimedAmounts[i]);
+        emit RewardsClaimed(user, rewardsList[i], to, claimer, claimedAmounts[i]);
+      }
     return (rewardsList, claimedAmounts);
   }
 

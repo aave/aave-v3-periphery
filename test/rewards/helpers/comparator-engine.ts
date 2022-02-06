@@ -69,9 +69,11 @@ export async function comparatorEngine<Input extends object, State extends objec
     const logicOutput = logic(updateInput, stateBefore, stateAfter, actionBlockTimestamp);
     const equalTo = logicOutput instanceof Promise ? await logicOutput : logicOutput;
     // @ts-ignore
-    expect(stateAfter[fieldName].toString()).to.be.equal(
-      equalTo.toString(),
-      `${fieldName} are not correctly updated`
+    console.log("FieldName ", fieldName);
+    expect(stateAfter[fieldName]).to.be.closeTo(
+      equalTo,
+      2,
+      `${fieldName} are not correctly updated`,
     );
   }
 }

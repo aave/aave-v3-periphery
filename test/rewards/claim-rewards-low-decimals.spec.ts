@@ -213,19 +213,6 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         {},
         2
       );
-      console.log(`Total supply: ${totalSupply}`);
-      console.log(
-        `Asset data before:
-        ${assetDataBefore.index},
-        ${assetDataBefore.lastUpdateTimestamp},
-        ${assetDataBefore.emissionPerSecond}`
-      );
-      console.log(
-        `Asset data after :
-        ${assetDataAfter.index},
-        ${assetDataAfter.lastUpdateTimestamp},
-        ${assetDataAfter.emissionPerSecond}`
-      );
       expect(userIndexAfter.toString()).to.be.equal(
         assetDataAfter.index.toString(),
         'user index are not correctly updated'
@@ -251,9 +238,6 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         );
       } else {
         expectedClaimedAmount = BigNumber.from(amountToClaim);
-        console.log(`unclaimedRewardsStorageAfter: ${unclaimedRewardsStorageAfter}`);
-        console.log(`unclaimedRewardsCalc: ${unclaimedRewardsCalc}`);
-        console.log(`amountToClaim: ${amountToClaim}`);
         expect(unclaimedRewardsStorageAfter.toString()).to.be.equal(
           unclaimedRewardsCalc.sub(amountToClaim).toString(),
           'unclaimed rewards after are wrong'

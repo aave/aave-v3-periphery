@@ -168,9 +168,11 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       const claimedAmount = destinationAddressBalanceAfter.sub(destinationAddressBalanceBefore);
 
       // Only calculate expected accrued rewards if unclaimedRewards is below the amount to claim due gas optimization
-      const expectedAccruedRewards = unclaimedRewardsStorageBefore.lt(amountToClaim)
-        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore).toString()
-        : '0';
+      const expectedAccruedRewards = getRewards(
+        stakedByUser,
+        userIndexAfter,
+        userIndexBefore
+      ).toString();
 
       await aDaiMockV2.cleanUserState();
 
@@ -205,16 +207,12 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         { underlyingAsset, totalSupply },
         assetDataBefore,
         assetDataAfter,
-        unclaimedRewardsStorageBefore.gte(amountToClaim)
-          ? Number(assetDataBefore.lastUpdateTimestamp.toString())
-          : actionBlockTimestamp,
+        actionBlockTimestamp,
         distributionEnd,
         {}
       );
       expect(userIndexAfter.toString()).to.be.equal(
-        unclaimedRewardsStorageBefore.gte(amountToClaim)
-          ? userIndexBefore.toString()
-          : assetDataAfter.index.toString(),
+        assetDataAfter.index.toString(),
         'user index are not correctly updated'
       );
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {

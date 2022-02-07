@@ -140,7 +140,26 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     override
     returns (address[] memory rewardsList, uint256[] memory unclaimedAmounts)
   {
-    return _getAllUserRewards(user, _getUserStake(assets, user));
+    RewardsDistributorTypes.UserAssetStatsInput[] memory userState = _getUserStake(assets, user);
+    rewardsList = new address[](_rewardsList.length);
+    unclaimedAmounts = new uint256[](rewardsList.length);
+
+    // Add unrealized rewards from user to unclaimedRewards
+    for (uint256 i = 0; i < userState.length; i++) {
+      for (uint256 r = 0; r < rewardsList.length; r++) {
+        rewardsList[r] = _rewardsList[r];
+        unclaimedAmounts[r] += _assets[userState[i].underlyingAsset]
+          .rewards[rewardsList[r]]
+          .usersData[user]
+          .accrued;
+
+        if (userState[i].userBalance == 0) {
+          continue;
+        }
+        unclaimedAmounts[r] += _getUnrealizedRewardsFromStake(user, rewardsList[r], userState[i]);
+      }
+    }
+    return (rewardsList, unclaimedAmounts);
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -379,37 +398,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     }
 
     return unclaimedRewards;
-  }
-
-  /**
-   * @dev Return the accrued rewards for an user over a list of distribution
-   * @param user The address of the user
-   * @param userState List of structs of the user data related with his stake
-   * @return rewardsList List of reward token addresses
-   * @return unclaimedRewards List of unclaimed + unrealized rewards, order matches "rewardsList" items
-   **/
-  function _getAllUserRewards(
-    address user,
-    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
-  ) internal view returns (address[] memory rewardsList, uint256[] memory unclaimedRewards) {
-    rewardsList = new address[](_rewardsList.length);
-    unclaimedRewards = new uint256[](rewardsList.length);
-
-    // Add unrealized rewards from user to unclaimedRewards
-    for (uint256 i = 0; i < userState.length; i++) {
-      if (userState[i].userBalance == 0) {
-        continue;
-      }
-      for (uint256 r = 0; r < rewardsList.length; r++) {
-        rewardsList[r] = _rewardsList[r];
-        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, rewardsList[r], userState[i]);
-        unclaimedRewards[r] += _assets[userState[i].underlyingAsset]
-          .rewards[rewardsList[r]]
-          .usersData[user]
-          .accrued;
-      }
-    }
-    return (rewardsList, unclaimedRewards);
   }
 
   /**

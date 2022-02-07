@@ -238,7 +238,8 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
         _assets[asset].rewards[reward].usersData[user].accrued = 0;
       } else {
         uint256 difference = totalRewards - amount;
-        _assets[asset].rewards[reward].usersData[user].accrued -= uint128(difference);
+        totalRewards -= difference;
+        _assets[asset].rewards[reward].usersData[user].accrued = uint128(difference);
         break;
       }
     }

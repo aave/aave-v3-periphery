@@ -1,6 +1,9 @@
 pragma solidity 0.8.10;
 
+
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
+import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
+import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
@@ -14,6 +17,9 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
  * @author Aave
  **/
 contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
+  
+  using SafeCast for uint256;
+  
   uint256 public constant REVISION = 1;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
@@ -239,7 +245,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
       } else {
         uint256 difference = totalRewards - amount;
         totalRewards -= difference;
-        _assets[asset].rewards[reward].usersData[user].accrued = uint128(difference);
+        _assets[asset].rewards[reward].usersData[user].accrued = difference.toUint128();
         break;
       }
     }

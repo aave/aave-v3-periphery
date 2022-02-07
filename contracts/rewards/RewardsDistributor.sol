@@ -1,8 +1,9 @@
 pragma solidity 0.8.10;
 
+import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
 import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
-import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 
 /**
  * @title RewardsDistributor
@@ -10,8 +11,11 @@ import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/
  * @author Aave
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
+
+  using SafeCast for uint256;
+  
   struct UserData {
-    uint128 index;
+    uint104 index; // matches reward index
     uint128 accrued;
   }
 
@@ -307,7 +311,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         accruedRewards = _getRewards(userBalance, newIndex, userIndex, assetUnit);
       }
 
-      rewardData.usersData[user].index = uint128(newIndex);
+      require(userIndex <= type(uint104).max, 'Index overflow');
+      rewardData.usersData[user].index = uint104(newIndex);
+    
       emit UserIndexUpdated(user, asset, reward, newIndex);
     }
 
@@ -348,7 +354,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
           totalSupply
         );
         if (accruedRewards != 0) {
-          _assets[asset].rewards[reward].usersData[user].accrued += uint128(accruedRewards);
+          _assets[asset].rewards[reward].usersData[user].accrued += accruedRewards.toUint128();
 
           emit RewardsAccrued(user, reward, accruedRewards);
         }

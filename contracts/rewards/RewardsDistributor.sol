@@ -321,13 +321,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Iterates and updates all rewards of an asset that belongs to an user
+   * @dev Iterates and accrues all the rewards for asset of the specifc user
    * @param asset The address of the reference asset of the distribution
    * @param user The user address
    * @param userBalance The current user asset balance
    * @param totalSupply Total supply of the asset
    **/
-  function _updateUserRewardsPerAssetInternal(
+  function _accrue(
     address asset,
     address user,
     uint256 userBalance,
@@ -363,16 +363,16 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Used by "frontend" stake contracts to update the data of an user when claiming rewards from there
+   * @dev Accrues all the rewards of the assets specified in the userState list
    * @param user The address of the user
    * @param userState List of structs of the user data related with his stake
    **/
-  function _distributeRewards(
+  function _accrueMultiple(
     address user,
     RewardsDistributorTypes.UserAssetStatsInput[] memory userState
   ) internal {
     for (uint256 i = 0; i < userState.length; i++) {
-      _updateUserRewardsPerAssetInternal(
+      _accrue(
         userState[i].underlyingAsset,
         user,
         userState[i].userBalance,

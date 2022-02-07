@@ -113,7 +113,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     uint256 totalSupply,
     uint256 userBalance
   ) external override {
-    _updateUserRewardsPerAssetInternal(msg.sender, user, userBalance, totalSupply);
+    _accrue(msg.sender, user, userBalance, totalSupply);
   }
 
   /// @inheritdoc IRewardsController
@@ -234,7 +234,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     }
     uint256 totalRewards;
 
-    _distributeRewards(user, _getUserStake(assets, user));
+    _accrueMultiple(user, _getUserStake(assets, user));
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];
       totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
@@ -278,7 +278,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     rewardsList = new address[](_rewardsList.length);
     claimedAmounts = new uint256[](_rewardsList.length);
 
-    _distributeRewards(user, _getUserStake(assets, user));
+    _accrueMultiple(user, _getUserStake(assets, user));
 
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];

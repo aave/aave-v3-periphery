@@ -112,7 +112,7 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
       await aEursMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
-      const unclaimedRewardsBefore = await rewardsController.getUserRewardsBalance(
+      const unclaimedRewardsBefore = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward
@@ -153,7 +153,7 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const unclaimedRewardsAfter = await rewardsController.getUserRewardsBalance(
+      const unclaimedRewardsAfter = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward

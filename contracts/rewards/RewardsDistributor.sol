@@ -129,7 +129,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserRewardsBalance(
+  function getUserRewards(
     address[] calldata assets,
     address user,
     address reward
@@ -138,7 +138,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getAllUserRewardsBalance(address[] calldata assets, address user)
+  function getAllUserRewards(address[] calldata assets, address user)
     external
     view
     override

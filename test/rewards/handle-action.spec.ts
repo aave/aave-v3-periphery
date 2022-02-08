@@ -134,7 +134,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         userIndexBefore
       ).toString();
 
-      const rewardsBalanceAfter = await rewardsController.getUserRewardsBalance(
+      const rewardsBalanceAfter = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward

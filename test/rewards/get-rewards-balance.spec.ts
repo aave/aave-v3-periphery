@@ -86,7 +86,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
         reward
       );
 
-      const unclaimedRewards = await rewardsController.getUserRewardsBalance(
+      const unclaimedRewards = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward

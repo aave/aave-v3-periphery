@@ -41,11 +41,11 @@ interface IRewardsDistributor {
   function getDistributionEnd(address asset, address reward) external view returns (uint256);
 
   /**
-   * @dev Returns the index of an user on a reward distribution
+   * @dev Returns the index of a user on a reward distribution
    * @param user Address of the user
    * @param asset The incentivized asset
    * @param reward The reward token of the incentivized asset
-   * @return The current user asset index in storage, not including new distributions
+   * @return The current user asset index, not including new distributions
    **/
   function getUserAssetIndex(
     address user,
@@ -83,7 +83,7 @@ interface IRewardsDistributor {
   function getRewardsList() external view returns (address[] memory);
 
   /**
-   * @dev Returns the accrued rewards balance of an user, not including virtually accrued rewards since last distribution.
+   * @dev Returns the accrued rewards balance of a user, not including virtually accrued rewards since last distribution.
    * @param user The address of the user
    * @param reward The address of the reward token
    * @return Unclaimed rewards, not including new distributions
@@ -91,7 +91,7 @@ interface IRewardsDistributor {
   function getUserAccruedRewards(address user, address reward) external view returns (uint256);
 
   /**
-   * @dev Returns a single rewards balance of an user, including virtually accrued and unrealized claimable rewards.
+   * @dev Returns a single rewards balance of a user, including virtually accrued and unrealized claimable rewards.
    * @param assets List of incentivized assets to check eligible distributions
    * @param user The address of the user
    * @param reward The address of the reward token
@@ -104,7 +104,7 @@ interface IRewardsDistributor {
   ) external view returns (uint256);
 
   /**
-   * @dev Returns a list all rewards of an user, including already accrued and unrealized claimable rewards
+   * @dev Returns a list all rewards of a user, including already accrued and unrealized claimable rewards
    * @param assets List of incentivized assets to check eligible distributions
    * @param user The address of the user
    * @return The function returns a Tuple of rewards list and the unclaimed rewards list
@@ -116,7 +116,7 @@ interface IRewardsDistributor {
 
   /**
    * @dev Returns the decimals of an asset to calculate the distribution delta
-   * @param asset The address to retrieve decimals saved at storage
+   * @param asset The address to retrieve decimals
    * @return The decimals of an underlying asset
    */
   function getAssetDecimals(address asset) external view returns (uint8);

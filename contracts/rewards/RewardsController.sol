@@ -212,7 +212,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param claimer Address of the claimer who claims rewards on behalf of user
@@ -260,7 +260,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param claimer Address of the claimer on behalf of user
    * @param user Address to check and claim rewards

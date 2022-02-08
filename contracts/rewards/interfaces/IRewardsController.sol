@@ -94,7 +94,7 @@ interface IRewardsController is IRewardsDistributor {
   ) external;
 
   /**
-   * @dev Claims reward for an user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
+   * @dev Claims reward for a user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param to Address that will be receiving the rewards
@@ -109,7 +109,7 @@ interface IRewardsController is IRewardsDistributor {
   ) external returns (uint256);
 
   /**
-   * @dev Claims reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
+   * @dev Claims reward for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
    * be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
@@ -140,7 +140,7 @@ interface IRewardsController is IRewardsDistributor {
   ) external returns (uint256);
 
   /**
-   * @dev Claims all rewards for an user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
+   * @dev Claims all rewards for a user to the desired address, on all the assets of the lending pool, accumulating the pending rewards
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param to Address that will be receiving the rewards
    * @return rewardsList List of addresses of the reward tokens and claimedAmounts, the list that contains the claimed amount per reward, following same order as "rewardList"
@@ -151,7 +151,7 @@ interface IRewardsController is IRewardsDistributor {
     returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
 
   /**
-   * @dev Claims all rewards for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
+   * @dev Claims all rewards for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards. The caller must
    * be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param user Address to check and claim rewards

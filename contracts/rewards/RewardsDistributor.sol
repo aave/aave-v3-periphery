@@ -284,10 +284,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Updates the state of an user in a distribution
+   * @dev Updates the state of a user in a distribution
    * @param user The user's address
    * @param asset The address of the reference asset of the distribution
    * @param reward The address of the reward
+   * @param assetUnit One unit of asset (10^decimals)
    * @param userBalance Amount of tokens staked by the user in the distribution at the moment
    * @param totalSupply Total tokens staked in the distribution
    * @return The accrued rewards for the user until the moment
@@ -382,7 +383,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Return the accrued unclaimed amount of a reward from an user over a list of distribution
+   * @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
    * @param userState List of structs of the user data related with his stake
@@ -407,7 +408,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Return the unrealized amount of one reward from an user over a list of distribution
+   * @dev Return the unrealized amount of one reward from a user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
    * @param stake Data of the user related with his stake

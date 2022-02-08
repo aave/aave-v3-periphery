@@ -435,19 +435,19 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
   /**
    * @dev Internal function for the calculation of user's rewards on a distribution
-   * @param principalUserBalance Balance of the user asset on a distribution
+   * @param userBalance Balance of the user asset on a distribution
    * @param reserveIndex Current index of the distribution
    * @param userIndex Index stored for the user, representation his staking moment
    * @param assetUnit One unit of asset (10^decimals)
    * @return The rewards
    **/
   function _getRewards(
-    uint256 principalUserBalance,
+    uint256 userBalance,
     uint256 reserveIndex,
     uint256 userIndex,
     uint256 assetUnit
   ) internal pure returns (uint256) {
-    uint256 result = principalUserBalance * (reserveIndex - userIndex);
+    uint256 result = userBalance * (reserveIndex - userIndex);
     assembly {
       result := div(result, assetUnit)
     }

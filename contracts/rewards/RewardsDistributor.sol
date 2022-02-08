@@ -11,9 +11,8 @@ import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
  * @author Aave
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
-
   using SafeCast for uint256;
-  
+
   struct UserData {
     uint104 index; // matches reward index
     uint128 accrued;
@@ -314,7 +313,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
       require(userIndex <= type(uint104).max, 'Index overflow');
       rewardData.usersData[user].index = uint104(newIndex);
-    
+
       emit UserIndexUpdated(user, asset, reward, newIndex);
     }
 
@@ -322,7 +321,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Iterates and accrues all the rewards for asset of the specifc user
+   * @dev Iterates and accrues all the rewards for asset of the specific user
    * @param asset The address of the reference asset of the distribution
    * @param user The user address
    * @param userBalance The current user asset balance

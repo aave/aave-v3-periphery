@@ -114,7 +114,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserUnclaimedRewardsFromStorage(address user, address reward)
+  function getUserAccruedRewards(address user, address reward)
     external
     view
     override

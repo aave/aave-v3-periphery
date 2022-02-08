@@ -101,7 +101,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );
@@ -141,7 +141,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageAfter = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageAfter = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );

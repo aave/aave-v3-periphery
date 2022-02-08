@@ -117,7 +117,7 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );
@@ -158,7 +158,7 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageAfter = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageAfter = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );

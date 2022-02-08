@@ -109,12 +109,12 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       );
       const lastTxTimestamp = await getBlockTimestamp(lastTxReceipt.blockNumber);
 
-      const unclaimedRewardsOneBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsOneBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         rewards[0]
       );
 
-      const unclaimedRewardsTwoBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsTwoBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         rewards[1]
       );

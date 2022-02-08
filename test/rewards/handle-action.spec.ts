@@ -91,7 +91,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         );
       }
 
-      const rewardsBalanceBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const rewardsBalanceBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );

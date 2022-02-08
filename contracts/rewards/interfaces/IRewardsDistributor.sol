@@ -83,15 +83,12 @@ interface IRewardsDistributor {
   function getRewardsList() external view returns (address[] memory);
 
   /**
-   * @dev Returns a single rewards balance of an user from contract storage state, not including virtually accrued rewards since last distribution.
+   * @dev Returns the accrued rewards balance of an user, not including virtually accrued rewards since last distribution.
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @return Unclaimed rewards, from storage
+   * @return Unclaimed rewards, not including new distributions
    **/
-  function getUserUnclaimedRewardsFromStorage(address user, address reward)
-    external
-    view
-    returns (uint256);
+  function getUserAccruedRewards(address user, address reward) external view returns (uint256);
 
   /**
    * @dev Returns a single rewards balance of an user, including virtually accrued and unrealized claimable rewards.

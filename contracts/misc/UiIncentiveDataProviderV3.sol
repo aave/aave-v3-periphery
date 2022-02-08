@@ -270,7 +270,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
             );
 
           userRewardInformation.userUnclaimedRewards = aTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();
@@ -323,7 +323,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
             );
 
           userRewardInformation.userUnclaimedRewards = vTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();
@@ -376,7 +376,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
             );
 
           userRewardInformation.userUnclaimedRewards = sTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();

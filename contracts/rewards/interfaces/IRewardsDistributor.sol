@@ -47,7 +47,7 @@ interface IRewardsDistributor {
    * @param reward The reward token of the incentivized asset
    * @return The current user asset index in storage, not including new distributions
    **/
-  function getUserAssetData(
+  function getUserAssetIndex(
     address user,
     address asset,
     address reward

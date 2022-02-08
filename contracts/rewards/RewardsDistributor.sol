@@ -105,7 +105,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserAssetData(
+  function getUserAssetIndex(
     address user,
     address asset,
     address reward

@@ -7,5 +7,5 @@ export async function getUserIndex(
   asset: string,
   reward: string
 ): Promise<BigNumber> {
-  return await distributionManager.getUserAssetData(user, asset, reward);
+  return await distributionManager.getUserAssetIndex(user, asset, reward);
 }

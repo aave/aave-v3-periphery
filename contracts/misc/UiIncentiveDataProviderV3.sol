@@ -263,7 +263,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = aTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.aTokenAddress,
               userRewardInformation.rewardTokenAddress
@@ -316,7 +316,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = vTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.variableDebtTokenAddress,
               userRewardInformation.rewardTokenAddress
@@ -369,7 +369,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = sTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.stableDebtTokenAddress,
               userRewardInformation.rewardTokenAddress

@@ -1,16 +1,25 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {RewardsDistributorTypes} from '../libraries/RewardsDistributorTypes.sol';
+import {DataTypes} from '../libraries/DataTypes.sol';
 
 interface IRewardsDistributor {
   event AssetConfigUpdated(
     address indexed asset,
     address indexed reward,
     uint256 emission,
-    uint256 distributionEnd
+    uint256 distributionEnd,
+    uint256 assetIndex
   );
-  event AssetIndexUpdated(address indexed asset, address indexed reward, uint256 index);
+  event Accrued(
+    address indexed asset,
+    address indexed reward,
+    address indexed user,
+    uint256 assetIndex,
+    uint256 userIndex,
+    uint256 rewardsAccrued
+  );
+
   event UserIndexUpdated(
     address indexed user,
     address indexed asset,

@@ -155,25 +155,18 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
       );
 
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
-        const eventAssetUpdated = eventsEmitted.find(({ name }) => name === 'AssetIndexUpdated');
-        const eventUserIndexUpdated = eventsEmitted.find(({ name }) => name === 'UserIndexUpdated');
+        const eventAccrued = eventsEmitted.find(({ name }) => name === 'Accrued');
 
-        if (!eventAssetUpdated) {
+        if (!eventAccrued) {
           fail('missing AssetIndexUpdated event');
         }
-        if (!eventUserIndexUpdated) {
-          fail('missing UserIndexUpdated event');
-        }
-        eventLogChecker(eventAssetUpdated, 'AssetIndexUpdated', [
+        eventLogChecker(eventAccrued, 'Accrued', [
           assetDataAfter.underlyingAsset,
           reward,
-          assetDataAfter.index,
-        ]);
-        eventLogChecker(eventUserIndexUpdated, 'UserIndexUpdated', [
           userAddress,
-          assetDataAfter.underlyingAsset,
-          reward,
           assetDataAfter.index,
+          assetDataAfter.index,
+          expectedAccruedRewards,
         ]);
       }
       // ------- Distribution Manager tests END -----
@@ -183,17 +176,7 @@ makeSuite('AaveIncentivesController handleAction tests', (testEnv) => {
         rewardsBalanceBefore.add(expectedAccruedRewards).toString(),
         'rewards balance are incorrect'
       );
-      if (expectedAccruedRewards !== '0') {
-        const eventAssetUpdated = eventsEmitted.find(({ name }) => name === 'RewardsAccrued');
-        if (!eventAssetUpdated) {
-          fail('missing RewardsAccrued event');
-        }
-        eventLogChecker(eventAssetUpdated, 'RewardsAccrued', [
-          userAddress,
-          reward,
-          expectedAccruedRewards,
-        ]);
-      }
+
       // ------- PEI tests END -----
     });
   }

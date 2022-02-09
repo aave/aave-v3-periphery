@@ -7,7 +7,7 @@ import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBal
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
-import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
+import {DataTypes} from './libraries/DataTypes.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
 /**
@@ -73,7 +73,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /// @inheritdoc IRewardsController
-  function configureAssets(RewardsDistributorTypes.RewardsConfigInput[] memory config)
+  function configureAssets(DataTypes.RewardsConfigInput[] memory config)
     external
     override
     onlyEmissionManager
@@ -113,7 +113,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     uint256 totalSupply,
     uint256 userBalance
   ) external override {
-    _accrue(msg.sender, user, userBalance, totalSupply);
+    _updateData(msg.sender, user, userBalance, totalSupply);
   }
 
   /// @inheritdoc IRewardsController
@@ -191,18 +191,18 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Get usage statistics of a list of assets that supports IScaledBalanceToken interface
+   * @dev Get user balances and total supply of all the assets specified by the assets parameter
    * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
    * @return userState contains a list of usage statistics like user balance and total supply of the assets passed as argument
    */
-  function _getUserStake(address[] calldata assets, address user)
+  function _getUserBalances(address[] calldata assets, address user)
     internal
     view
     override
-    returns (RewardsDistributorTypes.UserAssetStatsInput[] memory userState)
+    returns (DataTypes.UserAssetStatsInput[] memory userState)
   {
-    userState = new RewardsDistributorTypes.UserAssetStatsInput[](assets.length);
+    userState = new DataTypes.UserAssetStatsInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])
@@ -234,7 +234,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     }
     uint256 totalRewards;
 
-    _accrueMultiple(user, _getUserStake(assets, user));
+    _updateDataMultiple(user, _getUserBalances(assets, user));
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];
       totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
@@ -278,7 +278,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     rewardsList = new address[](_rewardsList.length);
     claimedAmounts = new uint256[](_rewardsList.length);
 
-    _accrueMultiple(user, _getUserStake(assets, user));
+    _updateDataMultiple(user, _getUserBalances(assets, user));
 
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];

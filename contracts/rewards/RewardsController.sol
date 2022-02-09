@@ -1,6 +1,5 @@
 pragma solidity 0.8.10;
 
-
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
@@ -16,9 +15,8 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
  * @author Aave
  **/
 contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
-  
   using SafeCast for uint256;
-  
+
   uint256 public constant REVISION = 1;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
@@ -209,7 +207,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
         .getScaledUserBalanceAndSupply(user);
     }
     return userState;
-  } 
+  }
 
   /**
    * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
@@ -293,10 +291,10 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
         }
       }
     }
-     for (uint256 i = 0; i < rewardsList.length; i++) {
-        _transferRewards(to, rewardsList[i], claimedAmounts[i]);
-        emit RewardsClaimed(user, rewardsList[i], to, claimer, claimedAmounts[i]);
-      }
+    for (uint256 i = 0; i < rewardsList.length; i++) {
+      _transferRewards(to, rewardsList[i], claimedAmounts[i]);
+      emit RewardsClaimed(user, rewardsList[i], to, claimer, claimedAmounts[i]);
+    }
     return (rewardsList, claimedAmounts);
   }
 

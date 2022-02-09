@@ -165,9 +165,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @dev Configure the _assets for a specific emission
    * @param rewardsInput The array of each asset configuration
    **/
-  function _configureAssets(DataTypes.RewardsConfigInput[] memory rewardsInput)
-    internal
-  {
+  function _configureAssets(DataTypes.RewardsConfigInput[] memory rewardsInput) internal {
     for (uint256 i = 0; i < rewardsInput.length; i++) {
       if (_assets[rewardsInput[i].asset].decimals == 0) {
         //never initialized before, adding to the list of assets
@@ -197,7 +195,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       }
 
       // Due emissions is still zero, updates only latestUpdateTimestamp
-      (uint256 newIndex,) = _updateRewardData(
+      (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
         rewardsInput[i].totalSupply,
         10**decimals
@@ -325,10 +323,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @param user The address of the user
    * @param userState List of structs of the user data related with his stake
    **/
-  function _updateDataMultiple(
-    address user,
-    DataTypes.UserAssetStatsInput[] memory userState
-  ) internal {
+  function _updateDataMultiple(address user, DataTypes.UserAssetStatsInput[] memory userState)
+    internal
+  {
     for (uint256 i = 0; i < userState.length; i++) {
       _updateData(
         userState[i].underlyingAsset,

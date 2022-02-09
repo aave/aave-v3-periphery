@@ -209,7 +209,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
         .getScaledUserBalanceAndSupply(user);
     }
     return userState;
-  }
+  } 
 
   /**
    * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.

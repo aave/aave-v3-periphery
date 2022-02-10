@@ -217,12 +217,17 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
       );
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
         await expect(action)
-          .to.emit(rewardsController, 'AssetIndexUpdated')
-          .withArgs(assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
-        await expect(action)
-          .to.emit(rewardsController, 'UserIndexUpdated')
-          .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
+          .to.emit(rewardsController, 'Accrued')
+          .withArgs(
+            assetDataAfter.underlyingAsset,
+            reward,
+            userAddress,
+            assetDataAfter.index,
+            assetDataAfter.index,
+            expectedAccruedRewards
+          );
       }
+
       // ------- Distribution Manager tests END -----
 
       let unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);
@@ -246,14 +251,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
         expectedClaimedAmount.toString(),
         'claimed amount are wrong'
       );
-      if (expectedAccruedRewards !== '0') {
-        await expect(action)
-          .to.emit(rewardsController, 'RewardsAccrued')
-          .withArgs(userAddress, reward, expectedAccruedRewards);
-        await expect(action)
-          .to.emit(rewardsController, 'UserIndexUpdated')
-          .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
-      }
+
       if (expectedClaimedAmount.gt(0)) {
         await expect(action)
           .to.emit(rewardsController, 'RewardsClaimed')

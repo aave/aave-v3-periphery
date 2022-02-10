@@ -215,7 +215,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           userIndexesBefore[index]
         ).toString()
       );
-
+      console.log("checking asset data");
       await Bluebird.each(assets, async (asset, i) => {
         await assetDataComparator(
           { underlyingAsset: asset, totalSupply: totalSupply[i] },
@@ -226,24 +226,28 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           {}
         );
 
-        expect(userIndexesAfter[i].toString()).to.be.equal(
+      console.log("checking index, user ", userIndexesAfter[i].toString(), " asset ",assetDataAfter[i].index.toString());
+        expect(userIndexesAfter[i].toString(), 'user index are not correctly updated').to.be.equal(
           assetDataAfter[i].index.toString(),
           'user index are not correctly updated'
         );
 
+        console.log("checking event ");
+        
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
-            .to.emit(rewardsController, 'AssetIndexUpdated')
-            .withArgs(assetDataAfter[i].underlyingAsset, rewards[i], assetDataAfter[i].index);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
+            .to.emit(rewardsController, 'Accrued')
             .withArgs(
-              userAddress,
               assetDataAfter[i].underlyingAsset,
               rewards[i],
-              assetDataAfter[i].index
+              userAddress,
+              assetDataAfter[i].index,
+              assetDataAfter[i].index,
+              expectedAccruedRewards[i]
             );
         }
+
+        console.log("checking unclaimed rewards ");
 
         let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
@@ -252,24 +256,12 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           '0',
           'unclaimed amount after should go to 0'
         );
+        console.log("checking claimed rewards ");
 
         expect(claimedAmounts[i].toString()).to.be.equal(
           expectedClaimedAmount.toString(),
           'claimed amount are wrong'
-        );
-        if (expectedAccruedRewards[i] !== '0') {
-          await expect(action)
-            .to.emit(rewardsController, 'RewardsAccrued')
-            .withArgs(userAddress, rewards[i], expectedAccruedRewards[i]);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
-            .withArgs(
-              userAddress,
-              assetDataAfter[i].underlyingAsset,
-              rewards[i],
-              assetDataAfter[i].index
-            );
-        }
+        );   
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
             .to.emit(rewardsController, 'RewardsClaimed')

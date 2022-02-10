@@ -244,17 +244,15 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
 
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
-            .to.emit(rewardsController, 'AssetIndexUpdated')
-            .withArgs(assetDataAfter[i].underlyingAsset, rewards[i], assetDataAfter[i].index);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
+            .to.emit(rewardsController, 'Accrued')
             .withArgs(
-              userAddress,
               assetDataAfter[i].underlyingAsset,
               rewards[i],
-              assetDataAfter[i].index
-            );
-        }
+              userAddress,
+              assetDataAfter[i].index,
+              assetDataAfter[i].index,
+              expectedAccruedRewards[i]
+            );        }
 
         let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
@@ -268,19 +266,7 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
           expectedClaimedAmount.toString(),
           'claimed amount are wrong'
         );
-        if (expectedAccruedRewards[i] !== '0') {
-          await expect(action)
-            .to.emit(rewardsController, 'RewardsAccrued')
-            .withArgs(userAddress, rewards[i], expectedAccruedRewards[i]);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
-            .withArgs(
-              userAddress,
-              assetDataAfter[i].underlyingAsset,
-              rewards[i],
-              assetDataAfter[i].index
-            );
-        }
+       
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
             .to.emit(rewardsController, 'RewardsClaimed')

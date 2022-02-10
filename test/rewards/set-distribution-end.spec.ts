@@ -21,12 +21,13 @@ makeSuite('AaveIncentivesControllerV2 setDistributionEnd', (testEnv: TestEnv) =>
       .connect(deployer.signer)
       .setDistributionEnd(aDai.address, stakedAave.address, '1010');
 
-    await expect(action)
-      .to.emit(rewardsController, 'AssetConfigUpdated')
-      .withArgs(aDai.address, stakedAave.address, '0', '1010');
-
     const afterData = await rewardsController.getRewardsData(aDai.address, stakedAave.address);
 
+    await expect(action)
+      .to.emit(rewardsController, 'AssetConfigUpdated')
+      .withArgs(aDai.address, stakedAave.address, '0', '1010', afterData[0]);
+
+    
     expect(afterData[3].toString()).to.be.equal('1010');
   });
 });

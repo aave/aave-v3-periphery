@@ -6,7 +6,7 @@ import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBal
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
-import {DataTypes} from './libraries/DataTypes.sol';
+import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
 /**
@@ -71,7 +71,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /// @inheritdoc IRewardsController
-  function configureAssets(DataTypes.RewardsConfigInput[] memory config)
+  function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
     external
     override
     onlyEmissionManager
@@ -198,9 +198,9 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     internal
     view
     override
-    returns (DataTypes.UserAssetStatsInput[] memory userState)
+    returns (RewardsDataTypes.UserAssetStatsInput[] memory userState)
   {
-    userState = new DataTypes.UserAssetStatsInput[](assets.length);
+    userState = new RewardsDataTypes.UserAssetStatsInput[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userState[i].underlyingAsset = assets[i];
       (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])

@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {IRewardsDistributor} from './IRewardsDistributor.sol';
 import {ITransferStrategyBase} from './ITransferStrategyBase.sol';
 import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
-import {DataTypes} from '../libraries/DataTypes.sol';
+import {RewardsDataTypes} from '../libraries/RewardsDataTypes.sol';
 
 interface IRewardsController is IRewardsDistributor {
   event ClaimerSet(address indexed user, address indexed claimer);
@@ -79,7 +79,7 @@ interface IRewardsController is IRewardsDistributor {
    *   IEACAggregatorProxy rewardOracle: The Price Oracle of a reward to visualize the incentives at the UI Frontend.
    *                                     Must follow Chainlink Aggregator IEACAggregatorProxy interface to be compatible.
    */
-  function configureAssets(DataTypes.RewardsConfigInput[] memory config) external;
+  function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external;
 
   /**
    * @dev Called by the corresponding asset on any update that affects the rewards distribution

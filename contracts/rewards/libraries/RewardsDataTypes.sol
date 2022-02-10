@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {ITransferStrategyBase} from '../interfaces/ITransferStrategyBase.sol';
 import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 
-library DataTypes {
+library RewardsDataTypes {
   struct RewardsConfigInput {
     uint88 emissionPerSecond;
     uint256 totalSupply;

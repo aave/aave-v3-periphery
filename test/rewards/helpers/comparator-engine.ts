@@ -40,7 +40,7 @@ export async function comparatorEngine<Input extends object, State extends objec
 
   for (const fieldName of unchangedFields) {
     // @ts-ignore
-    expect(stateAfter[fieldName].toString(),`${fieldName} are not updated`).to.be.equal(
+    expect(stateAfter[fieldName].toString(), `${fieldName} are not updated`).to.be.equal(
       // @ts-ignore
       stateBefore[fieldName].toString(),
       `${fieldName} should not change`
@@ -49,7 +49,7 @@ export async function comparatorEngine<Input extends object, State extends objec
 
   for (const fieldName of fieldsEqualToInput) {
     // @ts-ignore
-    expect(stateAfter[fieldName].toString(),`${fieldName} are not updated`).to.be.equal(
+    expect(stateAfter[fieldName].toString(), `${fieldName} are not updated`).to.be.equal(
       // @ts-ignore
       updateInput[fieldName].toString(),
       `${fieldName} are not updated`
@@ -58,9 +58,9 @@ export async function comparatorEngine<Input extends object, State extends objec
 
   for (const { fieldName, equalTo } of fieldsEqualToAnother) {
     // @ts-ignore
-    expect(stateAfter[fieldName].toString(),`${fieldName} are not updated`).to.be.equal(
+    expect(stateAfter[fieldName].toString(), `${fieldName} are not updated`).to.be.equal(
       // @ts-ignore
-      updateInput[equalTo].toString()      
+      updateInput[equalTo].toString()
     );
   }
 
@@ -68,10 +68,9 @@ export async function comparatorEngine<Input extends object, State extends objec
     const logicOutput = logic(updateInput, stateBefore, stateAfter, actionBlockTimestamp);
     const closeTo = logicOutput instanceof Promise ? await logicOutput : logicOutput;
     // @ts-ignore
-    expect(stateAfter[fieldName]).to.be.closeTo(
+    expect(stateAfter[fieldName], `${fieldName} are not correctly updated`).to.be.closeTo(
       closeTo,
-      2,
-      `${fieldName} are not correctly updated`
+      2
     );
   }
 }

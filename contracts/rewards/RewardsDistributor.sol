@@ -165,9 +165,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   function setEmissionPerSecond(
     address asset,
     address[] calldata rewards,
-    uint88[] calldata emissionsPerSecond
+    uint88[] calldata newEmissionsPerSecond
   ) external override onlyEmissionManager {
-    require(rewards.length == emissionsPerSecond.length, 'INVALID_INPUT');
+    require(rewards.length == newEmissionsPerSecond.length, 'INVALID_INPUT');
 
     for (uint256 i = 0; i < rewards.length; i++) {
       DataTypes.AssetData storage assetConfig = _assets[asset];
@@ -182,12 +182,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         10**assetConfig.decimals
       );
 
-      assetConfig.rewards[rewards[i]].emissionPerSecond = emissionsPerSecond[i];
+      assetConfig.rewards[rewards[i]].emissionPerSecond = newEmissionsPerSecond[i];
 
       emit AssetConfigUpdated(
         asset,
         rewards[i],
-        emissionsPerSecond[i],
+        newEmissionsPerSecond[i],
         assetConfig.rewards[rewards[i]].distributionEnd,
         newIndex
       );

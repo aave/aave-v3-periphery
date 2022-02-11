@@ -43,14 +43,14 @@ interface IRewardsDistributor {
 
   /**
    * @dev Sets the emission per second of a set of reward distributions
-   * @param asset The asset to incentivize
-   * @param rewards List of reward addresses
-   * @param emissionsPerSecond List of reward emissions per second
+   * @param asset The asset is being incentivized
+   * @param rewards List of reward addresses are being distributed
+   * @param newEmissionsPerSecond List of new reward emissions per second
    */
   function setEmissionPerSecond(
     address asset,
     address[] calldata rewards,
-    uint88[] calldata emissionsPerSecond
+    uint88[] calldata newEmissionsPerSecond
   ) external;
 
   /**

@@ -7,12 +7,10 @@ import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contrac
 
 /**
  * @title CollectorController
- * @notice The CollectorController contracts allows the owner
-           of the contract to approve or transfer tokens from
-           the collector proxy contract. This is needed because of
-           the transparent proxy pattern. The admin
-           of the AaveCollector proxy can't be the same as
-           the fundsAdmin address.
+ * @notice The CollectorController contracts allows the owner of the contract
+           to approve or transfer tokens from the collector proxy contract.
+           This is needed due the usage of transparent proxy pattern.
+           The admin of the Collector proxy can't be the same as the fundsAdmin address.
  * @author Aave
  **/
 contract CollectorController is Ownable {

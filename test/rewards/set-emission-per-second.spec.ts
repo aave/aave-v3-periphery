@@ -133,7 +133,9 @@ makeSuite('AaveIncentivesController V2 setEmissionPerSecond', async (testEnv: Te
         .withArgs(
           assetConfigAfter.underlyingAsset,
           assetConfigsUpdate[i].reward,
+          0,
           assetConfigAfter.emissionPerSecond,
+          0,
           assetConfigAfter.distributionEnd,
           assetConfigAfter.index
         );
@@ -247,7 +249,9 @@ makeSuite('AaveIncentivesController V2 setEmissionPerSecond', async (testEnv: Te
         .withArgs(
           assetsConfig[i].asset.address,
           assetsConfig[i].reward.address,
+          assetDataBefore.emissionPerSecond,
           assetsConfig[i].newEmissionPerSecond,
+          assetDataBefore.distributionEnd,
           assetDataBefore.distributionEnd,
           expectedIndex.toString(10)
         );

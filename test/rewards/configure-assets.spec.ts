@@ -292,7 +292,9 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
               .withArgs(
                 assetConfigAfter.underlyingAsset,
                 assetConfigsUpdate[i].reward,
+                0,
                 assetConfigAfter.emissionPerSecond,
+                0,
                 assetConfigAfter.distributionEnd,
                 assetConfigAfter.index
               );

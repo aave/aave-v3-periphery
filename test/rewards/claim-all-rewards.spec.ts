@@ -171,7 +171,7 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
       });
 
       const unclaimedRewardsStorageBefore = await Bluebird.map(rewards, (reward) =>
-        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserAccruedRewards(userAddress, reward)
       );
 
       const userIndexesBefore = await Bluebird.map(
@@ -205,7 +205,7 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
       );
 
       const unclaimedRewardsStorageAfter = await Bluebird.map(rewards, (reward) =>
-        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserAccruedRewards(userAddress, reward)
       );
 
       const destinationAddressBalanceAfter = await Bluebird.map(

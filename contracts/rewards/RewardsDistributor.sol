@@ -148,15 +148,18 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   function setDistributionEnd(
     address asset,
     address reward,
-    uint32 distributionEnd
+    uint32 newDistributionEnd
   ) external override onlyEmissionManager {
-    _assets[asset].rewards[reward].distributionEnd = distributionEnd;
+    uint256 oldDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
+    _assets[asset].rewards[reward].distributionEnd = newDistributionEnd;
 
     emit AssetConfigUpdated(
       asset,
       reward,
       _assets[asset].rewards[reward].emissionPerSecond,
-      distributionEnd,
+      _assets[asset].rewards[reward].emissionPerSecond,
+      oldDistributionEnd,
+      newDistributionEnd,
       _assets[asset].rewards[reward].index
     );
   }
@@ -180,12 +183,15 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         10**decimals
       );
 
+      uint256 oldEmissionPerSecond = rewardConfig.emissionPerSecond;
       rewardConfig.emissionPerSecond = newEmissionsPerSecond[i];
 
       emit AssetConfigUpdated(
         asset,
         rewards[i],
+        oldEmissionPerSecond,
         newEmissionsPerSecond[i],
+        rewardConfig.distributionEnd,
         rewardConfig.distributionEnd,
         newIndex
       );
@@ -239,7 +245,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       emit AssetConfigUpdated(
         rewardsInput[i].asset,
         rewardsInput[i].reward,
+        0,
         rewardsInput[i].emissionPerSecond,
+        0,
         rewardsInput[i].distributionEnd,
         newIndex
       );

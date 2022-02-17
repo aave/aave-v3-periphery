@@ -7,8 +7,10 @@ interface IRewardsDistributor {
   event AssetConfigUpdated(
     address indexed asset,
     address indexed reward,
-    uint256 emission,
-    uint256 distributionEnd,
+    uint256 oldEmission,
+    uint256 newEmission,
+    uint256 oldDistributionEnd,
+    uint256 newDistributionEnd,
     uint256 assetIndex
   );
   event Accrued(
@@ -33,12 +35,12 @@ interface IRewardsDistributor {
    * @dev Sets the end date for the distribution
    * @param asset The asset to incentivize
    * @param reward The reward token that incentives the asset
-   * @param distributionEnd The end date of the incentivization, in unix time format
+   * @param newDistributionEnd The end date of the incentivization, in unix time format
    **/
   function setDistributionEnd(
     address asset,
     address reward,
-    uint32 distributionEnd
+    uint32 newDistributionEnd
   ) external;
 
   /**

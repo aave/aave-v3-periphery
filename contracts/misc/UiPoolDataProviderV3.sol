@@ -5,7 +5,7 @@ import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {IAaveOracle} from '@aave/core-v3/contracts/interfaces/IAaveOracle.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {IVariableDebtToken} from '@aave/core-v3/contracts/interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '@aave/core-v3/contracts/interfaces/IStableDebtToken.sol';
@@ -43,18 +43,19 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     internal
     view
     returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
+      InterestRates memory
     )
   {
-    return (
-      interestRateStrategy.getVariableRateSlope1(),
-      interestRateStrategy.getVariableRateSlope2(),
-      interestRateStrategy.getStableRateSlope1(),
-      interestRateStrategy.getStableRateSlope2()
-    );
+    InterestRates memory interestRates;
+    interestRates.variableRateSlope1 = interestRateStrategy.getVariableRateSlope1();
+    interestRates.variableRateSlope2 = interestRateStrategy.getVariableRateSlope2();
+    interestRates.stableRateSlope1 = interestRateStrategy.getStableRateSlope1();
+    interestRates.stableRateSlope2 = interestRateStrategy.getStableRateSlope2();
+    interestRates.baseStableBorrowRate = interestRateStrategy.getBaseStableBorrowRate();
+    interestRates.baseVariableBorrowRate = interestRateStrategy.getBaseVariableBorrowRate();
+    interestRates.optimalUsageRatio = interestRateStrategy.OPTIMAL_USAGE_RATIO();
+
+    return interestRates;
   }
 
   function getReservesList(IPoolAddressesProvider provider)
@@ -76,7 +77,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       BaseCurrencyInfo memory
     )
   {
-    IPriceOracleGetter oracle = IPriceOracleGetter(provider.getPriceOracle());
+    IAaveOracle oracle = IAaveOracle(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
     AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(provider.getPoolDataProvider());
 
@@ -107,7 +108,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
       reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
-
+      reserveData.priceOracle = oracle.getSourceOfAsset(reserveData.underlyingAsset);
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
       );
@@ -150,15 +151,18 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
         isPaused
       ) = reserveConfigurationMap.getFlags();
 
-      (
-        reserveData.variableRateSlope1,
-        reserveData.variableRateSlope2,
-        reserveData.stableRateSlope1,
-        reserveData.stableRateSlope2
-      ) = getInterestRateStrategySlopes(
+      InterestRates memory interestRates = getInterestRateStrategySlopes(
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
       );
 
+      reserveData.variableRateSlope1 = interestRates.variableRateSlope1;
+      reserveData.variableRateSlope2 = interestRates.variableRateSlope2;
+      reserveData.stableRateSlope1 = interestRates.stableRateSlope1;
+      reserveData.stableRateSlope2 = interestRates.stableRateSlope2;
+      reserveData.baseStableBorrowRate = interestRates.baseStableBorrowRate;
+      reserveData.baseVariableBorrowRate = interestRates.baseVariableBorrowRate;
+      reserveData.optimalUsageRatio = interestRates.optimalUsageRatio;
+     
       // v3 only
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();

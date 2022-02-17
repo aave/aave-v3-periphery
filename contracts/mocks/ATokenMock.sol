@@ -61,6 +61,10 @@ contract ATokenMock {
     return _totalSupply;
   }
 
+  function totalSupply() external view returns (uint256) {
+    return _totalSupply;
+  }
+
   function cleanUserState() external {
     _userBalance = 0;
     _totalSupply = 0;

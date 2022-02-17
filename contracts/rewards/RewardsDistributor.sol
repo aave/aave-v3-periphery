@@ -161,6 +161,37 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     );
   }
 
+  /// @inheritdoc IRewardsDistributor
+  function setEmissionPerSecond(
+    address asset,
+    address[] calldata rewards,
+    uint88[] calldata newEmissionsPerSecond
+  ) external override onlyEmissionManager {
+    require(rewards.length == newEmissionsPerSecond.length, 'INVALID_INPUT');
+    for (uint256 i = 0; i < rewards.length; i++) {
+      DataTypes.AssetData storage assetConfig = _assets[asset];
+      DataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
+      uint256 decimals = assetConfig.decimals;
+      require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_NOT_EXISTS');
+
+      (uint256 newIndex, ) = _updateRewardData(
+        rewardConfig,
+        IERC20Detailed(asset).totalSupply(),
+        10**decimals
+      );
+
+      rewardConfig.emissionPerSecond = newEmissionsPerSecond[i];
+
+      emit AssetConfigUpdated(
+        asset,
+        rewards[i],
+        newEmissionsPerSecond[i],
+        rewardConfig.distributionEnd,
+        newIndex
+      );
+    }
+  }
+
   /**
    * @dev Configure the _assets for a specific emission
    * @param rewardsInput The array of each asset configuration

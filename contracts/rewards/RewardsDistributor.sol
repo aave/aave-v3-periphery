@@ -172,8 +172,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   ) external override onlyEmissionManager {
     require(rewards.length == newEmissionsPerSecond.length, 'INVALID_INPUT');
     for (uint256 i = 0; i < rewards.length; i++) {
-      DataTypes.AssetData storage assetConfig = _assets[asset];
-      DataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
+      RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
+      RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
       uint256 decimals = assetConfig.decimals;
       require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_NOT_EXISTS');
 

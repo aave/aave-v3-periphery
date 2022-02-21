@@ -215,7 +215,6 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           userIndexesBefore[index]
         ).toString()
       );
-      console.log("checking asset data");
       await Bluebird.each(assets, async (asset, i) => {
         await assetDataComparator(
           { underlyingAsset: asset, totalSupply: totalSupply[i] },
@@ -226,14 +225,11 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           {}
         );
 
-      console.log("checking index, user ", userIndexesAfter[i].toString(), " asset ",assetDataAfter[i].index.toString());
         expect(userIndexesAfter[i].toString(), 'user index are not correctly updated').to.be.equal(
           assetDataAfter[i].index.toString(),
           'user index are not correctly updated'
         );
-
-        console.log("checking event ");
-        
+ 
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
             .to.emit(rewardsController, 'Accrued')
@@ -247,8 +243,6 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
             );
         }
 
-        console.log("checking unclaimed rewards ");
-
         let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
         );
@@ -256,7 +250,6 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           '0',
           'unclaimed amount after should go to 0'
         );
-        console.log("checking claimed rewards ");
 
         expect(claimedAmounts[i].toString()).to.be.equal(
           expectedClaimedAmount.toString(),

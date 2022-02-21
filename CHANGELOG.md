@@ -1,5 +1,19 @@
 # Changelog
 
+### [1.11.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.11.0...v1.11.1) (2022-02-15)
+
+
+### Miscellaneous Chores
+
+* release 1.11.1 ([701fede](https://www.github.com/aave/aave-v3-periphery/commit/701fedeb9430385f6e7e3d275eba221782361040))
+
+## [1.11.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.10.0...v1.11.0) (2022-02-15)
+
+
+### Miscellaneous Chores
+
+* release 1.11.0 ([a4dee72](https://www.github.com/aave/aave-v3-periphery/commit/a4dee72c618c0512ed2bf2e6902c7b27e520f767))
+
 ## [1.10.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.9.1...v1.10.0) (2022-01-12)
 
 

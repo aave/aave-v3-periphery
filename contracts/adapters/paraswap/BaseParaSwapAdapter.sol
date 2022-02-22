@@ -25,7 +25,7 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
 
   struct PermitSignature {
     uint256 amount;
-    uint256 deadline;
+    uint256 expiration;
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -91,12 +91,12 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
     PermitSignature memory permitSignature
   ) internal {
     // If deadline is set to zero, assume there is no signature for permit
-    if (permitSignature.deadline != 0) {
+    if (permitSignature.expiration != 0) {
       reserveAToken.permit(
         user,
         address(this),
         permitSignature.amount,
-        permitSignature.deadline,
+        permitSignature.expiration,
         permitSignature.v,
         permitSignature.r,
         permitSignature.s

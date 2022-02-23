@@ -47,7 +47,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     address initiator,
     bytes calldata params
   ) external override nonReentrant returns (bool) {
-    require(msg.sender == address(POOL), 'CALLER_MUST_BE_LENDING_POOL');
+    require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
     require(
       assets.length == 1 && amounts.length == 1 && premiums.length == 1,
       'FLASHLOAN_MULTIPLE_ASSETS_NOT_SUPPORTED'

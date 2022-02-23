@@ -21,7 +21,7 @@
     "console:fork": "MAINNET_FORK=true hardhat console",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts ./test/paraswap/**/*.spect.ts",
     "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
-    "test-paraswap": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/paraswap/*.spec.ts ./test/rewards/**/*.spec.ts",
+    "test-paraswap": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/paraswap/*.spec.ts",
     "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/rewards/strategies/*.spec.ts",
     "coverage": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true EMPTY_RUN=true npx hardhat coverage --temp temp-artifacts --testfiles test/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test/**/*.spec.ts'",
     "clean": "rm -rf artifacts cache",

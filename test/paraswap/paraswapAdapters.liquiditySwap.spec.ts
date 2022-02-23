@@ -210,7 +210,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
 
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -220,7 +220,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           flashloanTotal.toString()
         );
 
@@ -246,7 +246,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           mockAugustusCalldata,
           mockAugustus.address,
           flashloanTotal,
-          expiration,
+          deadline,
           v,
           r,
           s
@@ -331,7 +331,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           paraswapLiquiditySwapAdapter
             .connect(user)
             .executeOperation([weth.address], [amountWETHtoSwap], [0], userAddress, params)
-        ).to.be.revertedWith('CALLER_MUST_BE_LENDING_POOL');
+        ).to.be.revertedWith('CALLER_MUST_BE_POOL');
       });
 
       it('should work correctly with tokens of different decimals', async () => {
@@ -723,7 +723,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainId';
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -733,7 +733,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           flashloanTotal.toString()
         );
 
@@ -758,7 +758,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           mockAugustusCalldata,
           mockAugustus.address,
           flashloanTotal,
-          expiration,
+          deadline,
           v,
           r,
           s
@@ -1149,7 +1149,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -1159,7 +1159,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           flashloanTotal.toString()
         );
 
@@ -1184,7 +1184,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           mockAugustusCalldata,
           mockAugustus.address,
           flashloanTotal,
-          expiration,
+          deadline,
           v,
           r,
           s
@@ -1333,7 +1333,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
 
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -1343,7 +1343,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           flashloanTotal.toString()
         );
 
@@ -1368,7 +1368,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           mockAugustusCalldata,
           mockAugustus.address,
           flashloanTotal,
-          expiration,
+          deadline,
           v,
           r,
           s
@@ -1465,7 +1465,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1512,7 +1512,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -1522,7 +1522,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           amountWETHtoSwap.toString()
         );
 
@@ -1553,7 +1553,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: amountWETHtoSwap,
-                expiration,
+                deadline,
                 v,
                 r,
                 s,
@@ -1623,7 +1623,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1680,7 +1680,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1741,7 +1741,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1797,7 +1797,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
             oracle.address, // using arbitrary contract instead of mock Augustus
             {
               amount: 0,
-              expiration: 0,
+              deadline: 0,
               v: 0,
               r: '0x0000000000000000000000000000000000000000000000000000000000000000',
               s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1855,7 +1855,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1914,7 +1914,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -1974,7 +1974,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2039,7 +2039,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2098,7 +2098,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
 
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -2108,7 +2108,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           bigAmountToSwap.toString()
         );
 
@@ -2139,7 +2139,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: bigAmountToSwap,
-                expiration,
+                deadline,
                 v,
                 r,
                 s,
@@ -2216,7 +2216,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2282,7 +2282,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2385,7 +2385,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2440,7 +2440,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chainid';
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -2450,7 +2450,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           amountWETHtoSwap.toString()
         );
 
@@ -2481,7 +2481,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: amountWETHtoSwap,
-                expiration,
+                deadline,
                 v,
                 r,
                 s,
@@ -2558,7 +2558,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: 0,
-                expiration: 0,
+                deadline: 0,
                 v: 0,
                 r: '0x0000000000000000000000000000000000000000000000000000000000000000',
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
@@ -2611,7 +2611,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
         const chainId = hre.network.config.chainId;
         if (!chainId) throw 'missing chain id';
-        const expiration = MAX_UINT_AMOUNT;
+        const deadline = MAX_UINT_AMOUNT;
         const nonce = (await aWETH.nonces(userAddress)).toNumber();
         const msgParams = buildPermitParams(
           chainId,
@@ -2621,7 +2621,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
           userAddress,
           paraswapLiquiditySwapAdapter.address,
           nonce,
-          expiration,
+          deadline,
           bigAmountToSwap.toString()
         );
 
@@ -2653,7 +2653,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
               mockAugustus.address,
               {
                 amount: bigAmountToSwap,
-                expiration,
+                deadline,
                 v,
                 r,
                 s,

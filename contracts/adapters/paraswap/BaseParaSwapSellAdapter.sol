@@ -15,8 +15,8 @@ import {BaseParaSwapAdapter} from './BaseParaSwapAdapter.sol';
  * @author Jason Raymond Bell
  */
 abstract contract BaseParaSwapSellAdapter is BaseParaSwapAdapter {
-  using SafeMath for uint256;
   using PercentageMath for uint256;
+  using SafeMath for uint256;
 
   IParaSwapAugustusRegistry public immutable AUGUSTUS_REGISTRY;
 

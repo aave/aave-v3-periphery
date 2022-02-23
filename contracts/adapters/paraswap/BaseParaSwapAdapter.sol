@@ -25,7 +25,7 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
 
   struct PermitSignature {
     uint256 amount;
-    uint256 expiration;
+    uint256 deadline;
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -40,6 +40,12 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
     address indexed fromAsset,
     address indexed toAsset,
     uint256 fromAmount,
+    uint256 receivedAmount
+  );
+  event Bought(
+    address indexed fromAsset,
+    address indexed toAsset,
+    uint256 amountSold,
     uint256 receivedAmount
   );
 
@@ -75,6 +81,18 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
     return POOL.getReserveData(asset);
   }
 
+  function _pullATokenAndWithdraw(
+    address reserve,
+    address user,
+    uint256 amount,
+    PermitSignature memory permitSignature
+  ) internal {
+    IERC20WithPermit reserveAToken = IERC20WithPermit(
+      _getReserveData(address(reserve)).aTokenAddress
+    );
+    _pullATokenAndWithdraw(reserve, reserveAToken, user, amount, permitSignature);
+  }
+
   /**
    * @dev Pull the ATokens from the user
    * @param reserve address of the asset
@@ -91,12 +109,12 @@ abstract contract BaseParaSwapAdapter is FlashLoanReceiverBase, Ownable {
     PermitSignature memory permitSignature
   ) internal {
     // If deadline is set to zero, assume there is no signature for permit
-    if (permitSignature.expiration != 0) {
+    if (permitSignature.deadline != 0) {
       reserveAToken.permit(
         user,
         address(this),
         permitSignature.amount,
-        permitSignature.expiration,
+        permitSignature.deadline,
         permitSignature.v,
         permitSignature.r,
         permitSignature.s

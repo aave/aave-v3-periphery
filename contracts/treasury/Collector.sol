@@ -11,7 +11,7 @@ import {ICollector} from './interfaces/ICollector.sol';
  *         to approve or transfer the collected ERC20 tokens.
  * @author Aave
  **/
-contract Collector is ICollector, VersionedInitializable {
+contract Collector is VersionedInitializable, ICollector {
   event NewFundsAdmin(address indexed fundsAdmin);
 
   address internal _fundsAdmin;

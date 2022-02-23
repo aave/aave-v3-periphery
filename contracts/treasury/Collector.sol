@@ -7,7 +7,8 @@ import {ICollector} from './interfaces/ICollector.sol';
 
 /**
  * @title Collector
- * @notice Stores the fees collected by the protocol and allows the fund administrator to approve or transfer the collected ERC20 tokens.
+ * @notice Stores the fees collected by the protocol and allows the fund administrator
+ *         to approve or transfer the collected ERC20 tokens.
  * @author Aave
  **/
 contract Collector is ICollector, VersionedInitializable {

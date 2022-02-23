@@ -29,12 +29,6 @@ interface ICollector {
   ) external;
 
   /**
-   * @dev Initialize the transparent proxy with the admin of the Collector
-   * @param reserveController The address of the admin that controls Collector
-   */
-  function initialize(address reserveController) external;
-
-  /**
    * @dev Retrieve the current funds administrator
    * @return The address of the funds administrator
    */

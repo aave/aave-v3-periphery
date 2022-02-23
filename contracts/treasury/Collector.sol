@@ -12,20 +12,30 @@ import {ICollector} from './interfaces/ICollector.sol';
  * @author Aave
  **/
 contract Collector is VersionedInitializable, ICollector {
+  /**
+   * @dev Emitted during the transfer of ownership of the funds administrator address
+   * @param from The new funds administrator address
+   **/
   event NewFundsAdmin(address indexed fundsAdmin);
 
   address internal _fundsAdmin;
 
   uint256 public constant REVISION = 1;
 
-  /// @inheritdoc ICollector
-  function initialize(address reserveController) external initializer {
-    _setFundsAdmin(reserveController);
-  }
-
+  /**
+   * @dev Allow only the funds administrator address to call functions marked by this modifier
+   */
   modifier onlyFundsAdmin() {
     require(msg.sender == _fundsAdmin, 'ONLY_BY_FUNDS_ADMIN');
     _;
+  }
+
+  /**
+   * @dev Initialize the transparent proxy with the admin of the Collector
+   * @param reserveController The address of the admin that controls Collector
+   */
+  function initialize(address reserveController) external initializer {
+    _setFundsAdmin(reserveController);
   }
 
   /// @inheritdoc VersionedInitializable

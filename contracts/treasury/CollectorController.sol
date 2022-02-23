@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {ICollector} from './interfaces/ICollector.sol';
-import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 
 /**
  * @title CollectorController
  * @notice The CollectorController contracts allows the owner of the contract
            to approve or transfer tokens from the collector proxy contract.
-           This is needed due the usage of transparent proxy pattern.
            The admin of the Collector proxy can't be the same as the fundsAdmin address.
+           This is needed due the usage of transparent proxy pattern.
  * @author Aave
  **/
 contract CollectorController is Ownable {

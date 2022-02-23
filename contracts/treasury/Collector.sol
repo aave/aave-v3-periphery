@@ -9,17 +9,14 @@ import {ICollector} from './interfaces/ICollector.sol';
  * @title Collector
  * @notice Stores the fees collected by the protocol and allows the fund administrator
  *         to approve or transfer the collected ERC20 tokens.
+ * @dev Implementation contract that must be initialized using transparent proxy pattern.
  * @author Aave
  **/
 contract Collector is VersionedInitializable, ICollector {
-  /**
-   * @dev Emitted during the transfer of ownership of the funds administrator address
-   * @param from The new funds administrator address
-   **/
-  event NewFundsAdmin(address indexed fundsAdmin);
-
+  // Store the current funds administrator address
   address internal _fundsAdmin;
 
+  // Revision version of this implementation contract
   uint256 public constant REVISION = 1;
 
   /**

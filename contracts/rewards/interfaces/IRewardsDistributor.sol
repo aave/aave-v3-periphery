@@ -45,15 +45,6 @@ interface IRewardsDistributor {
     uint256 rewardsAccrued
   );
 
-  event UserIndexUpdated(
-    address indexed user,
-    address indexed asset,
-    address indexed reward,
-    uint256 index
-  );
-
-  event RewardsAccrued(address indexed user, address indexed reward, uint256 amount);
-
   /**
    * @dev Sets the end date for the distribution
    * @param asset The asset to incentivize

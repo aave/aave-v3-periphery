@@ -1,7 +1,22 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+/**
+ * @title IRewardsDistributor
+ * @author Aave
+ * @notice Defines the basic interface for a Rewards Distributor.
+ */
 interface IRewardsDistributor {
+  /**
+   * @dev Emitted when the configuration of the rewards of an asset is updated.
+   * @param asset The address of the incentivized asset
+   * @param reward The address of the reward token
+   * @param oldEmission The old emissions per second value of the reward distribution
+   * @param newEmission The new emissions per second value of the reward distribution
+   * @param oldDistributionEnd The old end timestamp of the reward distribution
+   * @param newDistributionEnd The new end timestamp of the reward distribution
+   * @param assetIndex The index of the asset distribution
+   */
   event AssetConfigUpdated(
     address indexed asset,
     address indexed reward,
@@ -11,6 +26,16 @@ interface IRewardsDistributor {
     uint256 newDistributionEnd,
     uint256 assetIndex
   );
+
+  /**
+   * @dev Emitted when rewards of an asset are accrued on behalf of a user.
+   * @param asset The address of the incentivized asset
+   * @param reward The address of the reward token
+   * @param user The address of the user that rewards are accrued on behalf of
+   * @param assetIndex The index of the asset distribution
+   * @param userIndex The index of the asset distribution on behalf of the user
+   * @param rewardsAccrued The amount of rewards accrued
+   */
   event Accrued(
     address indexed asset,
     address indexed reward,
@@ -75,10 +100,13 @@ interface IRewardsDistributor {
   ) external view returns (uint256);
 
   /**
-   * @dev Returns the configuration of the distribution for a certain asset
+   * @dev Returns the configuration of the distribution reward for a certain asset
    * @param asset The incentivized asset
    * @param reward The reward token of the incentivized asset
-   * @return The asset index, the emission per second, the last updated timestamp and the distribution end timestamp
+   * @return The index of the asset distribution
+   * @return The emission per second of the reward distribution
+   * @return The timestamp of the last update of the index
+   * @return The timestamp of the distribution end
    **/
   function getRewardsData(address asset, address reward)
     external
@@ -128,7 +156,8 @@ interface IRewardsDistributor {
    * @dev Returns a list all rewards of a user, including already accrued and unrealized claimable rewards
    * @param assets List of incentivized assets to check eligible distributions
    * @param user The address of the user
-   * @return The function returns a Tuple of rewards list and the unclaimed rewards list
+   * @return The list of reward addresses
+   * @return The list of unclaimed amount of rewards
    **/
   function getAllUserRewards(address[] calldata assets, address user)
     external

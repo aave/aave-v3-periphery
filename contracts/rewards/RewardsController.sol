@@ -211,7 +211,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Claims one type of reward for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param claimer Address of the claimer who claims rewards on behalf of user
@@ -259,7 +259,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Claims one type of reward for a user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param claimer Address of the claimer on behalf of user
    * @param user Address to check and claim rewards
@@ -352,7 +352,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev internal function to update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
+   * @dev Update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
    * @notice The Price Oracle of a reward is used for displaying correct data about the incentives at the UI frontend.
    * @param reward The address of the reward token
    * @param rewardOracle The address of the price oracle

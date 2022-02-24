@@ -263,8 +263,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @dev Updates the state of the distribution for the specified reward
    * @param rewardData Storage pointer to the distribution reward config
    * @param totalSupply Current total of underlying assets for this distribution
-   * @param assetUnit One unit of asset (10^decimals)
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The new distribution index
+   * @return True if the index was updated, false otherwise
    **/
   function _updateRewardData(
     RewardsDataTypes.RewardData storage rewardData,
@@ -289,7 +290,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @dev Updates the state of the distribution for the specific user
    * @param rewardData Storage pointer to the distribution reward config
    * @param user The address of the user
-   * @param assetUnit One unit of asset (10^decimals)
+   * @param userBalance The user balance of the asset
+   * @param newAssetIndex The new index of the asset distribution
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The rewards accrued since the last update
    **/
   function _updateUserData(
@@ -438,7 +441,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @param userBalance Balance of the user asset on a distribution
    * @param reserveIndex Current index of the distribution
    * @param userIndex Index stored for the user, representation his staking moment
-   * @param assetUnit One unit of asset (10^decimals)
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The rewards
    **/
   function _getRewards(
@@ -457,7 +460,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   /**
    * @dev Calculates the next value of an specific distribution index, with validations
    * @param totalSupply of the asset being rewarded
-   * @param assetUnit One unit of asset (10^decimals)
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The new index.
    **/
   function _getAssetIndex(

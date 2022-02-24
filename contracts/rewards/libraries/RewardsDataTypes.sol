@@ -15,8 +15,8 @@ library RewardsDataTypes {
     IEACAggregatorProxy rewardOracle;
   }
 
-  struct UserAssetStatsInput {
-    address underlyingAsset;
+  struct UserAssetBalance {
+    address asset;
     uint256 userBalance;
     uint256 totalSupply;
   }

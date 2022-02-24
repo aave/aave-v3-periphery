@@ -123,23 +123,27 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     override
     returns (address[] memory rewardsList, uint256[] memory unclaimedAmounts)
   {
-    RewardsDataTypes.UserAssetStatsInput[] memory userState = _getUserBalances(assets, user);
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserBalances(assets, user);
     rewardsList = new address[](_rewardsList.length);
     unclaimedAmounts = new uint256[](rewardsList.length);
 
     // Add unrealized rewards from user to unclaimedRewards
-    for (uint256 i = 0; i < userState.length; i++) {
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
       for (uint256 r = 0; r < rewardsList.length; r++) {
         rewardsList[r] = _rewardsList[r];
-        unclaimedAmounts[r] += _assets[userState[i].underlyingAsset]
+        unclaimedAmounts[r] += _assets[userAssetBalances[i].asset]
           .rewards[rewardsList[r]]
           .usersData[user]
           .accrued;
 
-        if (userState[i].userBalance == 0) {
+        if (userAssetBalances[i].userBalance == 0) {
           continue;
         }
-        unclaimedAmounts[r] += _getUnrealizedRewardsFromStake(user, rewardsList[r], userState[i]);
+        unclaimedAmounts[r] += _getUnrealizedRewardsFromStake(
+          user,
+          rewardsList[r],
+          userAssetBalances[i]
+        );
       }
     }
     return (rewardsList, unclaimedAmounts);
@@ -359,19 +363,20 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Accrues all the rewards of the assets specified in the userState list
+   * @dev Accrues all the rewards of the assets specified in the userAssetBalances list
    * @param user The address of the user
-   * @param userState List of structs of the user data related with his stake
+   * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
    **/
-  function _updateDataMultiple(address user, RewardsDataTypes.UserAssetStatsInput[] memory userState)
-    internal
-  {
-    for (uint256 i = 0; i < userState.length; i++) {
+  function _updateDataMultiple(
+    address user,
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
+  ) internal {
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
       _updateData(
-        userState[i].underlyingAsset,
+        userAssetBalances[i].asset,
         user,
-        userState[i].userBalance,
-        userState[i].totalSupply
+        userAssetBalances[i].userBalance,
+        userAssetBalances[i].totalSupply
       );
     }
   }
@@ -380,22 +385,22 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @param userState List of structs of the user data related with his stake
+   * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
    * @return unclaimedRewards The accrued rewards for the user until the moment
    **/
   function _getUserReward(
     address user,
     address reward,
-    RewardsDataTypes.UserAssetStatsInput[] memory userState
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
   ) internal view returns (uint256 unclaimedRewards) {
     // Add unrealized rewards
-    for (uint256 i = 0; i < userState.length; i++) {
-      if (userState[i].userBalance == 0) {
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
+      if (userAssetBalances[i].userBalance == 0) {
         continue;
       }
       unclaimedRewards +=
-        _getUnrealizedRewardsFromStake(user, reward, userState[i]) +
-        _assets[userState[i].underlyingAsset].rewards[reward].usersData[user].accrued;
+        _getUnrealizedRewardsFromStake(user, reward, userAssetBalances[i]) +
+        _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
     }
 
     return unclaimedRewards;
@@ -405,19 +410,27 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @dev Return the unrealized amount of one reward from a user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @param stake Data of the user related with his stake
+   * @param userAssetBalance struct with the user balance and total supply of the incentivized asset
    * @return The unrealized rewards for the user until the moment
    **/
   function _getUnrealizedRewardsFromStake(
     address user,
     address reward,
-    RewardsDataTypes.UserAssetStatsInput memory stake
+    RewardsDataTypes.UserAssetBalance memory userAssetBalance
   ) internal view returns (uint256) {
-    RewardsDataTypes.RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
-    uint256 assetUnit = 10**_assets[stake.underlyingAsset].decimals;
-    (, uint256 nextIndex) = _getAssetIndex(rewardData, stake.totalSupply, assetUnit);
+    RewardsDataTypes.RewardData storage rewardData = _assets[userAssetBalance.asset].rewards[
+      reward
+    ];
+    uint256 assetUnit = 10**_assets[userAssetBalance.asset].decimals;
+    (, uint256 nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalSupply, assetUnit);
 
-    return _getRewards(stake.userBalance, nextIndex, rewardData.usersData[user].index, assetUnit);
+    return
+      _getRewards(
+        userAssetBalance.userBalance,
+        nextIndex,
+        rewardData.usersData[user].index,
+        assetUnit
+      );
   }
 
   /**
@@ -478,16 +491,16 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Get user staking distribution of a list of assets
-   * @dev To be fulfilled with custom logic of the underlying asset to get total staked supply and user stake balance
-   * @param assets List of asset addresses of the user
+   * @dev Get user balances and total supply of all the assets specified by the assets parameter
+   * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
+   * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
   function _getUserBalances(address[] calldata assets, address user)
     internal
     view
     virtual
-    returns (RewardsDataTypes.UserAssetStatsInput[] memory userState);
+    returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances);
 
   /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {

@@ -193,21 +193,21 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
    * @dev Get user balances and total supply of all the assets specified by the assets parameter
    * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
-   * @return userState contains a list of usage statistics like user balance and total supply of the assets passed as argument
+   * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
   function _getUserBalances(address[] calldata assets, address user)
     internal
     view
     override
-    returns (RewardsDataTypes.UserAssetStatsInput[] memory userState)
+    returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances)
   {
-    userState = new RewardsDataTypes.UserAssetStatsInput[](assets.length);
+    userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
-      userState[i].underlyingAsset = assets[i];
-      (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])
+      userAssetBalances[i].asset = assets[i];
+      (userAssetBalances[i].userBalance, userAssetBalances[i].totalSupply) = IScaledBalanceToken(assets[i])
         .getScaledUserBalanceAndSupply(user);
     }
-    return userState;
+    return userAssetBalances;
   }
 
   /**

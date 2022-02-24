@@ -244,15 +244,17 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       );
 
       // Configure emission and distribution end of the reward per asset
+      uint88 oldEmissionsPerSecond = rewardConfig.emissionPerSecond;
+      uint32 oldDistributionEnd = rewardConfig.distributionEnd;
       rewardConfig.emissionPerSecond = rewardsInput[i].emissionPerSecond;
       rewardConfig.distributionEnd = rewardsInput[i].distributionEnd;
 
       emit AssetConfigUpdated(
         rewardsInput[i].asset,
         rewardsInput[i].reward,
-        0,
+        oldEmissionsPerSecond,
         rewardsInput[i].emissionPerSecond,
-        0,
+        oldDistributionEnd,
         rewardsInput[i].distributionEnd,
         newIndex
       );

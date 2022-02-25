@@ -195,7 +195,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
    * @param user Address of the user
    * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
-  function _getUserBalances(address[] calldata assets, address user)
+  function _getUserAssetBalances(address[] calldata assets, address user)
     internal
     view
     override
@@ -233,7 +233,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     }
     uint256 totalRewards;
 
-    _updateDataMultiple(user, _getUserBalances(assets, user));
+    _updateDataMultiple(user, _getUserAssetBalances(assets, user));
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];
       totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
@@ -278,7 +278,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     rewardsList = new address[](rewardsListLength);
     claimedAmounts = new uint256[](rewardsListLength);
 
-    _updateDataMultiple(user, _getUserBalances(assets, user));
+    _updateDataMultiple(user, _getUserAssetBalances(assets, user));
 
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];

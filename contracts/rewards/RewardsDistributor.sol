@@ -113,7 +113,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     address user,
     address reward
   ) external view override returns (uint256) {
-    return _getUserReward(user, reward, _getUserBalances(assets, user));
+    return _getUserReward(user, reward, _getUserAssetBalances(assets, user));
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -123,7 +123,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     override
     returns (address[] memory rewardsList, uint256[] memory unclaimedAmounts)
   {
-    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserBalances(assets, user);
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserAssetBalances(assets, user);
     rewardsList = new address[](_rewardsList.length);
     unclaimedAmounts = new uint256[](rewardsList.length);
 
@@ -503,7 +503,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @param user Address of the user
    * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
-  function _getUserBalances(address[] calldata assets, address user)
+  function _getUserAssetBalances(address[] calldata assets, address user)
     internal
     view
     virtual

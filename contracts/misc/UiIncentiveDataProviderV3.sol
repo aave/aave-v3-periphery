@@ -39,8 +39,8 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
     view
     returns (AggregatedReserveIncentiveData[] memory)
   {
-    IPool lendingPool = IPool(provider.getPool());
-    address[] memory reserves = lendingPool.getReservesList();
+    IPool pool = IPool(provider.getPool());
+    address[] memory reserves = pool.getReservesList();
     AggregatedReserveIncentiveData[]
       memory reservesIncentiveData = new AggregatedReserveIncentiveData[](reserves.length);
     // Iterate through the reserves to get all the information from the (a/s/v) Tokens
@@ -48,7 +48,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
       AggregatedReserveIncentiveData memory reserveIncentiveData = reservesIncentiveData[i];
       reserveIncentiveData.underlyingAsset = reserves[i];
 
-      DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
+      DataTypes.ReserveData memory baseData = pool.getReserveData(reserves[i]);
 
       // Get aTokens rewards information
       // TODO: check that this is deployed correctly on contract and remove casting
@@ -234,15 +234,15 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
     view
     returns (UserReserveIncentiveData[] memory)
   {
-    IPool lendingPool = IPool(provider.getPool());
-    address[] memory reserves = lendingPool.getReservesList();
+    IPool pool = IPool(provider.getPool());
+    address[] memory reserves = pool.getReservesList();
 
     UserReserveIncentiveData[] memory userReservesIncentivesData = new UserReserveIncentiveData[](
       user != address(0) ? reserves.length : 0
     );
 
     for (uint256 i = 0; i < reserves.length; i++) {
-      DataTypes.ReserveData memory baseData = lendingPool.getReserveData(reserves[i]);
+      DataTypes.ReserveData memory baseData = pool.getReserveData(reserves[i]);
 
       // user reserve data
       userReservesIncentivesData[i].underlyingAsset = reserves[i];

@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.11.1",
+  "version": "1.12.1",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -19,8 +19,9 @@
     "hardhat:matic": "hardhat --network matic",
     "compile": "SKIP_LOAD=true hardhat compile",
     "console:fork": "MAINNET_FORK=true hardhat console",
-    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
+    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts ./test/paraswap/**.spec.ts",
     "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
+    "test-paraswap": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/paraswap/*.spec.ts",
     "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/rewards/strategies/*.spec.ts",
     "coverage": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true EMPTY_RUN=true npx hardhat coverage --temp temp-artifacts --testfiles test/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && TS_NODE_TRANSPILE_ONLY=1 COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test/**/*.spec.ts'",
     "clean": "rm -rf artifacts cache",
@@ -54,7 +55,9 @@
     "eslint": "^7.24.0",
     "eslint-config-prettier": "^8.2.0",
     "eslint-plugin-prettier": "^3.3.1",
+    "eth-sig-util": "^3.0.1",
     "ethereum-waffle": "^3.3.0",
+    "ethereumjs-util": "^7.1.4",
     "ethers": "^5.4.7",
     "hardhat": "^2.6.8",
     "hardhat-dependency-compiler": "^1.1.1",

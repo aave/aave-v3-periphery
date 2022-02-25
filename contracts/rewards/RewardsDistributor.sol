@@ -275,9 +275,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     uint256 assetUnit
   ) internal returns (uint256, bool) {
     (uint256 oldIndex, uint256 newIndex) = _getAssetIndex(rewardData, totalSupply, assetUnit);
-    bool dataUpdated;
-    if ((dataUpdated = newIndex != oldIndex)) {
+    bool indexUpdated;
+    if (newIndex != oldIndex) {
       require(newIndex <= type(uint104).max, 'Index overflow');
+      indexUpdated = true;
+
       //optimization: storing one after another saves one SSTORE
       rewardData.index = uint104(newIndex);
       rewardData.lastUpdateTimestamp = uint32(block.timestamp);
@@ -285,7 +287,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       rewardData.lastUpdateTimestamp = uint32(block.timestamp);
     }
 
-    return (newIndex, dataUpdated);
+    return (newIndex, indexUpdated);
   }
 
   /**

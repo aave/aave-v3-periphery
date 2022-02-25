@@ -274,14 +274,15 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     address user,
     address to
   ) internal returns (address[] memory rewardsList, uint256[] memory claimedAmounts) {
-    rewardsList = new address[](_rewardsList.length);
-    claimedAmounts = new uint256[](_rewardsList.length);
+    uint256 rewardsListLength = _rewardsList.length;
+    rewardsList = new address[](rewardsListLength);
+    claimedAmounts = new uint256[](rewardsListLength);
 
     _updateDataMultiple(user, _getUserBalances(assets, user));
 
     for (uint256 i = 0; i < assets.length; i++) {
       address asset = assets[i];
-      for (uint256 j = 0; j < rewardsList.length; j++) {
+      for (uint256 j = 0; j < rewardsListLength; j++) {
         if (rewardsList[j] == address(0)) {
           rewardsList[j] = _rewardsList[j];
         }
@@ -292,7 +293,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
         }
       }
     }
-    for (uint256 i = 0; i < rewardsList.length; i++) {
+    for (uint256 i = 0; i < rewardsListLength; i++) {
       _transferRewards(to, rewardsList[i], claimedAmounts[i]);
       emit RewardsClaimed(user, rewardsList[i], to, claimer, claimedAmounts[i]);
     }

@@ -180,7 +180,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
       RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
       uint256 decimals = assetConfig.decimals;
-      require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_NOT_EXISTS');
+      require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_DOES_NOT_EXIST');
 
       (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
@@ -277,7 +277,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     (uint256 oldIndex, uint256 newIndex) = _getAssetIndex(rewardData, totalSupply, assetUnit);
     bool indexUpdated;
     if (newIndex != oldIndex) {
-      require(newIndex <= type(uint104).max, 'Index overflow');
+      require(newIndex <= type(uint104).max, 'INDEX_OVERFLOW');
       indexUpdated = true;
 
       //optimization: storing one after another saves one SSTORE

@@ -2,11 +2,12 @@
 pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
+import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
-import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
+import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 
 /**
@@ -15,6 +16,8 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
  * @author Aave
  **/
 contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
+  using SafeCast for uint256;
+
   uint256 public constant REVISION = 1;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
@@ -69,7 +72,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /// @inheritdoc IRewardsController
-  function configureAssets(RewardsDistributorTypes.RewardsConfigInput[] memory config)
+  function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config)
     external
     override
     onlyEmissionManager
@@ -109,7 +112,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     uint256 totalSupply,
     uint256 userBalance
   ) external override {
-    _updateUserRewardsPerAssetInternal(msg.sender, user, userBalance, totalSupply);
+    _updateData(msg.sender, user, userBalance, totalSupply);
   }
 
   /// @inheritdoc IRewardsController
@@ -187,28 +190,28 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev Get usage statistics of a list of assets that supports IScaledBalanceToken interface
+   * @dev Get user balances and total supply of all the assets specified by the assets parameter
    * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
-   * @return userState contains a list of usage statistics like user balance and total supply of the assets passed as argument
+   * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
-  function _getUserStake(address[] calldata assets, address user)
+  function _getUserAssetBalances(address[] calldata assets, address user)
     internal
     view
     override
-    returns (RewardsDistributorTypes.UserAssetStatsInput[] memory userState)
+    returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances)
   {
-    userState = new RewardsDistributorTypes.UserAssetStatsInput[](assets.length);
+    userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
-      userState[i].underlyingAsset = assets[i];
-      (userState[i].userBalance, userState[i].totalSupply) = IScaledBalanceToken(assets[i])
+      userAssetBalances[i].asset = assets[i];
+      (userAssetBalances[i].userBalance, userAssetBalances[i].totalSupply) = IScaledBalanceToken(assets[i])
         .getScaledUserBalanceAndSupply(user);
     }
-    return userState;
+    return userAssetBalances;
   }
 
   /**
-   * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param amount Amount of rewards to claim
    * @param claimer Address of the claimer who claims rewards on behalf of user
@@ -228,28 +231,35 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     if (amount == 0) {
       return 0;
     }
-    uint256 unclaimedRewards = _usersUnclaimedRewards[user][reward];
+    uint256 totalRewards;
 
-    if (amount > unclaimedRewards) {
-      _distributeRewards(user, _getUserStake(assets, user));
-      unclaimedRewards = _usersUnclaimedRewards[user][reward];
+    _updateDataMultiple(user, _getUserAssetBalances(assets, user));
+    for (uint256 i = 0; i < assets.length; i++) {
+      address asset = assets[i];
+      totalRewards += _assets[asset].rewards[reward].usersData[user].accrued;
+
+      if (totalRewards <= amount) {
+        _assets[asset].rewards[reward].usersData[user].accrued = 0;
+      } else {
+        uint256 difference = totalRewards - amount;
+        totalRewards -= difference;
+        _assets[asset].rewards[reward].usersData[user].accrued = difference.toUint128();
+        break;
+      }
     }
 
-    if (unclaimedRewards == 0) {
+    if (totalRewards == 0) {
       return 0;
     }
 
-    uint256 amountToClaim = amount > unclaimedRewards ? unclaimedRewards : amount;
-    _usersUnclaimedRewards[user][reward] = unclaimedRewards - amountToClaim; // Safe due to the previous line
+    _transferRewards(to, reward, totalRewards);
+    emit RewardsClaimed(user, reward, to, claimer, totalRewards);
 
-    _transferRewards(to, reward, amountToClaim);
-    emit RewardsClaimed(user, reward, to, claimer, amountToClaim);
-
-    return amountToClaim;
+    return totalRewards;
   }
 
   /**
-   * @dev Claims one type of reward for an user on behalf, on all the assets of the lending pool, accumulating the pending rewards.
+   * @dev Claims one type of reward for a user on behalf, on all the assets of the pool, accumulating the pending rewards.
    * @param assets List of assets to check eligible distributions before claiming rewards
    * @param claimer Address of the claimer on behalf of user
    * @param user Address to check and claim rewards
@@ -264,23 +274,28 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     address user,
     address to
   ) internal returns (address[] memory rewardsList, uint256[] memory claimedAmounts) {
-    _distributeRewards(user, _getUserStake(assets, user));
+    uint256 rewardsListLength = _rewardsList.length;
+    rewardsList = new address[](rewardsListLength);
+    claimedAmounts = new uint256[](rewardsListLength);
 
-    rewardsList = new address[](_rewardsList.length);
-    claimedAmounts = new uint256[](_rewardsList.length);
+    _updateDataMultiple(user, _getUserAssetBalances(assets, user));
 
-    for (uint256 i = 0; i < _rewardsList.length; i++) {
-      address reward = _rewardsList[i];
-      uint256 rewardAmount = _usersUnclaimedRewards[user][reward];
-
-      rewardsList[i] = reward;
-      claimedAmounts[i] = rewardAmount;
-
-      if (rewardAmount != 0) {
-        _usersUnclaimedRewards[user][reward] = 0;
-        _transferRewards(to, reward, rewardAmount);
-        emit RewardsClaimed(user, reward, to, claimer, rewardAmount);
+    for (uint256 i = 0; i < assets.length; i++) {
+      address asset = assets[i];
+      for (uint256 j = 0; j < rewardsListLength; j++) {
+        if (rewardsList[j] == address(0)) {
+          rewardsList[j] = _rewardsList[j];
+        }
+        uint256 rewardAmount = _assets[asset].rewards[rewardsList[j]].usersData[user].accrued;
+        if (rewardAmount != 0) {
+          claimedAmounts[j] += rewardAmount;
+          _assets[asset].rewards[rewardsList[j]].usersData[user].accrued = 0;
+        }
       }
+    }
+    for (uint256 i = 0; i < rewardsListLength; i++) {
+      _transferRewards(to, rewardsList[i], claimedAmounts[i]);
+      emit RewardsClaimed(user, rewardsList[i], to, claimer, claimedAmounts[i]);
     }
     return (rewardsList, claimedAmounts);
   }
@@ -338,7 +353,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   }
 
   /**
-   * @dev internal function to update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
+   * @dev Update the Price Oracle of a reward token. The Price Oracle must follow Chainlink IEACAggregatorProxy interface.
    * @notice The Price Oracle of a reward is used for displaying correct data about the incentives at the UI frontend.
    * @param reward The address of the reward token
    * @param rewardOracle The address of the price oracle

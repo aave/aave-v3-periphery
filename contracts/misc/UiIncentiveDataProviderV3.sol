@@ -263,14 +263,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = aTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = aTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.aTokenAddress,
               userRewardInformation.rewardTokenAddress
             );
 
           userRewardInformation.userUnclaimedRewards = aTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();
@@ -316,14 +316,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = vTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = vTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.variableDebtTokenAddress,
               userRewardInformation.rewardTokenAddress
             );
 
           userRewardInformation.userUnclaimedRewards = vTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();
@@ -369,14 +369,14 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
           userRewardInformation.rewardTokenAddress = sTokenRewardAddresses[j];
 
           userRewardInformation.tokenIncentivesUserIndex = sTokenIncentiveController
-            .getUserAssetData(
+            .getUserAssetIndex(
               user,
               baseData.stableDebtTokenAddress,
               userRewardInformation.rewardTokenAddress
             );
 
           userRewardInformation.userUnclaimedRewards = sTokenIncentiveController
-            .getUserUnclaimedRewardsFromStorage(user, userRewardInformation.rewardTokenAddress);
+            .getUserAccruedRewards(user, userRewardInformation.rewardTokenAddress);
           userRewardInformation.rewardTokenDecimals = IERC20Detailed(
             userRewardInformation.rewardTokenAddress
           ).decimals();

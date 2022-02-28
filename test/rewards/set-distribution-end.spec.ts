@@ -17,16 +17,29 @@ makeSuite('AaveIncentivesControllerV2 setDistributionEnd', (testEnv: TestEnv) =>
   it('Update distribution end of a rewarded asset', async () => {
     const { rewardsController, deployer, aDai, stakedAave } = testEnv;
 
+    const beforeData = await rewardsController.getRewardsData(aDai.address, stakedAave.address);
+
     const action = await rewardsController
       .connect(deployer.signer)
       .setDistributionEnd(aDai.address, stakedAave.address, '1010');
 
-    await expect(action)
-      .to.emit(rewardsController, 'AssetConfigUpdated')
-      .withArgs(aDai.address, stakedAave.address, '0', '1010');
-
     const afterData = await rewardsController.getRewardsData(aDai.address, stakedAave.address);
 
+    await expect(action)
+      .to.emit(rewardsController, 'AssetConfigUpdated')
+      .withArgs(
+        aDai.address,
+        stakedAave.address,
+        beforeData[1],
+        beforeData[1],
+        beforeData[3],
+        '1010',
+        afterData[0]
+      );
+
+    expect(beforeData[0]).to.be.equal(afterData[0]);
+    expect(beforeData[1]).to.be.equal(afterData[1]);
+    expect(beforeData[2]).to.be.equal(afterData[2]);
     expect(afterData[3].toString()).to.be.equal('1010');
   });
 });

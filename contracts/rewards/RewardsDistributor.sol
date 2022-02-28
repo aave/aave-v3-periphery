@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
-import {RewardsDistributorTypes} from './libraries/RewardsDistributorTypes.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
+import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
+import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
 
 /**
  * @title RewardsDistributor
@@ -11,34 +12,21 @@ import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/
  * @author Aave
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
-  struct RewardData {
-    uint88 emissionPerSecond;
-    uint104 index;
-    uint32 lastUpdateTimestamp;
-    uint32 distributionEnd;
-    mapping(address => uint256) usersIndex;
-  }
-
-  struct AssetData {
-    mapping(address => RewardData) rewards;
-    address[] availableRewards;
-    uint8 decimals;
-  }
-
+  using SafeCast for uint256;
   // manager of incentives
   address public immutable EMISSION_MANAGER;
 
   // asset => AssetData
-  mapping(address => AssetData) internal _assets;
-
-  // user => reward => unclaimed rewards
-  mapping(address => mapping(address => uint256)) internal _usersUnclaimedRewards;
+  mapping(address => RewardsDataTypes.AssetData) internal _assets;
 
   // reward => enabled
   mapping(address => bool) internal _isRewardEnabled;
 
   // global rewards list
   address[] internal _rewardsList;
+
+  //global assets list
+  address[] internal _assetsList;
 
   modifier onlyEmissionManager() {
     require(msg.sender == EMISSION_MANAGER, 'ONLY_EMISSION_MANAGER');
@@ -81,7 +69,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
   /// @inheritdoc IRewardsDistributor
   function getRewardsByAsset(address asset) external view override returns (address[] memory) {
-    return _assets[asset].availableRewards;
+    uint128 rewardsCount = _assets[asset].availableRewardsCount;
+    address[] memory availableRewards = new address[](rewardsCount);
+
+    for (uint128 i = 0; i < rewardsCount; i++) {
+      availableRewards[i] = _assets[asset].availableRewards[i];
+    }
+    return availableRewards;
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -90,76 +84,150 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserAssetData(
+  function getUserAssetIndex(
     address user,
     address asset,
     address reward
   ) public view override returns (uint256) {
-    return _assets[asset].rewards[reward].usersIndex[user];
+    return _assets[asset].rewards[reward].usersData[user].index;
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserUnclaimedRewardsFromStorage(address user, address reward)
+  function getUserAccruedRewards(address user, address reward)
     external
     view
     override
     returns (uint256)
   {
-    return _usersUnclaimedRewards[user][reward];
+    uint256 totalAccrued;
+    for (uint256 i = 0; i < _assetsList.length; i++) {
+      totalAccrued += _assets[_assetsList[i]].rewards[reward].usersData[user].accrued;
+    }
+
+    return totalAccrued;
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserRewardsBalance(
+  function getUserRewards(
     address[] calldata assets,
     address user,
     address reward
   ) external view override returns (uint256) {
-    return _getUserReward(user, reward, _getUserStake(assets, user));
+    return _getUserReward(user, reward, _getUserAssetBalances(assets, user));
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getAllUserRewardsBalance(address[] calldata assets, address user)
+  function getAllUserRewards(address[] calldata assets, address user)
     external
     view
     override
     returns (address[] memory rewardsList, uint256[] memory unclaimedAmounts)
   {
-    return _getAllUserRewards(user, _getUserStake(assets, user));
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserAssetBalances(assets, user);
+    rewardsList = new address[](_rewardsList.length);
+    unclaimedAmounts = new uint256[](rewardsList.length);
+
+    // Add unrealized rewards from user to unclaimedRewards
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
+      for (uint256 r = 0; r < rewardsList.length; r++) {
+        rewardsList[r] = _rewardsList[r];
+        unclaimedAmounts[r] += _assets[userAssetBalances[i].asset]
+          .rewards[rewardsList[r]]
+          .usersData[user]
+          .accrued;
+
+        if (userAssetBalances[i].userBalance == 0) {
+          continue;
+        }
+        unclaimedAmounts[r] += _getPendingRewards(
+          user,
+          rewardsList[r],
+          userAssetBalances[i]
+        );
+      }
+    }
+    return (rewardsList, unclaimedAmounts);
   }
 
   /// @inheritdoc IRewardsDistributor
   function setDistributionEnd(
     address asset,
     address reward,
-    uint32 distributionEnd
+    uint32 newDistributionEnd
   ) external override onlyEmissionManager {
-    _assets[asset].rewards[reward].distributionEnd = distributionEnd;
+    uint256 oldDistributionEnd = _assets[asset].rewards[reward].distributionEnd;
+    _assets[asset].rewards[reward].distributionEnd = newDistributionEnd;
 
     emit AssetConfigUpdated(
       asset,
       reward,
       _assets[asset].rewards[reward].emissionPerSecond,
-      distributionEnd
+      _assets[asset].rewards[reward].emissionPerSecond,
+      oldDistributionEnd,
+      newDistributionEnd,
+      _assets[asset].rewards[reward].index
     );
+  }
+
+  /// @inheritdoc IRewardsDistributor
+  function setEmissionPerSecond(
+    address asset,
+    address[] calldata rewards,
+    uint88[] calldata newEmissionsPerSecond
+  ) external override onlyEmissionManager {
+    require(rewards.length == newEmissionsPerSecond.length, 'INVALID_INPUT');
+    for (uint256 i = 0; i < rewards.length; i++) {
+      RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
+      RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
+      uint256 decimals = assetConfig.decimals;
+      require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_DOES_NOT_EXIST');
+
+      (uint256 newIndex, ) = _updateRewardData(
+        rewardConfig,
+        IERC20Detailed(asset).totalSupply(),
+        10**decimals
+      );
+
+      uint256 oldEmissionPerSecond = rewardConfig.emissionPerSecond;
+      rewardConfig.emissionPerSecond = newEmissionsPerSecond[i];
+
+      emit AssetConfigUpdated(
+        asset,
+        rewards[i],
+        oldEmissionPerSecond,
+        newEmissionsPerSecond[i],
+        rewardConfig.distributionEnd,
+        rewardConfig.distributionEnd,
+        newIndex
+      );
+    }
   }
 
   /**
    * @dev Configure the _assets for a specific emission
    * @param rewardsInput The array of each asset configuration
    **/
-  function _configureAssets(RewardsDistributorTypes.RewardsConfigInput[] memory rewardsInput)
-    internal
-  {
+  function _configureAssets(RewardsDataTypes.RewardsConfigInput[] memory rewardsInput) internal {
     for (uint256 i = 0; i < rewardsInput.length; i++) {
-      _assets[rewardsInput[i].asset].decimals = IERC20Detailed(rewardsInput[i].asset).decimals();
+      if (_assets[rewardsInput[i].asset].decimals == 0) {
+        //never initialized before, adding to the list of assets
+        _assetsList.push(rewardsInput[i].asset);
+      }
 
-      RewardData storage rewardConfig = _assets[rewardsInput[i].asset].rewards[
+      uint256 decimals = _assets[rewardsInput[i].asset].decimals = IERC20Detailed(
+        rewardsInput[i].asset
+      ).decimals();
+
+      RewardsDataTypes.RewardData storage rewardConfig = _assets[rewardsInput[i].asset].rewards[
         rewardsInput[i].reward
       ];
 
       // Add reward address to asset available rewards if latestUpdateTimestamp is zero
       if (rewardConfig.lastUpdateTimestamp == 0) {
-        _assets[rewardsInput[i].asset].availableRewards.push(rewardsInput[i].reward);
+        _assets[rewardsInput[i].asset].availableRewards[
+          _assets[rewardsInput[i].asset].availableRewardsCount
+        ] = rewardsInput[i].reward;
+        _assets[rewardsInput[i].asset].availableRewardsCount++;
       }
 
       // Add reward address to global rewards list if still not enabled
@@ -169,303 +237,277 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       }
 
       // Due emissions is still zero, updates only latestUpdateTimestamp
-      _updateAssetStateInternal(
-        rewardsInput[i].asset,
-        rewardsInput[i].reward,
+      (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
         rewardsInput[i].totalSupply,
-        _assets[rewardsInput[i].asset].decimals
+        10**decimals
       );
 
       // Configure emission and distribution end of the reward per asset
+      uint88 oldEmissionsPerSecond = rewardConfig.emissionPerSecond;
+      uint32 oldDistributionEnd = rewardConfig.distributionEnd;
       rewardConfig.emissionPerSecond = rewardsInput[i].emissionPerSecond;
       rewardConfig.distributionEnd = rewardsInput[i].distributionEnd;
 
       emit AssetConfigUpdated(
         rewardsInput[i].asset,
         rewardsInput[i].reward,
+        oldEmissionsPerSecond,
         rewardsInput[i].emissionPerSecond,
-        rewardsInput[i].distributionEnd
+        oldDistributionEnd,
+        rewardsInput[i].distributionEnd,
+        newIndex
       );
     }
   }
 
   /**
-   * @dev Updates the state of one distribution, mainly rewards index and timestamp
-   * @param asset The address of the asset being updated
-   * @param reward The address of the reward being updated
-   * @param rewardConfig Storage pointer to the distribution's reward config
+   * @dev Updates the state of the distribution for the specified reward
+   * @param rewardData Storage pointer to the distribution reward config
    * @param totalSupply Current total of underlying assets for this distribution
-   * @param decimals The decimals of the underlying asset
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The new distribution index
+   * @return True if the index was updated, false otherwise
    **/
-  function _updateAssetStateInternal(
-    address asset,
-    address reward,
-    RewardData storage rewardConfig,
+  function _updateRewardData(
+    RewardsDataTypes.RewardData storage rewardData,
     uint256 totalSupply,
-    uint8 decimals
-  ) internal returns (uint256) {
-    uint256 oldIndex = rewardConfig.index;
-
-    if (block.timestamp == rewardConfig.lastUpdateTimestamp) {
-      return oldIndex;
-    }
-
-    uint256 newIndex = _getAssetIndex(
-      oldIndex,
-      rewardConfig.emissionPerSecond,
-      rewardConfig.lastUpdateTimestamp,
-      rewardConfig.distributionEnd,
-      totalSupply,
-      decimals
-    );
-
+    uint256 assetUnit
+  ) internal returns (uint256, bool) {
+    (uint256 oldIndex, uint256 newIndex) = _getAssetIndex(rewardData, totalSupply, assetUnit);
+    bool indexUpdated;
     if (newIndex != oldIndex) {
-      require(newIndex <= type(uint104).max, 'Index overflow');
+      require(newIndex <= type(uint104).max, 'INDEX_OVERFLOW');
+      indexUpdated = true;
+
       //optimization: storing one after another saves one SSTORE
-      rewardConfig.index = uint104(newIndex);
-      rewardConfig.lastUpdateTimestamp = uint32(block.timestamp);
-      emit AssetIndexUpdated(asset, reward, newIndex);
+      rewardData.index = uint104(newIndex);
+      rewardData.lastUpdateTimestamp = block.timestamp.toUint32();
     } else {
-      rewardConfig.lastUpdateTimestamp = uint32(block.timestamp);
+      rewardData.lastUpdateTimestamp = block.timestamp.toUint32();
     }
 
-    return newIndex;
+    return (newIndex, indexUpdated);
   }
 
   /**
-   * @dev Updates the state of an user in a distribution
-   * @param user The user's address
-   * @param asset The address of the reference asset of the distribution
-   * @param reward The address of the reward
-   * @param userBalance Amount of tokens staked by the user in the distribution at the moment
-   * @param totalSupply Total tokens staked in the distribution
-   * @return The accrued rewards for the user until the moment
+   * @dev Updates the state of the distribution for the specific user
+   * @param rewardData Storage pointer to the distribution reward config
+   * @param user The address of the user
+   * @param userBalance The user balance of the asset
+   * @param newAssetIndex The new index of the asset distribution
+   * @param assetUnit One unit of asset (10**decimals)
+   * @return The rewards accrued since the last update
    **/
-  function _updateUserRewardsInternal(
+  function _updateUserData(
+    RewardsDataTypes.RewardData storage rewardData,
     address user,
-    address asset,
-    address reward,
     uint256 userBalance,
-    uint256 totalSupply
-  ) internal returns (uint256) {
-    RewardData storage rewardData = _assets[asset].rewards[reward];
-    uint256 userIndex = rewardData.usersIndex[user];
-    uint256 accruedRewards = 0;
-
-    uint256 newIndex = _updateAssetStateInternal(
-      asset,
-      reward,
-      rewardData,
-      totalSupply,
-      _assets[asset].decimals
-    );
-
-    if (userIndex != newIndex) {
+    uint256 newAssetIndex,
+    uint256 assetUnit
+  ) internal returns (uint256, bool) {
+    uint256 userIndex = rewardData.usersData[user].index;
+    uint256 rewardsAccrued;
+    bool dataUpdated;
+    if ((dataUpdated = userIndex != newAssetIndex)) {
+      // already checked for overflow in _updateRewardData
+      rewardData.usersData[user].index = uint104(newAssetIndex);
       if (userBalance != 0) {
-        accruedRewards = _getRewards(userBalance, newIndex, userIndex, _assets[asset].decimals);
+        rewardsAccrued = _getRewards(userBalance, newAssetIndex, userIndex, assetUnit);
+
+        rewardData.usersData[user].accrued += rewardsAccrued.toUint128();
       }
-
-      rewardData.usersIndex[user] = newIndex;
-      emit UserIndexUpdated(user, asset, reward, newIndex);
     }
-
-    return accruedRewards;
+    return (rewardsAccrued, dataUpdated);
   }
 
   /**
-   * @dev Iterates and updates all rewards of an asset that belongs to an user
+   * @dev Iterates and accrues all the rewards for asset of the specific user
    * @param asset The address of the reference asset of the distribution
    * @param user The user address
    * @param userBalance The current user asset balance
    * @param totalSupply Total supply of the asset
    **/
-  function _updateUserRewardsPerAssetInternal(
+  function _updateData(
     address asset,
     address user,
     uint256 userBalance,
     uint256 totalSupply
   ) internal {
-    for (uint256 r = 0; r < _assets[asset].availableRewards.length; r++) {
-      address reward = _assets[asset].availableRewards[r];
-      uint256 accruedRewards = _updateUserRewardsInternal(
-        user,
-        asset,
-        reward,
-        userBalance,
-        totalSupply
-      );
-      if (accruedRewards != 0) {
-        _usersUnclaimedRewards[user][reward] += accruedRewards;
+    uint256 assetUnit;
+    uint256 numAvailableRewards = _assets[asset].availableRewardsCount;
+    unchecked {
+      assetUnit = 10**_assets[asset].decimals;
+    }
 
-        emit RewardsAccrued(user, reward, accruedRewards);
+    if (numAvailableRewards == 0) {
+      return;
+    }
+    unchecked {
+      for (uint128 r = 0; r < numAvailableRewards; r++) {
+        address reward = _assets[asset].availableRewards[r];
+        RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[reward];
+
+        (uint256 newAssetIndex, bool rewardDataUpdated) = _updateRewardData(
+          rewardData,
+          totalSupply,
+          assetUnit
+        );
+
+        (uint256 rewardsAccrued, bool userDataUpdated) = _updateUserData(
+          rewardData,
+          user,
+          userBalance,
+          newAssetIndex,
+          assetUnit
+        );
+
+        if (rewardDataUpdated || userDataUpdated) {
+          emit Accrued(asset, reward, user, newAssetIndex, newAssetIndex, rewardsAccrued);
+        }
       }
     }
   }
 
   /**
-   * @dev Used by "frontend" stake contracts to update the data of an user when claiming rewards from there
+   * @dev Accrues all the rewards of the assets specified in the userAssetBalances list
    * @param user The address of the user
-   * @param userState List of structs of the user data related with his stake
+   * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
    **/
-  function _distributeRewards(
+  function _updateDataMultiple(
     address user,
-    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
   ) internal {
-    for (uint256 i = 0; i < userState.length; i++) {
-      _updateUserRewardsPerAssetInternal(
-        userState[i].underlyingAsset,
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
+      _updateData(
+        userAssetBalances[i].asset,
         user,
-        userState[i].userBalance,
-        userState[i].totalSupply
+        userAssetBalances[i].userBalance,
+        userAssetBalances[i].totalSupply
       );
     }
   }
 
   /**
-   * @dev Return the accrued unclaimed amount of a reward from an user over a list of distribution
+   * @dev Return the accrued unclaimed amount of a reward from a user over a list of distribution
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @param userState List of structs of the user data related with his stake
+   * @param userAssetBalances List of structs with the user balance and total supply of a set of assets
    * @return unclaimedRewards The accrued rewards for the user until the moment
    **/
   function _getUserReward(
     address user,
     address reward,
-    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances
   ) internal view returns (uint256 unclaimedRewards) {
     // Add unrealized rewards
-    for (uint256 i = 0; i < userState.length; i++) {
-      if (userState[i].userBalance == 0) {
+    for (uint256 i = 0; i < userAssetBalances.length; i++) {
+      if (userAssetBalances[i].userBalance == 0) {
         continue;
       }
-      unclaimedRewards += _getUnrealizedRewardsFromStake(user, reward, userState[i]);
+      unclaimedRewards +=
+        _getPendingRewards(user, reward, userAssetBalances[i]) +
+        _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
     }
 
-    // Return unrealized rewards plus stored unclaimed rewardss
-    return unclaimedRewards + _usersUnclaimedRewards[user][reward];
+    return unclaimedRewards;
   }
 
   /**
-   * @dev Return the accrued rewards for an user over a list of distribution
-   * @param user The address of the user
-   * @param userState List of structs of the user data related with his stake
-   * @return rewardsList List of reward token addresses
-   * @return unclaimedRewards List of unclaimed + unrealized rewards, order matches "rewardsList" items
-   **/
-  function _getAllUserRewards(
-    address user,
-    RewardsDistributorTypes.UserAssetStatsInput[] memory userState
-  ) internal view returns (address[] memory rewardsList, uint256[] memory unclaimedRewards) {
-    rewardsList = new address[](_rewardsList.length);
-    unclaimedRewards = new uint256[](rewardsList.length);
-
-    // Add stored rewards from user to unclaimedRewards
-    for (uint256 y = 0; y < rewardsList.length; y++) {
-      rewardsList[y] = _rewardsList[y];
-      unclaimedRewards[y] = _usersUnclaimedRewards[user][rewardsList[y]];
-    }
-
-    // Add unrealized rewards from user to unclaimedRewards
-    for (uint256 i = 0; i < userState.length; i++) {
-      if (userState[i].userBalance == 0) {
-        continue;
-      }
-      for (uint256 r = 0; r < rewardsList.length; r++) {
-        unclaimedRewards[r] += _getUnrealizedRewardsFromStake(user, rewardsList[r], userState[i]);
-      }
-    }
-    return (rewardsList, unclaimedRewards);
-  }
-
-  /**
-   * @dev Return the unrealized amount of one reward from an user over a list of distribution
+   * @dev Calculates the pending (not yet accrued) rewards since the last user action
    * @param user The address of the user
    * @param reward The address of the reward token
-   * @param stake Data of the user related with his stake
-   * @return The unrealized rewards for the user until the moment
+   * @param userAssetBalance struct with the user balance and total supply of the incentivized asset
+   * @return The pending rewards for the user since the last user action
    **/
-  function _getUnrealizedRewardsFromStake(
+  function _getPendingRewards(
     address user,
     address reward,
-    RewardsDistributorTypes.UserAssetStatsInput memory stake
+    RewardsDataTypes.UserAssetBalance memory userAssetBalance
   ) internal view returns (uint256) {
-    RewardData storage rewardData = _assets[stake.underlyingAsset].rewards[reward];
-    uint8 assetDecimals = _assets[stake.underlyingAsset].decimals;
-    uint256 assetIndex = _getAssetIndex(
-      rewardData.index,
-      rewardData.emissionPerSecond,
-      rewardData.lastUpdateTimestamp,
-      rewardData.distributionEnd,
-      stake.totalSupply,
-      assetDecimals
-    );
+    RewardsDataTypes.RewardData storage rewardData = _assets[userAssetBalance.asset].rewards[
+      reward
+    ];
+    uint256 assetUnit = 10**_assets[userAssetBalance.asset].decimals;
+    (, uint256 nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalSupply, assetUnit);
 
-    return _getRewards(stake.userBalance, assetIndex, rewardData.usersIndex[user], assetDecimals);
+    return
+      _getRewards(
+        userAssetBalance.userBalance,
+        nextIndex,
+        rewardData.usersData[user].index,
+        assetUnit
+      );
   }
 
   /**
    * @dev Internal function for the calculation of user's rewards on a distribution
-   * @param principalUserBalance Balance of the user asset on a distribution
+   * @param userBalance Balance of the user asset on a distribution
    * @param reserveIndex Current index of the distribution
    * @param userIndex Index stored for the user, representation his staking moment
-   * @param decimals The decimals of the underlying asset
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The rewards
    **/
   function _getRewards(
-    uint256 principalUserBalance,
+    uint256 userBalance,
     uint256 reserveIndex,
     uint256 userIndex,
-    uint8 decimals
+    uint256 assetUnit
   ) internal pure returns (uint256) {
-    return (principalUserBalance * (reserveIndex - userIndex)) / 10**decimals;
+    uint256 result = userBalance * (reserveIndex - userIndex);
+    assembly {
+      result := div(result, assetUnit)
+    }
+    return result;
   }
 
   /**
    * @dev Calculates the next value of an specific distribution index, with validations
-   * @param currentIndex Current index of the distribution
-   * @param emissionPerSecond Representing the total rewards distributed per second per asset unit, on the distribution
-   * @param lastUpdateTimestamp Last moment this distribution was updated
-   * @param totalBalance of tokens considered for the distribution
-   * @param decimals The decimals of the underlying asset
+   * @param totalSupply of the asset being rewarded
+   * @param assetUnit One unit of asset (10**decimals)
    * @return The new index.
    **/
   function _getAssetIndex(
-    uint256 currentIndex,
-    uint256 emissionPerSecond,
-    uint128 lastUpdateTimestamp,
-    uint256 distributionEnd,
-    uint256 totalBalance,
-    uint8 decimals
-  ) internal view returns (uint256) {
+    RewardsDataTypes.RewardData storage rewardData,
+    uint256 totalSupply,
+    uint256 assetUnit
+  ) internal view returns (uint256, uint256) {
+    uint256 oldIndex = rewardData.index;
+    uint256 distributionEnd = rewardData.distributionEnd;
+    uint256 emissionPerSecond = rewardData.emissionPerSecond;
+    uint256 lastUpdateTimestamp = rewardData.lastUpdateTimestamp;
+
     if (
       emissionPerSecond == 0 ||
-      totalBalance == 0 ||
+      totalSupply == 0 ||
       lastUpdateTimestamp == block.timestamp ||
       lastUpdateTimestamp >= distributionEnd
     ) {
-      return currentIndex;
+      return (oldIndex, oldIndex);
     }
 
     uint256 currentTimestamp = block.timestamp > distributionEnd
       ? distributionEnd
       : block.timestamp;
     uint256 timeDelta = currentTimestamp - lastUpdateTimestamp;
-    return (emissionPerSecond * timeDelta * (10**decimals)) / totalBalance + currentIndex;
+    uint256 firstTerm = emissionPerSecond * timeDelta * assetUnit;
+    assembly {
+      firstTerm := div(firstTerm, totalSupply)
+    }
+    return (oldIndex, (firstTerm + oldIndex));
   }
 
   /**
-   * @dev Get user staking distribution of a list of assets
-   * @dev To be fulfilled with custom logic of the underlying asset to get total staked supply and user stake balance
-   * @param assets List of asset addresses of the user
+   * @dev Get user balances and total supply of all the assets specified by the assets parameter
+   * @param assets List of assets to retrieve user balance and total supply
    * @param user Address of the user
+   * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
-  function _getUserStake(address[] calldata assets, address user)
+  function _getUserAssetBalances(address[] calldata assets, address user)
     internal
     view
     virtual
-    returns (RewardsDistributorTypes.UserAssetStatsInput[] memory userState);
+    returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances);
 
   /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {

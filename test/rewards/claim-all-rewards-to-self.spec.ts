@@ -155,11 +155,11 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       });
 
       const unclaimedRewardsBefore = await Bluebird.map(rewards, (reward) =>
-        rewardsController.getUserRewardsBalance(assets, userAddress, reward)
+        rewardsController.getUserRewards(assets, userAddress, reward)
       );
 
       const unclaimedRewardsStorageBefore = await Bluebird.map(rewards, (reward) =>
-        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserAccruedRewards(userAddress, reward)
       );
 
       const userIndexesBefore = await Bluebird.map(
@@ -193,7 +193,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       );
 
       const unclaimedRewardsStorageAfter = await Bluebird.map(rewards, (reward) =>
-        rewardsController.getUserUnclaimedRewardsFromStorage(userAddress, reward)
+        rewardsController.getUserAccruedRewards(userAddress, reward)
       );
 
       const destinationAddressBalanceAfter = await Bluebird.map(
@@ -215,7 +215,6 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           userIndexesBefore[index]
         ).toString()
       );
-
       await Bluebird.each(assets, async (asset, i) => {
         await assetDataComparator(
           { underlyingAsset: asset, totalSupply: totalSupply[i] },
@@ -226,22 +225,21 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           {}
         );
 
-        expect(userIndexesAfter[i].toString()).to.be.equal(
+        expect(userIndexesAfter[i].toString(), 'user index are not correctly updated').to.be.equal(
           assetDataAfter[i].index.toString(),
           'user index are not correctly updated'
         );
-
+ 
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
-            .to.emit(rewardsController, 'AssetIndexUpdated')
-            .withArgs(assetDataAfter[i].underlyingAsset, rewards[i], assetDataAfter[i].index);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
+            .to.emit(rewardsController, 'Accrued')
             .withArgs(
-              userAddress,
               assetDataAfter[i].underlyingAsset,
               rewards[i],
-              assetDataAfter[i].index
+              userAddress,
+              assetDataAfter[i].index,
+              assetDataAfter[i].index,
+              expectedAccruedRewards[i]
             );
         }
 
@@ -256,20 +254,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
         expect(claimedAmounts[i].toString()).to.be.equal(
           expectedClaimedAmount.toString(),
           'claimed amount are wrong'
-        );
-        if (expectedAccruedRewards[i] !== '0') {
-          await expect(action)
-            .to.emit(rewardsController, 'RewardsAccrued')
-            .withArgs(userAddress, rewards[i], expectedAccruedRewards[i]);
-          await expect(action)
-            .to.emit(rewardsController, 'UserIndexUpdated')
-            .withArgs(
-              userAddress,
-              assetDataAfter[i].underlyingAsset,
-              rewards[i],
-              assetDataAfter[i].index
-            );
-        }
+        );   
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
             .to.emit(rewardsController, 'RewardsClaimed')

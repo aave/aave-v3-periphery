@@ -84,7 +84,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
 
     await expect(
       aDaiMockV2.doubleHandleActionOnAic(users[1].address, '2000', '100')
-    ).to.be.revertedWith('Index overflow');
+    ).to.be.revertedWith('INDEX_OVERFLOW');
   });
 
   it('Should claimRewards revert if to argument is ZERO_ADDRESS', async () => {

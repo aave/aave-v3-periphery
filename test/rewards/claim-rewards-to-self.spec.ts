@@ -96,12 +96,12 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
       await aDaiMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
 
-      const unclaimedRewardsBefore = await rewardsController.getUserRewardsBalance(
+      const unclaimedRewardsBefore = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageBefore = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageBefore = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );
@@ -136,12 +136,12 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         await getRewardsData(rewardsController, [underlyingAsset], [reward])
       )[0];
 
-      const unclaimedRewardsAfter = await rewardsController.getUserRewardsBalance(
+      const unclaimedRewardsAfter = await rewardsController.getUserRewards(
         [underlyingAsset],
         userAddress,
         reward
       );
-      const unclaimedRewardsStorageAfter = await rewardsController.getUserUnclaimedRewardsFromStorage(
+      const unclaimedRewardsStorageAfter = await rewardsController.getUserAccruedRewards(
         userAddress,
         reward
       );
@@ -151,9 +151,11 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       const claimedAmount = destinationAddressBalanceAfter.sub(destinationAddressBalanceBefore);
 
       // Only calculate expected accrued rewards if unclaimedRewards is below the amount to claim due gas optimization
-      const expectedAccruedRewards = unclaimedRewardsStorageBefore.lt(amountToClaim)
-        ? getRewards(stakedByUser, userIndexAfter, userIndexBefore).toString()
-        : '0';
+      const expectedAccruedRewards = getRewards(
+        stakedByUser,
+        userIndexAfter,
+        userIndexBefore
+      ).toString();
 
       await aDaiMockV2.cleanUserState();
 
@@ -188,25 +190,25 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         { underlyingAsset, totalSupply },
         assetDataBefore,
         assetDataAfter,
-        unclaimedRewardsStorageBefore.gte(amountToClaim)
-          ? Number(assetDataBefore.lastUpdateTimestamp.toString())
-          : actionBlockTimestamp,
+        actionBlockTimestamp,
         distributionEnd,
         {}
       );
       expect(userIndexAfter.toString()).to.be.equal(
-        unclaimedRewardsStorageBefore.gte(amountToClaim)
-          ? userIndexBefore.toString()
-          : assetDataAfter.index.toString(),
+        assetDataAfter.index.toString(),
         'user index are not correctly updated'
       );
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
         await expect(action)
-          .to.emit(rewardsController, 'AssetIndexUpdated')
-          .withArgs(assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
-        await expect(action)
-          .to.emit(rewardsController, 'UserIndexUpdated')
-          .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
+          .to.emit(rewardsController, 'Accrued')
+          .withArgs(
+            assetDataAfter.underlyingAsset,
+            reward,
+            userAddress,
+            assetDataAfter.index,
+            assetDataAfter.index,
+            expectedAccruedRewards
+          );
       }
       // ------- Distribution Manager tests END -----
 
@@ -231,14 +233,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
         expectedClaimedAmount.toString(),
         'claimed amount are wrong'
       );
-      if (expectedAccruedRewards !== '0') {
-        await expect(action)
-          .to.emit(rewardsController, 'RewardsAccrued')
-          .withArgs(userAddress, reward, expectedAccruedRewards);
-        await expect(action)
-          .to.emit(rewardsController, 'UserIndexUpdated')
-          .withArgs(userAddress, assetDataAfter.underlyingAsset, reward, assetDataAfter.index);
-      }
+
       if (expectedClaimedAmount.gt(0)) {
         await expect(action)
           .to.emit(rewardsController, 'RewardsClaimed')

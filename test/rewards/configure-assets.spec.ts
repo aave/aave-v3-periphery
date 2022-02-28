@@ -278,17 +278,6 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
             );
             expect(rewardsList.length).to.gte(0);
             expect(rewardsList).to.include(assetConfigUpdateInput.reward);
-            // Check AssetIndexUpdate if asset already configured and index moved
-            if (!assetConfigAfter.index.eq(assetConfigBefore.index)) {
-              await expect(action)
-                .to.emit(rewardsController, 'AssetIndexUpdated')
-                .withArgs(
-                  assetConfigAfter.underlyingAsset,
-                  assetConfigsUpdate[i].reward,
-                  assetConfigAfter.index
-                );
-              eventArrayIndex += 1;
-            }
 
             // Check Asset Configuration
             await expect(
@@ -303,8 +292,11 @@ makeSuite('AaveIncentivesController V2 configureAssets', (testEnv: TestEnv) => {
               .withArgs(
                 assetConfigAfter.underlyingAsset,
                 assetConfigsUpdate[i].reward,
+                assetConfigBefore.emissionPerSecond,
                 assetConfigAfter.emissionPerSecond,
-                assetConfigAfter.distributionEnd
+                assetConfigBefore.distributionEnd,
+                assetConfigAfter.distributionEnd,
+                assetConfigAfter.index
               );
 
             eventArrayIndex += 1;

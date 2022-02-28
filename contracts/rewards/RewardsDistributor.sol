@@ -139,7 +139,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         if (userAssetBalances[i].userBalance == 0) {
           continue;
         }
-        unclaimedAmounts[r] += _getUnrealizedRewardsFromStake(
+        unclaimedAmounts[r] += _getPendingRewards(
           user,
           rewardsList[r],
           userAssetBalances[i]
@@ -406,7 +406,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         continue;
       }
       unclaimedRewards +=
-        _getUnrealizedRewardsFromStake(user, reward, userAssetBalances[i]) +
+        _getPendingRewards(user, reward, userAssetBalances[i]) +
         _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
     }
 
@@ -414,13 +414,13 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Return the unrealized amount of one reward from a user over a list of distribution
+   * @dev Calculates the pending (not yet accrued) rewards since the last user action
    * @param user The address of the user
    * @param reward The address of the reward token
    * @param userAssetBalance struct with the user balance and total supply of the incentivized asset
-   * @return The unrealized rewards for the user until the moment
+   * @return The pending rewards for the user since the last user action
    **/
-  function _getUnrealizedRewardsFromStake(
+  function _getPendingRewards(
     address user,
     address reward,
     RewardsDataTypes.UserAssetBalance memory userAssetBalance

@@ -282,9 +282,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
       //optimization: storing one after another saves one SSTORE
       rewardData.index = uint104(newIndex);
-      rewardData.lastUpdateTimestamp = uint32(block.timestamp);
+      rewardData.lastUpdateTimestamp = block.timestamp.toUint32();
     } else {
-      rewardData.lastUpdateTimestamp = uint32(block.timestamp);
+      rewardData.lastUpdateTimestamp = block.timestamp.toUint32();
     }
 
     return (newIndex, indexUpdated);

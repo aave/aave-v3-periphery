@@ -189,12 +189,12 @@ makeSuite('AaveIncentivesController V2 setEmissionPerSecond', async (testEnv: Te
     // Not existent Asset incentivization
     await expect(
       rewardsController.setEmissionPerSecond(ONE_ADDRESS, [ONE_ADDRESS], [2])
-    ).to.be.revertedWith('DISTRIBUTION_NOT_EXISTS');
+    ).to.be.revertedWith('DISTRIBUTION_DOES_NOT_EXIST');
 
     // Not existent Reward distribution
     await expect(
       rewardsController.setEmissionPerSecond(aDaiMockV2.address, [ONE_ADDRESS], [2])
-    ).to.be.revertedWith('DISTRIBUTION_NOT_EXISTS');
+    ).to.be.revertedWith('DISTRIBUTION_DOES_NOT_EXIST');
   });
 
   it('EmissionManager updates the emission per second of distributions', async () => {

@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.12.2](https://www.github.com/aave/aave-v3-periphery/compare/v1.12.1...v1.12.2) (2022-02-28)
+
+
+### Bug Fixes
+
+* fixed revert messages ([57e6906](https://www.github.com/aave/aave-v3-periphery/commit/57e690686208911b86fa911aa13b7ccb41543125))
+
 ### [1.12.1](https://www.github.com/aave/aave-v3-periphery/compare/v1.12.0...v1.12.1) (2022-02-25)
 
 

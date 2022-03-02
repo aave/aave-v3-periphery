@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.12.2...v1.13.0) (2022-03-02)
+
+
+### Features
+
+* use latest aave@deploy-v3 and aave@core-v3 package, use the Test market at tests ([4b3a8f4](https://www.github.com/aave/aave-v3-periphery/commit/4b3a8f488e3520d85093a908ea898e845e16cbc3))
+
 ### [1.12.2](https://www.github.com/aave/aave-v3-periphery/compare/v1.12.1...v1.12.2) (2022-02-28)
 
 

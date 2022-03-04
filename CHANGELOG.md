@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.13.0...v1.14.0) (2022-03-04)
+
+
+### Features
+
+* add owner constructor parameters to contracts that inherit Ownable. ([a3fcaff](https://www.github.com/aave/aave-v3-periphery/commit/a3fcaff5377c427f8ae0941fa77357aab9e95a5a))
+* Added beta deploy package. Fix test that hangs due multiple deployments. ([444139a](https://www.github.com/aave/aave-v3-periphery/commit/444139af5f216d9946c90ac833be4839749e9bc6))
+
 ## [1.13.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.12.2...v1.13.0) (2022-03-02)
 
 

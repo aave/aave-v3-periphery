@@ -229,7 +229,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
           assetDataAfter[i].index.toString(),
           'user index are not correctly updated'
         );
- 
+
         if (!assetDataAfter[i].index.eq(assetDataBefore[i].index)) {
           await expect(action)
             .to.emit(rewardsController, 'Accrued')
@@ -243,7 +243,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
             );
         }
 
-        let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
+        const expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
         );
         expect(unclaimedRewardsStorageAfter[i].toString()).to.be.equal(
@@ -254,7 +254,7 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
         expect(claimedAmounts[i].toString()).to.be.equal(
           expectedClaimedAmount.toString(),
           'claimed amount are wrong'
-        );   
+        );
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
             .to.emit(rewardsController, 'RewardsClaimed')

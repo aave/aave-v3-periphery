@@ -18,10 +18,12 @@ import {ReentrancyGuard} from '../../dependencies/openzeppelin/ReentrancyGuard.s
 contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard {
   using SafeMath for uint256;
 
-  constructor(IPoolAddressesProvider addressesProvider, IParaSwapAugustusRegistry augustusRegistry)
-    BaseParaSwapSellAdapter(addressesProvider, augustusRegistry)
-  {
-    // This is only required to initialize BaseParaSwapSellAdapter
+  constructor(
+    IPoolAddressesProvider addressesProvider,
+    IParaSwapAugustusRegistry augustusRegistry,
+    address owner
+  ) BaseParaSwapSellAdapter(addressesProvider, augustusRegistry) {
+    transferOwnership(owner);
   }
 
   /**

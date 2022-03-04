@@ -37,7 +37,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
   let evmSnapshotId: string;
 
   before(async () => {
-    const { addressesProvider } = testEnv;
+    const { addressesProvider, deployer } = testEnv;
 
     mockAugustus = await new MockParaSwapAugustus__factory(await getFirstSigner()).deploy();
     mockAugustusRegistry = await new MockParaSwapAugustusRegistry__factory(
@@ -45,7 +45,8 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
     ).deploy(mockAugustus.address);
     paraswapRepayAdapter = await deployParaSwapRepayAdapter(
       addressesProvider.address,
-      mockAugustusRegistry.address
+      mockAugustusRegistry.address,
+      deployer.address
     );
   });
 
@@ -96,25 +97,32 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
     describe('constructor', () => {
       it('should deploy with correct parameters', async () => {
-        const { addressesProvider } = testEnv;
-        await deployParaSwapRepayAdapter(addressesProvider.address, mockAugustusRegistry.address);
+        const { addressesProvider, deployer } = testEnv;
+        await deployParaSwapRepayAdapter(
+          addressesProvider.address,
+          mockAugustusRegistry.address,
+          deployer.address
+        );
       });
 
       it('should revert if not valid addresses provider', async () => {
+        const { deployer } = testEnv;
         await expect(
           deployParaSwapRepayAdapter(
             mockAugustus.address, // any invalid contract can be used here
-            mockAugustusRegistry.address
+            mockAugustusRegistry.address,
+            deployer.address
           )
         ).to.be.reverted;
       });
 
       it('should revert if not valid augustus registry', async () => {
-        const { addressesProvider } = testEnv;
+        const { addressesProvider, deployer } = testEnv;
         await expect(
           deployParaSwapRepayAdapter(
             addressesProvider.address,
-            mockAugustus.address // any invalid contract can be used here
+            mockAugustus.address,
+            deployer.address
           )
         ).to.be.reverted;
       });
@@ -1666,10 +1674,12 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
 async function deployParaSwapRepayAdapter(
   poolAddressesProvider: tEthereumAddress,
-  augustusRegistry: tEthereumAddress
+  augustusRegistry: tEthereumAddress,
+  owner: tEthereumAddress
 ) {
   return await new ParaSwapRepayAdapter__factory(await getFirstSigner()).deploy(
     poolAddressesProvider,
-    augustusRegistry
+    augustusRegistry,
+    owner
   );
 }

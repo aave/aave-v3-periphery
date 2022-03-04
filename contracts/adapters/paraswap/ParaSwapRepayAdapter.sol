@@ -28,10 +28,12 @@ contract ParaSwapRepayAdapter is BaseParaSwapBuyAdapter, ReentrancyGuard {
     bool useEthPath;
   }
 
-  constructor(IPoolAddressesProvider addressesProvider, IParaSwapAugustusRegistry augustusRegistry)
-    BaseParaSwapBuyAdapter(addressesProvider, augustusRegistry)
-  {
-    // This is only required to initialize BaseParaSwapBuyAdapter
+  constructor(
+    IPoolAddressesProvider addressesProvider,
+    IParaSwapAugustusRegistry augustusRegistry,
+    address owner
+  ) BaseParaSwapBuyAdapter(addressesProvider, augustusRegistry) {
+    transferOwnership(owner);
   }
 
   /**

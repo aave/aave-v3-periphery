@@ -55,7 +55,8 @@ makeSuite('Base Transfer Strategy', (testEnv: TestEnv) => {
     const incentivesController = RANDOM_ADDRESSES[0];
     const rewardsAdmin = RANDOM_ADDRESSES[1];
 
-    const artifact = await hre.deployments.deploy('PullRewardsTransferStrategy', {
+    const artifact = await hre.deployments.deploy('PullRewardsTransferStrategy-Tests', {
+      contract: 'PullRewardsTransferStrategy',
       from: deployer.address,
       args: [incentivesController, rewardsAdmin, ZERO_ADDRESS],
     });

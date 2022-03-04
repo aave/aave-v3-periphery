@@ -21,9 +21,11 @@ contract WETHGateway is IWETHGateway, Ownable {
   /**
    * @dev Sets the WETH address and the PoolAddressesProvider address. Infinite approves pool.
    * @param weth Address of the Wrapped Ether contract
+   * @param owner Address of the owner of this contract
    **/
-  constructor(address weth) {
+  constructor(address weth, address owner) {
     WETH = IWETH(weth);
+    transferOwnership(owner);
   }
 
   function authorizePool(address pool) external onlyOwner {

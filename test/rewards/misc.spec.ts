@@ -27,7 +27,7 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
       artifact.abi,
       artifact.address
     )) as RewardsController;
-    await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(
+    await expect((await rewardsController.getEmissionManager()).toString()).to.be.equal(
       peiEmissionManager
     );
   });

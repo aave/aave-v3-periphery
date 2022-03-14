@@ -102,7 +102,7 @@ export interface TestEnv {
   rewardsPriceAggregators: tEthereumAddress[];
 }
 
-let hardhatevmSnapshotId: string = '0x1';
+let hardhatevmSnapshotId = '0x1';
 const setHardhatevmSnapshotId = (id: string) => {
   hardhatevmSnapshotId = id;
 };
@@ -183,10 +183,10 @@ export async function initializeMakeSuite() {
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
   const allTokens = await testEnv.helpersContract.getAllATokens();
-  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
-  const aUsdcAddress = allTokens.find((aToken) => aToken.symbol === 'aUSDC')?.tokenAddress;
+  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aTestDAI')?.tokenAddress;
+  const aUsdcAddress = allTokens.find((aToken) => aToken.symbol === 'aTestUSDC')?.tokenAddress;
 
-  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
+  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aTestWETH')?.tokenAddress;
 
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
@@ -200,9 +200,11 @@ export async function initializeMakeSuite() {
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress || !aUsdcAddress) {
+    console.error('Missing AToken address');
     process.exit(1);
   }
   if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
+    console.error('Missing Reserve address');
     process.exit(1);
   }
 

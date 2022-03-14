@@ -44,9 +44,11 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   constructor(address emissionManager) RewardsDistributor(emissionManager) {}
 
   /**
-   * @dev Empty initialize for RewardsController
+   * @dev Initialize for RewardsController where emission manager is provided at input parameter
    **/
-  function initialize() external initializer {}
+  function initialize(address emissionManager) external initializer {
+    _setEmissionManager(emissionManager);
+  }
 
   /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {
@@ -204,8 +206,9 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userAssetBalances[i].asset = assets[i];
-      (userAssetBalances[i].userBalance, userAssetBalances[i].totalSupply) = IScaledBalanceToken(assets[i])
-        .getScaledUserBalanceAndSupply(user);
+      (userAssetBalances[i].userBalance, userAssetBalances[i].totalSupply) = IScaledBalanceToken(
+        assets[i]
+      ).getScaledUserBalanceAndSupply(user);
     }
     return userAssetBalances;
   }

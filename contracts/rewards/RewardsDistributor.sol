@@ -531,8 +531,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @param emissionManager The address of the new emission manager
    */
   function _setEmissionManager(address emissionManager) internal {
-    require(emissionManager != address(0), 'EMISSION_MANAGER_NOT_ZERO');
+    address previousEmissionManager = _emissionManager;
     _emissionManager = emissionManager;
-    emit EmissionManagerUpdated(emissionManager);
+    emit EmissionManagerUpdated(previousEmissionManager, emissionManager);
   }
 }

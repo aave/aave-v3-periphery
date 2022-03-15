@@ -21,13 +21,6 @@ makeSuite('RewardsController EmissionManager Role', (testEnv: TestEnv) => {
       rewardsController.connect(user1.signer).setEmissionManager(user1.address)
     ).to.be.revertedWith('ONLY_EMISSION_MANAGER');
   });
-  it('Revert at setEmissionManager if emission manager is ZERO_ADDRESS', async () => {
-    const { rewardsController } = testEnv;
-
-    await expect(rewardsController.setEmissionManager(ZERO_ADDRESS)).to.be.revertedWith(
-      'EMISSION_MANAGER_NOT_ZERO'
-    );
-  });
 
   it('Successfully call setEmissionManager if called by emission manager', async () => {
     const {

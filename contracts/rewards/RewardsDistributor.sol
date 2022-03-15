@@ -527,8 +527,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /**
-   * @dev Update the EmissionManager admin to the provided address parameter
-   * @param emissionManager The address of the new emission manager
+   * @dev Updates the address of the emission manager
+   * @param emissionManager The address of the new EmissionManager
    */
   function _setEmissionManager(address emissionManager) internal {
     address previousEmissionManager = _emissionManager;

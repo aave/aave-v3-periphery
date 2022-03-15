@@ -173,14 +173,14 @@ interface IRewardsDistributor {
   function getAssetDecimals(address asset) external view returns (uint8);
 
   /**
-   * @dev Returns the current EmissionManager admin address
-   * @return The address of the EmissionManager admin
+   * @dev Returns the address of the emission manager
+   * @return The address of the EmissionManager
    */
   function getEmissionManager() external view returns (address);
 
   /**
-   * @dev Update the EmissionManager admin to a new address
-   * @param emissionManager The address of the new emission manager
+   * @dev Updates the address of the emission manager
+   * @param emissionManager The address of the new EmissionManager
    */
   function setEmissionManager(address emissionManager) external;
 }

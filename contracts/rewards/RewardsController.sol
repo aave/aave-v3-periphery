@@ -44,7 +44,8 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   constructor(address emissionManager) RewardsDistributor(emissionManager) {}
 
   /**
-   * @dev Initialize for RewardsController where emission manager is provided at input parameter
+   * @dev Initialize for RewardsController
+   * @param emissionManager address of the EmissionManager
    **/
   function initialize(address emissionManager) external initializer {
     _setEmissionManager(emissionManager);

@@ -51,7 +51,7 @@ interface IRewardsDistributor {
    * @param newEmissionManager The address of the new emission manager
    */
   event EmissionManagerUpdated(
-    address indexed previousEmissionManager,
+    address indexed oldEmissionManager,
     address indexed newEmissionManager
   );
 

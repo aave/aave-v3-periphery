@@ -46,6 +46,16 @@ interface IRewardsDistributor {
   );
 
   /**
+   * @dev Emitted when setEmissionManager is called after transfer of the EmissionManager role to a new admin
+   * @param previousEmissionManager The address of the previous emission manager that requested the update of emission manager
+   * @param newEmissionManager The address of the new emission manager admin
+   */
+  event EmissionManagerUpdated(
+    address indexed previousEmissionManager,
+    address indexed newEmissionManager
+  );
+
+  /**
    * @dev Sets the end date for the distribution
    * @param asset The asset to incentivize
    * @param reward The reward token that incentives the asset
@@ -161,4 +171,16 @@ interface IRewardsDistributor {
    * @return The decimals of an underlying asset
    */
   function getAssetDecimals(address asset) external view returns (uint8);
+
+  /**
+   * @dev Returns the address of the emission manager
+   * @return The address of the EmissionManager
+   */
+  function getEmissionManager() external view returns (address);
+
+  /**
+   * @dev Updates the address of the emission manager
+   * @param emissionManager The address of the new EmissionManager
+   */
+  function setEmissionManager(address emissionManager) external;
 }

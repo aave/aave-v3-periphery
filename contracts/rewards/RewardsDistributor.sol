@@ -14,7 +14,7 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
 abstract contract RewardsDistributor is IRewardsDistributor {
   using SafeCast for uint256;
   // manager of incentives
-  address public immutable EMISSION_MANAGER;
+  address internal _emissionManager;
 
   // asset => AssetData
   mapping(address => RewardsDataTypes.AssetData) internal _assets;
@@ -29,12 +29,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   address[] internal _assetsList;
 
   modifier onlyEmissionManager() {
-    require(msg.sender == EMISSION_MANAGER, 'ONLY_EMISSION_MANAGER');
+    require(msg.sender == _emissionManager, 'ONLY_EMISSION_MANAGER');
     _;
   }
 
   constructor(address emissionManager) {
-    EMISSION_MANAGER = emissionManager;
+    _setEmissionManager(emissionManager);
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -123,7 +123,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     override
     returns (address[] memory rewardsList, uint256[] memory unclaimedAmounts)
   {
-    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserAssetBalances(assets, user);
+    RewardsDataTypes.UserAssetBalance[] memory userAssetBalances = _getUserAssetBalances(
+      assets,
+      user
+    );
     rewardsList = new address[](_rewardsList.length);
     unclaimedAmounts = new uint256[](rewardsList.length);
 
@@ -139,11 +142,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
         if (userAssetBalances[i].userBalance == 0) {
           continue;
         }
-        unclaimedAmounts[r] += _getPendingRewards(
-          user,
-          rewardsList[r],
-          userAssetBalances[i]
-        );
+        unclaimedAmounts[r] += _getPendingRewards(user, rewardsList[r], userAssetBalances[i]);
       }
     }
     return (rewardsList, unclaimedAmounts);
@@ -180,7 +179,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       RewardsDataTypes.AssetData storage assetConfig = _assets[asset];
       RewardsDataTypes.RewardData storage rewardConfig = _assets[asset].rewards[rewards[i]];
       uint256 decimals = assetConfig.decimals;
-      require(decimals != 0 && rewardConfig.lastUpdateTimestamp != 0, 'DISTRIBUTION_DOES_NOT_EXIST');
+      require(
+        decimals != 0 && rewardConfig.lastUpdateTimestamp != 0,
+        'DISTRIBUTION_DOES_NOT_EXIST'
+      );
 
       (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
@@ -512,5 +514,25 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {
     return _assets[asset].decimals;
+  }
+
+  /// @inheritdoc IRewardsDistributor
+  function getEmissionManager() external view returns (address) {
+    return _emissionManager;
+  }
+
+  /// @inheritdoc IRewardsDistributor
+  function setEmissionManager(address emissionManager) external onlyEmissionManager {
+    _setEmissionManager(emissionManager);
+  }
+
+  /**
+   * @dev Updates the address of the emission manager
+   * @param emissionManager The address of the new EmissionManager
+   */
+  function _setEmissionManager(address emissionManager) internal {
+    address previousEmissionManager = _emissionManager;
+    _emissionManager = emissionManager;
+    emit EmissionManagerUpdated(previousEmissionManager, emissionManager);
   }
 }

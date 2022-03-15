@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.15.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.14.0...v1.15.0) (2022-03-15)
+
+
+### Features
+
+* Add previousEmissionManager event parameter and remove zero address check ([b0c18a2](https://www.github.com/aave/aave-v3-periphery/commit/b0c18a2d681b5384d790ad721566b112e67a10c9))
+* Allow Emission Manager owner of RewardsController to be mutable by current admin ([902e524](https://www.github.com/aave/aave-v3-periphery/commit/902e524e2740199fa594885863d6a5a94c441272))
+
+
+### Bug Fixes
+
+* Fix docs ([3751fcf](https://www.github.com/aave/aave-v3-periphery/commit/3751fcfbdc9bcf1e7e2de22e9614bc5faaefce27))
+* Fix EmissionManagerUpdated event docstring ([49fe12b](https://www.github.com/aave/aave-v3-periphery/commit/49fe12b61b6633444d4522ad66c357f4d41fe5c9))
+* Fix EmissionManagerUpdated event docstring ([6e0ae79](https://www.github.com/aave/aave-v3-periphery/commit/6e0ae79ad5446fc1c21be703d6f68c50fad18e78))
+* Remove test case of ZERO new emissionManager ([837c949](https://www.github.com/aave/aave-v3-periphery/commit/837c9494c947b7b3dbf80812c1f3dccacdc2a8f2))
+
 ## [1.14.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.13.0...v1.14.0) (2022-03-04)
 
 

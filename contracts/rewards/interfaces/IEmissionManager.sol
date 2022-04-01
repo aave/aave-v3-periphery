@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {IEACAggregatorProxy} from '../../misc/interfaces/IEACAggregatorProxy.sol';
 import {RewardsDataTypes} from '../libraries/RewardsDataTypes.sol';
 import {ITransferStrategyBase} from './ITransferStrategyBase.sol';
+import {IRewardsController} from './IRewardsController.sol';
 
 /**
  * @title IEmissionManager
@@ -112,4 +113,17 @@ interface IEmissionManager {
    * @param controller the address of the RewardsController contract
    */
   function setRewardsController(address controller) external;
+
+  /**
+   * @dev Returns the rewards controller address
+   * @return The address of the RewardsController contract
+   */
+  function getRewardsController() external view returns (IRewardsController);
+
+  /**
+   * @dev Returns the admin of the given reward emission
+   * @param reward The address of the reward token
+   * @return The address of the emission admin
+   */
+  function getEmissionAdmin(address reward) external view returns (address);
 }

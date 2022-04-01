@@ -15,15 +15,15 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
  */
 contract EmissionManager is Ownable, IEmissionManager {
   // Map of reward addresses and their emission admins (rewardAddress => emissionAdmin)
-  mapping(address => address) public emissionAdmins;
+  mapping(address => address) internal _emissionAdmins;
 
-  IRewardsController public rewardsController;
+  IRewardsController internal _rewardsController;
 
   /**
    * @dev Only emission admin of the given reward can call functions marked by this modifier.
    **/
   modifier onlyEmissionAdmin(address reward) {
-    require(msg.sender == emissionAdmins[reward], 'ONLY_EMISSION_ADMIN');
+    require(msg.sender == _emissionAdmins[reward], 'ONLY_EMISSION_ADMIN');
     _;
   }
 
@@ -32,15 +32,15 @@ contract EmissionManager is Ownable, IEmissionManager {
    * @param controller The address of the RewardsController contract
    */
   constructor(address controller) {
-    rewardsController = IRewardsController(controller);
+    _rewardsController = IRewardsController(controller);
   }
 
   /// @inheritdoc IEmissionManager
   function configureAssets(RewardsDataTypes.RewardsConfigInput[] memory config) external override {
     for (uint256 i = 0; i < config.length; i++) {
-      require(emissionAdmins[config[i].reward] == msg.sender, 'ONLY_EMISSION_ADMIN');
+      require(_emissionAdmins[config[i].reward] == msg.sender, 'ONLY_EMISSION_ADMIN');
     }
-    rewardsController.configureAssets(config);
+    _rewardsController.configureAssets(config);
   }
 
   /// @inheritdoc IEmissionManager
@@ -49,7 +49,7 @@ contract EmissionManager is Ownable, IEmissionManager {
     override
     onlyEmissionAdmin(reward)
   {
-    rewardsController.setTransferStrategy(reward, transferStrategy);
+    _rewardsController.setTransferStrategy(reward, transferStrategy);
   }
 
   /// @inheritdoc IEmissionManager
@@ -58,7 +58,7 @@ contract EmissionManager is Ownable, IEmissionManager {
     override
     onlyEmissionAdmin(reward)
   {
-    rewardsController.setRewardOracle(reward, rewardOracle);
+    _rewardsController.setRewardOracle(reward, rewardOracle);
   }
 
   /// @inheritdoc IEmissionManager
@@ -67,7 +67,7 @@ contract EmissionManager is Ownable, IEmissionManager {
     address reward,
     uint32 newDistributionEnd
   ) external override onlyEmissionAdmin(reward) {
-    rewardsController.setDistributionEnd(asset, reward, newDistributionEnd);
+    _rewardsController.setDistributionEnd(asset, reward, newDistributionEnd);
   }
 
   /// @inheritdoc IEmissionManager
@@ -77,30 +77,40 @@ contract EmissionManager is Ownable, IEmissionManager {
     uint88[] calldata newEmissionsPerSecond
   ) external override {
     for (uint256 i = 0; i < rewards.length; i++) {
-      require(emissionAdmins[rewards[i]] == msg.sender, 'ONLY_EMISSION_ADMIN');
+      require(_emissionAdmins[rewards[i]] == msg.sender, 'ONLY_EMISSION_ADMIN');
     }
-    rewardsController.setEmissionPerSecond(asset, rewards, newEmissionsPerSecond);
+    _rewardsController.setEmissionPerSecond(asset, rewards, newEmissionsPerSecond);
   }
 
   /// @inheritdoc IEmissionManager
   function setClaimer(address user, address claimer) external override onlyOwner {
-    rewardsController.setClaimer(user, claimer);
+    _rewardsController.setClaimer(user, claimer);
   }
 
   /// @inheritdoc IEmissionManager
   function setEmissionManager(address emissionManager) external override onlyOwner {
-    rewardsController.setEmissionManager(emissionManager);
+    _rewardsController.setEmissionManager(emissionManager);
   }
 
   /// @inheritdoc IEmissionManager
   function setEmissionAdmin(address reward, address admin) external override onlyOwner {
-    address oldAdmin = emissionAdmins[reward];
-    emissionAdmins[reward] = admin;
+    address oldAdmin = _emissionAdmins[reward];
+    _emissionAdmins[reward] = admin;
     emit EmissionAdminUpdated(reward, oldAdmin, admin);
   }
 
   /// @inheritdoc IEmissionManager
   function setRewardsController(address controller) external override onlyOwner {
-    rewardsController = IRewardsController(controller);
+    _rewardsController = IRewardsController(controller);
+  }
+
+  /// @inheritdoc IEmissionManager
+  function getRewardsController() external view override returns (IRewardsController) {
+    return _rewardsController;
+  }
+
+  /// @inheritdoc IEmissionManager
+  function getEmissionAdmin(address reward) external view override returns (address) {
+    return _emissionAdmins[reward];
   }
 }

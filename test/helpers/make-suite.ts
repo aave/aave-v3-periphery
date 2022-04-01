@@ -53,6 +53,7 @@ import {
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
+import { EmissionManager, EmissionManager__factory } from '../../types';
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -84,6 +85,7 @@ export interface TestEnv {
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
+  emissionManager: EmissionManager;
   rewardsController: RewardsController;
   rewardsVault: SignerWithAddress;
   stakedAave: StakedAaveV3;
@@ -129,6 +131,7 @@ const testEnv: TestEnv = {
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
+  emissionManager: {} as EmissionManager,
   rewardsController: {} as RewardsController,
   rewardsVault: {} as SignerWithAddress,
   stakedAave: {} as StakedAaveV3,
@@ -237,6 +240,9 @@ export async function initializeMakeSuite() {
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
   const rewardsController = ((await getIncentivesV2()) as any) as RewardsController;
   testEnv.rewardsController = rewardsController;
+  testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
+    rewardsController.address
+  );
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();
   testEnv.aaveToken = testEnv.aave;

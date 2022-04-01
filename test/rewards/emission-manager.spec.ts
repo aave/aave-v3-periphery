@@ -33,9 +33,9 @@ makeSuite('EmissionManager', (testEnv: TestEnv) => {
   it('Owner sets a new rewards controller', async () => {
     const { emissionManager } = testEnv;
 
-    expect(await emissionManager.rewardsController()).to.be.eq(mockRewardsController.address);
+    expect(await emissionManager.getRewardsController()).to.be.eq(mockRewardsController.address);
     expect(await emissionManager.setRewardsController(ZERO_ADDRESS));
-    expect(await emissionManager.rewardsController()).to.be.eq(ZERO_ADDRESS);
+    expect(await emissionManager.getRewardsController()).to.be.eq(ZERO_ADDRESS);
   });
 
   it('Non-owner user tries to set a new rewards controller (revert expected)', async () => {
@@ -48,23 +48,23 @@ makeSuite('EmissionManager', (testEnv: TestEnv) => {
 
   it('Non-owner user tries to set a new emission admin (revert expected)', async () => {
     const { emissionManager, rewardToken, users } = testEnv;
-    expect(await emissionManager.emissionAdmins(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
+    expect(await emissionManager.getEmissionAdmin(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
     await expect(
       emissionManager
         .connect(users[0].signer)
         .setEmissionAdmin(rewardToken.address, users[1].address)
     ).to.be.revertedWith('Ownable: caller is not the owner');
-    expect(await emissionManager.emissionAdmins(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
+    expect(await emissionManager.getEmissionAdmin(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
   });
 
   it('Owner sets a new emission admin', async () => {
     const { emissionManager, rewardToken, users } = testEnv;
 
-    expect(await emissionManager.emissionAdmins(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
+    expect(await emissionManager.getEmissionAdmin(rewardToken.address)).to.be.eq(ZERO_ADDRESS);
     expect(await emissionManager.setEmissionAdmin(rewardToken.address, users[1].address))
       .to.emit(emissionManager, 'EmissionAdminUpdated')
       .withArgs(rewardToken.address, ZERO_ADDRESS, users[1].address);
-    expect(await emissionManager.emissionAdmins(rewardToken.address)).to.be.eq(users[1].address);
+    expect(await emissionManager.getEmissionAdmin(rewardToken.address)).to.be.eq(users[1].address);
   });
 
   it('Non-owner user tries to set an authorized claimer (revert expected)', async () => {

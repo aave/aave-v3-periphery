@@ -14,7 +14,7 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
  * @notice It manages the list of admins of reward emissions and provides functions to control reward emissions.
  */
 contract EmissionManager is Ownable, IEmissionManager {
-  // Map of reward addresses and their emission admins (rewardAddress => emissionAdmin)
+  // reward => emissionAdmin
   mapping(address => address) internal _emissionAdmins;
 
   IRewardsController internal _rewardsController;

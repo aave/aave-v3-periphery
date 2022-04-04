@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.17.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.16.0...v1.17.0) (2022-04-04)
+
+
+### Features
+
+* Add owner constructor parameter to EmissionManager contract to support CREATE2 factory deployments ([a36fc32](https://www.github.com/aave/aave-v3-periphery/commit/a36fc32437eee04da125e5f467231eb99354923e))
+
+
+### Bug Fixes
+
+* Fix docs ([7b0b0fd](https://www.github.com/aave/aave-v3-periphery/commit/7b0b0fdffb5f6305be865576edf3e20c0d12d8c6))
+
 ## [1.16.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.15.0...v1.16.0) (2022-04-04)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.16.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.15.0...v1.16.0) (2022-04-04)
+
+
+### Features
+
+* Add emission manager contract ([abcb674](https://www.github.com/aave/aave-v3-periphery/commit/abcb6746557efc214462b0c7bdbe0bacdf775eaf))
+
+
+### Bug Fixes
+
+* Add missing docs to modifier ([ad663df](https://www.github.com/aave/aave-v3-periphery/commit/ad663df941f8b675aea16658ca6f7ae8e0465c1b))
+* Fix docs ([70e1c0f](https://www.github.com/aave/aave-v3-periphery/commit/70e1c0f3c5ec71dd7195f0a287e8b0cfc2327ae5))
+* Make emission manager variables internal ([37966a1](https://www.github.com/aave/aave-v3-periphery/commit/37966a15965941efe872d1ce2ab0555674214b2d))
+
 ## [1.15.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.14.0...v1.15.0) (2022-03-15)
 
 

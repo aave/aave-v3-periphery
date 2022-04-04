@@ -241,7 +241,8 @@ export async function initializeMakeSuite() {
   const rewardsController = ((await getIncentivesV2()) as any) as RewardsController;
   testEnv.rewardsController = rewardsController;
   testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
-    rewardsController.address
+    rewardsController.address,
+    deployer.address
   );
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();

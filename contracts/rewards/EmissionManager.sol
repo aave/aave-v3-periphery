@@ -30,9 +30,11 @@ contract EmissionManager is Ownable, IEmissionManager {
   /**
    * Constructor.
    * @param controller The address of the RewardsController contract
+   * @param owner The address of the owner
    */
-  constructor(address controller) {
+  constructor(address controller, address owner) {
     _rewardsController = IRewardsController(controller);
+    transferOwnership(owner);
   }
 
   /// @inheritdoc IEmissionManager

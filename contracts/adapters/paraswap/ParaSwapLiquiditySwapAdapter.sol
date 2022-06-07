@@ -53,6 +53,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
     uint256 flashLoanAmount = amount;
+    uint256 premiumLocal = premium;
     address initiatorLocal = initiator;
     IERC20Detailed assetToSwapFrom = IERC20Detailed(asset);
     (
@@ -72,8 +73,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       swapCalldata,
       augustus,
       permitParams,
-      amount,
-      premium,
+      flashLoanAmount,
+      premiumLocal,
       initiatorLocal,
       assetToSwapFrom,
       assetToSwapTo,

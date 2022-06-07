@@ -331,7 +331,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           paraswapLiquiditySwapAdapter
             .connect(user)
-            .executeOperation([weth.address], [amountWETHtoSwap], [0], userAddress, params)
+            .executeOperation(weth.address, amountWETHtoSwap, 0, userAddress, params)
         ).to.be.revertedWith('CALLER_MUST_BE_POOL');
       });
 

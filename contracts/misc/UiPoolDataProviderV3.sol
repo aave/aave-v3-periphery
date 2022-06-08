@@ -169,6 +169,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
 
+      reserveData.isSiloedBorrowing = reserveConfigurationMap.getSiloedBorrowing();
       reserveData.isPaused = isPaused;
       reserveData.unbacked = baseData.unbacked;
       reserveData.isolationModeTotalDebt = baseData.isolationModeTotalDebt;

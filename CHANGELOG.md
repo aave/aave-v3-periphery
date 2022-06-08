@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.18.0](https://github.com/aave/aave-v3-periphery/compare/v1.17.0...v1.18.0) (2022-06-08)
+
+
+### Features
+
+* use simple flash loan ([e715175](https://github.com/aave/aave-v3-periphery/commit/e715175c899f95dcde98099965aad2fabdbdc1f2))
+
+
+### Bug Fixes
+
+* assign variable to stack to deep ([8f2b68b](https://github.com/aave/aave-v3-periphery/commit/8f2b68b452a19197c0b6664598f1f7a940b958c7))
+* fix tests for executeOperation ([2f98828](https://github.com/aave/aave-v3-periphery/commit/2f98828abb3832886ec14d7651a437137c93bbec))
+* remove typo ([70dd011](https://github.com/aave/aave-v3-periphery/commit/70dd011d5661c6f22dda968bca8b06587ddc82d2))
+* use simple receiver ([3aa2b26](https://github.com/aave/aave-v3-periphery/commit/3aa2b266850c46f861b77dbbaffd1c67b422124a))
+
+
+### Miscellaneous Chores
+
+* release 1.18.0 ([63c4695](https://github.com/aave/aave-v3-periphery/commit/63c4695a2d4ce4a12c2aaf9b3fce4b998abf0203))
+
 ## [1.17.0](https://www.github.com/aave/aave-v3-periphery/compare/v1.16.0...v1.17.0) (2022-04-04)
 
 

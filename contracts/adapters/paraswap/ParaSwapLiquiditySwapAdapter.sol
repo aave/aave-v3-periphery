@@ -30,11 +30,12 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
    * @dev Swaps the received reserve amount from the flash loan into the asset specified in the params.
    * The received funds from the swap are then deposited into the protocol on behalf of the user.
    * The user should give this contract allowance to pull the ATokens in order to withdraw the underlying asset and repay the flash loan.
-   * @param assets Address of the underlying asset to be swapped from
-   * @param amounts Amount of the flash loan i.e. maximum amount to swap
-   * @param premiums Fee of the flash loan
-   * @param initiator Account that initiated the flash loan
-   * @param params Additional variadic field to include extra params. Expected parameters:
+   * @param asset The address of the flash-borrowed asset
+   * @param amount The amount of the flash-borrowed asset
+   * @param premium The fee of the flash-borrowed asset
+   * @param initiator The address of the flashloan initiator
+   * @param params The byte-encoded params passed when initiating the flashloan
+   * @return True if the execution of the operation succeeds, false otherwise
    *   address assetToSwapTo Address of the underlying asset to be swapped to and deposited
    *   uint256 minAmountToReceive Min amount to be received from the swap
    *   uint256 swapAllBalanceOffset Set to offset of fromAmount in Augustus calldata if wanting to swap all balance, otherwise 0
@@ -43,22 +44,18 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
    *   PermitSignature permitParams Struct containing the permit signatures, set to all zeroes if not used
    */
   function executeOperation(
-    address[] calldata assets,
-    uint256[] calldata amounts,
-    uint256[] calldata premiums,
+    address asset,
+    uint256 amount,
+    uint256 premium,
     address initiator,
     bytes calldata params
   ) external override nonReentrant returns (bool) {
     require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
-    require(
-      assets.length == 1 && amounts.length == 1 && premiums.length == 1,
-      'FLASHLOAN_MULTIPLE_ASSETS_NOT_SUPPORTED'
-    );
 
-    uint256 flashLoanAmount = amounts[0];
-    uint256 premium = premiums[0];
+    uint256 flashLoanAmount = amount;
+    uint256 premiumLocal = premium;
     address initiatorLocal = initiator;
-    IERC20Detailed assetToSwapFrom = IERC20Detailed(assets[0]);
+    IERC20Detailed assetToSwapFrom = IERC20Detailed(asset);
     (
       IERC20Detailed assetToSwapTo,
       uint256 minAmountToReceive,
@@ -77,7 +74,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       augustus,
       permitParams,
       flashLoanAmount,
-      premium,
+      premiumLocal,
       initiatorLocal,
       assetToSwapFrom,
       assetToSwapTo,

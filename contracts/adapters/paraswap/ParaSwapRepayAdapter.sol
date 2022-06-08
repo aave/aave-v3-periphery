@@ -42,11 +42,12 @@ contract ParaSwapRepayAdapter is BaseParaSwapBuyAdapter, ReentrancyGuard {
    * The user should give this contract allowance to pull the ATokens in order to withdraw the underlying asset, swap it
    * and repay the flash loan.
    * Supports only one asset on the flash loan.
-   * @param assets Address of collateral asset(Flash loan asset)
-   * @param amounts Amount of flash loan taken
-   * @param premiums Fee of the flash loan
-   * @param initiator Address of the user
-   * @param params Additional variadic field to include extra params. Expected parameters:
+   * @param asset The address of the flash-borrowed asset
+   * @param amount The amount of the flash-borrowed asset
+   * @param premium The fee of the flash-borrowed asset
+   * @param initiator The address of the flashloan initiator
+   * @param params The byte-encoded params passed when initiating the flashloan
+   * @return True if the execution of the operation succeeds, false otherwise
    *   IERC20Detailed debtAsset Address of the debt asset
    *   uint256 debtAmount Amount of debt to be repaid
    *   uint256 rateMode Rate modes of the debt to be repaid
@@ -58,24 +59,18 @@ contract ParaSwapRepayAdapter is BaseParaSwapBuyAdapter, ReentrancyGuard {
    *   PermitSignature permitParams Struct containing the permit signatures, set to all zeroes if not used
    */
   function executeOperation(
-    address[] calldata assets,
-    uint256[] calldata amounts,
-    uint256[] calldata premiums,
+    address asset,
+    uint256 amount,
+    uint256 premium,
     address initiator,
     bytes calldata params
   ) external override nonReentrant returns (bool) {
     require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
-    require(
-      assets.length == 1 && amounts.length == 1 && premiums.length == 1,
-      'FLASHLOAN_MULTIPLE_ASSETS_NOT_SUPPORTED'
-    );
-
-    uint256 collateralAmount = amounts[0];
-    uint256 premium = premiums[0];
+    uint256 collateralAmount = amount;
     address initiatorLocal = initiator;
 
-    IERC20Detailed collateralAsset = IERC20Detailed(assets[0]);
+    IERC20Detailed collateralAsset = IERC20Detailed(asset);
 
     _swapAndRepay(params, premium, initiatorLocal, collateralAsset, collateralAmount);
 

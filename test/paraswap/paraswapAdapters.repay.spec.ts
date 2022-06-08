@@ -195,12 +195,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -321,12 +319,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -403,13 +399,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           paraswapRepayAdapter
             .connect(user)
-            .executeOperation(
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
-              params
-            )
+            .executeOperation(weth.address, amountWETHtoSwap.toString(), 0, userAddress, params)
         ).to.be.revertedWith('CALLER_MUST_BE_POOL');
       });
 
@@ -472,12 +462,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -540,12 +528,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -609,12 +595,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -698,12 +682,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapRepayAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap.toString()],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap.toString(),
               params,
               0
             )
@@ -811,12 +793,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
         await pool
           .connect(user)
-          .flashLoan(
+          .flashLoanSimple(
             paraswapRepayAdapter.address,
-            [weth.address],
-            [flashLoanAmount.toString()],
-            [0],
-            userAddress,
+            weth.address,
+            flashLoanAmount.toString(),
             params,
             0
           );
@@ -920,12 +900,10 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
         await pool
           .connect(user)
-          .flashLoan(
+          .flashLoanSimple(
             paraswapRepayAdapter.address,
-            [weth.address],
-            [flashLoanAmount.toString()],
-            [0],
-            userAddress,
+            weth.address,
+            flashLoanAmount.toString(),
             params,
             0
           );

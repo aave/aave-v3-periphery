@@ -162,12 +162,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -260,12 +258,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -335,7 +331,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           paraswapLiquiditySwapAdapter
             .connect(user)
-            .executeOperation([weth.address], [amountWETHtoSwap], [0], userAddress, params)
+            .executeOperation(weth.address, amountWETHtoSwap, 0, userAddress, params)
         ).to.be.revertedWith('CALLER_MUST_BE_POOL');
       });
 
@@ -417,12 +413,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [usdc.address],
-              [amountUSDCtoSwap],
-              [0],
-              userAddress,
+              usdc.address,
+              amountUSDCtoSwap,
               params,
               0
             )
@@ -501,12 +495,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -592,12 +584,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [usdc.address],
-              [amountUSDCtoSwap],
-              [0],
-              userAddress,
+              usdc.address,
+              amountUSDCtoSwap,
               params,
               0
             )
@@ -663,12 +653,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [bigAmountToSwap],
-              [0],
-              userAddress,
+              weth.address,
+              bigAmountToSwap,
               params,
               0
             )
@@ -772,12 +760,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [bigAmountToSwap],
-              [0],
-              userAddress,
+              weth.address,
+              bigAmountToSwap,
               params,
               0
             )
@@ -855,12 +841,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [smallAmountToSwap],
-              [0],
-              userAddress,
+              weth.address,
+              smallAmountToSwap,
               params,
               0
             )
@@ -917,12 +901,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -988,12 +970,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -1097,12 +1077,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -1198,12 +1176,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [amountWETHtoSwap],
-              [0],
-              userAddress,
+              weth.address,
+              amountWETHtoSwap,
               params,
               0
             )
@@ -1282,12 +1258,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [bigAmountToSwap],
-              [0],
-              userAddress,
+              weth.address,
+              bigAmountToSwap,
               params,
               0
             )
@@ -1382,12 +1356,10 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await expect(
           pool
             .connect(user)
-            .flashLoan(
+            .flashLoanSimple(
               paraswapLiquiditySwapAdapter.address,
-              [weth.address],
-              [bigAmountToSwap],
-              [0],
-              userAddress,
+              weth.address,
+              bigAmountToSwap,
               params,
               0
             )

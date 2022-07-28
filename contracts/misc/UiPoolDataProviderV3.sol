@@ -124,9 +124,12 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       // Due we take the symbol from underlying token we need a special case for $MKR as symbol() returns bytes32
       if (address(reserveData.underlyingAsset) == address(MKR_ADDRESS)) {
         bytes32 symbol = IERC20DetailedBytes(reserveData.underlyingAsset).symbol();
+        bytes32 name = IERC20DetailedBytes(reserveData.underlyingAsset).name();
         reserveData.symbol = bytes32ToString(symbol);
+        reserveData.name = bytes32ToString(name);
       } else {
         reserveData.symbol = IERC20Detailed(reserveData.underlyingAsset).symbol();
+        reserveData.name = IERC20Detailed(reserveData.underlyingAsset).name();
       }
 
       //stores the reserve configuration

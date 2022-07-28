@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
+import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IRewardsController} from '../rewards/interfaces/IRewardsController.sol';
-import {IUiIncentiveDataProviderV3} from './interfaces/IUiIncentiveDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IncentivizedERC20} from '@aave/core-v3/contracts/protocol/tokenization/base/IncentivizedERC20.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {IRewardsController} from '../rewards/interfaces/IRewardsController.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
+import {IUiIncentiveDataProviderV3} from './interfaces/IUiIncentiveDataProviderV3.sol';
 
 contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
   using UserConfiguration for DataTypes.UserConfigurationMap;
-
-  constructor() {}
 
   function getFullReservesIncentiveData(IPoolAddressesProvider provider, address user)
     external
@@ -352,7 +350,7 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
         );
       }
 
-      // stable debt toekn
+      // stable debt token
       IRewardsController sTokenIncentiveController = IRewardsController(
         address(IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController())
       );

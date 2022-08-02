@@ -30,15 +30,23 @@ makeSuite('AaveIncentivesControllerV2 reward oracle tests', (testEnv: TestEnv) =
     );
 
     // Retrieve reward oracle
+    const configuredOracle = await rewardsController.getRewardOracle(rewardToken.address);
+    expect(configuredOracle).equals(rewardPriceAggregator);
   });
 
   it('Update the reward oracle with emission manager', async () => {
-    const { rewardsController } = testEnv;
-    await expect(rewardsController.initialize()).to.be.reverted;
+    const { rewardsController, rewardsPriceAggregators, rewardToken } = testEnv;
+    await waitForTx(
+      await rewardsController.setRewardOracle(rewardToken.address, rewardsPriceAggregators[2])
+    );
+    const configuredOracle = await rewardsController.getRewardOracle(rewardToken.address);
+    expect(configuredOracle).equals(rewardsPriceAggregators[2]);
   });
 
   it('Revert due update the reward oracle from non admin account', async () => {
-    const { rewardsController } = testEnv;
-    await expect(rewardsController.initialize()).to.be.reverted;
+    const { rewardsController, users } = testEnv;
+    await expect(
+      rewardsController.connect(users[2].signer).setRewardOracle(ZERO_ADDRESS, ZERO_ADDRESS)
+    ).be.revertedWith('ONLY_EMISSION_MANAGER');
   });
 });

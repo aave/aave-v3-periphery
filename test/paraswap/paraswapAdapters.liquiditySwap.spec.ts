@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { ParaSwapLiquiditySwapAdapter } from './../../types/ParaSwapLiquiditySwapAdapter.d';
 import { ParaSwapLiquiditySwapAdapter__factory } from './../../types/factories/ParaSwapLiquiditySwapAdapter__factory';
+import { PANIC_CODES } from '@nomicfoundation/hardhat-chai-matchers/panic';
 import {
   AToken,
   eContractid,
@@ -1606,9 +1607,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
               }
             )
-        ).to.be.revertedWith(
-          'VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
-        );
+        ).to.be.revertedWithPanic(PANIC_CODES.ARITHMETIC_UNDER_OR_OVERFLOW);
       });
 
       it('should revert when trying to swap more than allowance', async () => {
@@ -1663,9 +1662,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
                 s: '0x0000000000000000000000000000000000000000000000000000000000000000',
               }
             )
-        ).to.be.revertedWith(
-          'VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
-        );
+        ).to.be.revertedWithPanic(PANIC_CODES.ARITHMETIC_UNDER_OR_OVERFLOW);
       });
 
       it('should revert when min amount to receive exceeds the max slippage amount', async () => {

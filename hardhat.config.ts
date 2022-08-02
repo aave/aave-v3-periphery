@@ -4,6 +4,7 @@ import { NETWORKS_RPC_URL } from './helper-hardhat-config';
 
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
+import '@nomicfoundation/hardhat-chai-matchers';
 import '@typechain/hardhat';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-gas-reporter';

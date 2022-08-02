@@ -8,7 +8,6 @@ import bluebird from 'bluebird';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
 import bignumberChai from 'chai-bignumber';
-import { solidity } from 'ethereum-waffle';
 import {
   getPool,
   getPoolConfiguratorProxy,
@@ -56,7 +55,6 @@ import { parseEther } from 'ethers/lib/utils';
 import { EmissionManager, EmissionManager__factory } from '../../types';
 
 chai.use(bignumberChai());
-chai.use(solidity);
 
 export interface SignerWithAddress {
   signer: Signer;

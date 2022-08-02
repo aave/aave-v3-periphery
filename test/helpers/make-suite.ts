@@ -49,6 +49,7 @@ import {
   MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
   deployMintableERC20,
+  getEmissionManager,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -175,6 +176,7 @@ export async function initializeMakeSuite() {
 
   testEnv.configurator = await getPoolConfiguratorProxy();
 
+  const emissionManager = await getEmissionManager();
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
   testEnv.registry = await getPoolAddressesProviderRegistry();
@@ -283,6 +285,7 @@ export async function initializeMakeSuite() {
       .connect(rewardsVault.signer)
       .transfer(testEnv.stakedTokenStrategy.address, parseEther('30000000000'))
   );
+  await waitForTx(await emissionManager.setEmissionManager(deployer.address));
 }
 
 const setSnapshot = async () => {

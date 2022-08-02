@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.18.1](https://github.com/aave/aave-v3-periphery/compare/v1.18.0...v1.18.1) (2022-07-28)
+
+
+### Bug Fixes
+
+* Add clean ups to UIIncentiveDataProvider and PoolDataProvider ([4d80e42](https://github.com/aave/aave-v3-periphery/commit/4d80e425ab301d8e9573f8457a1cf534314ec957))
+* add name to response ([78a976f](https://github.com/aave/aave-v3-periphery/commit/78a976f519845e6dd5e1e52649df9f1659013206))
+* add value to struct ([5ab18b5](https://github.com/aave/aave-v3-periphery/commit/5ab18b5bca1d7247d63ac01c41a09d235a5e5067))
+
 ## [1.18.0](https://github.com/aave/aave-v3-periphery/compare/v1.17.0...v1.18.0) (2022-06-08)
 
 

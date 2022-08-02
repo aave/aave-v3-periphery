@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
 interface IUiPoolDataProviderV3 {
   struct InterestRates {
@@ -66,7 +65,7 @@ interface IUiPoolDataProviderV3 {
     uint256 debtCeilingDecimals;
     uint8 eModeCategoryId;
     uint256 borrowCap;
-    uint256 supplyCap; 
+    uint256 supplyCap;
     // eMode
     uint16 eModeLtv;
     uint16 eModeLiquidationThreshold;
@@ -101,15 +100,10 @@ interface IUiPoolDataProviderV3 {
   function getReservesData(IPoolAddressesProvider provider)
     external
     view
-    returns (
-      AggregatedReserveData[] memory,
-      BaseCurrencyInfo memory
-    );
+    returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory);
 
   function getUserReservesData(IPoolAddressesProvider provider, address user)
     external
     view
-    returns (
-      UserReserveData[] memory, uint8
-    );
+    returns (UserReserveData[] memory, uint8);
 }

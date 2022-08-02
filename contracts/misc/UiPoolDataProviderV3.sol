@@ -3,22 +3,20 @@ pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IAaveOracle} from '@aave/core-v3/contracts/interfaces/IAaveOracle.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {IVariableDebtToken} from '@aave/core-v3/contracts/interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '@aave/core-v3/contracts/interfaces/IStableDebtToken.sol';
+import {DefaultReserveInterestRateStrategy} from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
+import {AaveProtocolDataProvider} from '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
 import {WadRayMath} from '@aave/core-v3/contracts/protocol/libraries/math/WadRayMath.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '@aave/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
-import {AaveProtocolDataProvider} from '@aave/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
+import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';
 
 contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
   using WadRayMath for uint256;
@@ -30,9 +28,8 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
   uint256 public constant ETH_CURRENCY_UNIT = 1 ether;
   address public constant MKR_ADDRESS = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
 
-
   constructor(
-    IEACAggregatorProxy _networkBaseTokenPriceInUsdProxyAggregator, 
+    IEACAggregatorProxy _networkBaseTokenPriceInUsdProxyAggregator,
     IEACAggregatorProxy _marketReferenceCurrencyPriceInUsdProxyAggregator
   ) {
     networkBaseTokenPriceInUsdProxyAggregator = _networkBaseTokenPriceInUsdProxyAggregator;
@@ -42,9 +39,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
   function getInterestRateStrategySlopes(DefaultReserveInterestRateStrategy interestRateStrategy)
     internal
     view
-    returns (
-      InterestRates memory
-    )
+    returns (InterestRates memory)
   {
     InterestRates memory interestRates;
     interestRates.variableRateSlope1 = interestRateStrategy.getVariableRateSlope1();
@@ -72,14 +67,13 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     public
     view
     override
-    returns (
-      AggregatedReserveData[] memory,
-      BaseCurrencyInfo memory
-    )
+    returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory)
   {
     IAaveOracle oracle = IAaveOracle(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
-    AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(provider.getPoolDataProvider());
+    AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(
+      provider.getPoolDataProvider()
+    );
 
     address[] memory reserves = pool.getReservesList();
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
@@ -89,8 +83,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       reserveData.underlyingAsset = reserves[i];
 
       // reserve current state
-      DataTypes.ReserveData memory baseData =
-        pool.getReserveData(reserveData.underlyingAsset);
+      DataTypes.ReserveData memory baseData = pool.getReserveData(reserveData.underlyingAsset);
       //the liquidity index. Expressed in ray
       reserveData.liquidityIndex = baseData.liquidityIndex;
       //variable borrow index. Expressed in ray
@@ -107,7 +100,9 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       reserveData.variableDebtTokenAddress = baseData.variableDebtTokenAddress;
       //address of the interest rate strategy
       reserveData.interestRateStrategyAddress = baseData.interestRateStrategyAddress;
-      reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(reserveData.underlyingAsset);
+      reserveData.priceInMarketReferenceCurrency = oracle.getAssetPrice(
+        reserveData.underlyingAsset
+      );
       reserveData.priceOracle = oracle.getSourceOfAsset(reserveData.underlyingAsset);
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
@@ -145,13 +140,12 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       ) = reserveConfigurationMap.getParams();
       reserveData.usageAsCollateralEnabled = reserveData.baseLTVasCollateral != 0;
 
-      bool isPaused;
       (
         reserveData.isActive,
         reserveData.isFrozen,
         reserveData.borrowingEnabled,
         reserveData.stableBorrowRateEnabled,
-        isPaused
+        reserveData.isPaused
       ) = reserveConfigurationMap.getFlags();
 
       InterestRates memory interestRates = getInterestRateStrategySlopes(
@@ -165,7 +159,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       reserveData.baseStableBorrowRate = interestRates.baseStableBorrowRate;
       reserveData.baseVariableBorrowRate = interestRates.baseVariableBorrowRate;
       reserveData.optimalUsageRatio = interestRates.optimalUsageRatio;
-     
+
       // v3 only
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
       reserveData.debtCeiling = reserveConfigurationMap.getDebtCeiling();
@@ -173,12 +167,13 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
 
       reserveData.isSiloedBorrowing = reserveConfigurationMap.getSiloedBorrowing();
-      reserveData.isPaused = isPaused;
       reserveData.unbacked = baseData.unbacked;
       reserveData.isolationModeTotalDebt = baseData.isolationModeTotalDebt;
       reserveData.accruedToTreasury = baseData.accruedToTreasury;
 
-      DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(reserveData.eModeCategoryId);
+      DataTypes.EModeCategory memory categoryData = pool.getEModeCategoryData(
+        reserveData.eModeCategoryId
+      );
       reserveData.eModeLtv = categoryData.ltv;
       reserveData.eModeLiquidationThreshold = categoryData.liquidationThreshold;
       reserveData.eModeLiquidationBonus = categoryData.liquidationBonus;
@@ -190,15 +185,21 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     }
 
     BaseCurrencyInfo memory baseCurrencyInfo;
-    baseCurrencyInfo.networkBaseTokenPriceInUsd = networkBaseTokenPriceInUsdProxyAggregator.latestAnswer();
-    baseCurrencyInfo.networkBaseTokenPriceDecimals = networkBaseTokenPriceInUsdProxyAggregator.decimals();
+    baseCurrencyInfo.networkBaseTokenPriceInUsd = networkBaseTokenPriceInUsdProxyAggregator
+      .latestAnswer();
+    baseCurrencyInfo.networkBaseTokenPriceDecimals = networkBaseTokenPriceInUsdProxyAggregator
+      .decimals();
 
     try oracle.BASE_CURRENCY_UNIT() returns (uint256 baseCurrencyUnit) {
       baseCurrencyInfo.marketReferenceCurrencyUnit = baseCurrencyUnit;
       baseCurrencyInfo.marketReferenceCurrencyPriceInUsd = int256(baseCurrencyUnit);
-    } catch (bytes memory /*lowLevelData*/) {  
+    } catch (
+      bytes memory /*lowLevelData*/
+    ) {
       baseCurrencyInfo.marketReferenceCurrencyUnit = ETH_CURRENCY_UNIT;
-      baseCurrencyInfo.marketReferenceCurrencyPriceInUsd = marketReferenceCurrencyPriceInUsdProxyAggregator.latestAnswer();
+      baseCurrencyInfo
+        .marketReferenceCurrencyPriceInUsd = marketReferenceCurrencyPriceInUsdProxyAggregator
+        .latestAnswer();
     }
 
     return (reservesData, baseCurrencyInfo);
@@ -216,8 +217,9 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
 
     uint8 userEmodeCategoryId = uint8(pool.getUserEMode(user));
 
-    UserReserveData[] memory userReservesData =
-      new UserReserveData[](user != address(0) ? reserves.length : 0);
+    UserReserveData[] memory userReservesData = new UserReserveData[](
+      user != address(0) ? reserves.length : 0
+    );
 
     for (uint256 i = 0; i < reserves.length; i++) {
       DataTypes.ReserveData memory baseData = pool.getReserveData(reserves[i]);
@@ -231,20 +233,16 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
 
       if (userConfig.isBorrowing(i)) {
         userReservesData[i].scaledVariableDebt = IVariableDebtToken(
-          baseData
-            .variableDebtTokenAddress
-        )
-          .scaledBalanceOf(user);
+          baseData.variableDebtTokenAddress
+        ).scaledBalanceOf(user);
         userReservesData[i].principalStableDebt = IStableDebtToken(baseData.stableDebtTokenAddress)
           .principalBalanceOf(user);
         if (userReservesData[i].principalStableDebt != 0) {
           userReservesData[i].stableBorrowRate = IStableDebtToken(baseData.stableDebtTokenAddress)
             .getUserStableRate(user);
           userReservesData[i].stableBorrowLastUpdateTimestamp = IStableDebtToken(
-            baseData
-              .stableDebtTokenAddress
-          )
-            .getUserLastUpdated(user);
+            baseData.stableDebtTokenAddress
+          ).getUserLastUpdated(user);
         }
       }
     }

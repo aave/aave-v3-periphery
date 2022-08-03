@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/aave/aave-v3-periphery/compare/v1.18.1...v1.9.0) (2022-08-03)
+
+
+### Miscellaneous Chores
+
+* release 1.9.0 ([3856ca6](https://github.com/aave/aave-v3-periphery/commit/3856ca69c84ddcf27e957ae1e5f0eb0e01047f4e))
+
 ## [1.18.1](https://github.com/aave/aave-v3-periphery/compare/v1.18.0...v1.18.1) (2022-07-28)
 
 

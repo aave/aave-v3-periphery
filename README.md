@@ -22,3 +22,29 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 ## Connect with the community
 
 You can join at the [Discord](http://aave.com/discord) channel or at the [Governance Forum](https://governance.aave.com/) for asking questions about the protocol or talk about Aave with other peers.
+
+## Getting started
+
+Make sure you have the npm token setup in your $HOME directory
+
+```
+//npm.pkg.github.com/:_authToken=ASK_FOR_SECRET
+```
+
+Download the dependencies
+
+```
+npm i
+```
+
+Compile the contracts
+
+```
+npm run compile
+```
+
+## Running tests
+
+```
+npm test
+```

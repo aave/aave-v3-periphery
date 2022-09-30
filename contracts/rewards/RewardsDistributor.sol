@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
+import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
@@ -54,6 +55,23 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       _assets[asset].rewards[reward].emissionPerSecond,
       _assets[asset].rewards[reward].lastUpdateTimestamp,
       _assets[asset].rewards[reward].distributionEnd
+    );
+  }
+
+  /// @inheritdoc IRewardsDistributor
+  function getAssetIndex(address asset, address reward)
+    external
+    view
+    override
+    returns(uint256, uint256)
+  {
+    RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[
+      reward
+    ];
+    return _getAssetIndex(
+      rewardData,
+      IScaledBalanceToken(asset).scaledTotalSupply(),
+      10 ** _assets[asset].decimals
     );
   }
 

@@ -12,7 +12,7 @@ The `RewardsDistributor` abstract contract manages the distribution and accounta
 
 ## Rewards Controller
 
-The Rewards Controller is the main contract and where the user interacts to claim the rewards of their positions. It inherits `RewardsDistributor` to handle the distribution of rewards. The users of the incentivised ERC20 assets will accrue value if they hold their tokens in possession without the need of staking or blocking the assets inside a contract. At every transfer the asset must call the `handleAction` method to account the rewards of the user.
+The Rewards Controller is the main contract and where the user interacts to claim the rewards of their positions. It inherits `RewardsDistributor` to handle the distribution of rewards. The users of the incentivised ERC20 assets will accrue value if they hold their tokens in possession without the need of staking or blocking the assets inside a contract. At every transfer the asset must call the `handleAction` method to account for the accumulated rewards of the user prior to balance change.
 
 The users can claim all the rewards or an individual reward per transaction, with a variety of functions that allow more granularity at claim.
 
@@ -155,7 +155,7 @@ The `RewardsDistributorTypes.RewardsConfigInput` struct is composed with the fol
 
 ## handleAction
 
-Called by the corresponding asset on transfer hook to update the rewards distribution of an user.
+Called by the corresponding asset on transfer hook in order to update the rewards distribution.
 
 ### Interface
 
@@ -163,11 +163,11 @@ Called by the corresponding asset on transfer hook to update the rewards distrib
 
 ### Input parameters
 
-| Parameter Name | Type    | Description                   |
-| -------------- | ------- | ----------------------------- |
-| user           | address | The address of the user       |
-| userBalance    | uint256 | The user balance of the asset |
-| totalSupply    | uint256 | The total supply of the asset |
+| Parameter Name | Type    | Description                                                |
+| -------------- | ------- | ---------------------------------------------------------- |
+| user           | address | The address of the user whose asset balance has changed    |
+| userBalance    | uint256 | The previous user balance prior to balance change          |
+| totalSupply    | uint256 | The total supply of the asset prior to user balance change |
 
 ## claimRewards
 

@@ -120,6 +120,21 @@ interface IRewardsDistributor {
     );
 
   /**
+   * @dev Calculates the next value of an specific distribution index, with validations.
+   * @param asset The incentivized asset
+   * @param reward The reward token of the incentivized asset
+   * @return The old index of the asset distribution
+   * @return The new index of the asset distribution
+   **/
+  function getAssetIndex(address asset, address reward)
+    external
+    view
+    returns(
+      uint256,
+      uint256
+    );
+
+  /**
    * @dev Returns the list of available reward token addresses of an incentivized asset
    * @param asset The incentivized asset
    * @return List of rewards addresses of the input asset

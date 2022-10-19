@@ -94,6 +94,7 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
 
       const userIndex = await getUserIndex(rewardsController, userAddress, underlyingAsset, reward);
       const assetData = (await getRewardsData(rewardsController, [underlyingAsset], [reward]))[0];
+      const assetIndex = await rewardsController.getAssetIndex(underlyingAsset, reward);
 
       await aDaiMockV2.cleanUserState();
 
@@ -107,6 +108,8 @@ makeSuite('AaveIncentivesController getRewardsBalance tests', (testEnv) => {
       );
       const expectedAccruedRewards = getRewards(stakedByUser, expectedAssetIndex, userIndex);
 
+      expect(assetIndex[0].toString()).to.be.equal(assetData.index.toString());
+      expect(assetIndex[1].toString()).to.be.equal(expectedAssetIndex.toFixed());
       if (shouldAccrue) {
         expect(expectedAccruedRewards).gt('0');
         expect(unclaimedRewards.toString()).to.be.equal(

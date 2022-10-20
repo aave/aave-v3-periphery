@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {ITransferStrategyBase} from '../rewards/interfaces/ITransferStrategyBase.sol';
 import {TransferStrategyBase} from '../rewards/transfer-strategies/TransferStrategyBase.sol';

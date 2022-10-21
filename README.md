@@ -25,12 +25,6 @@ You can join at the [Discord](http://aave.com/discord) channel or at the [Govern
 
 ## Getting started
 
-Make sure you have the npm token setup in your $HOME directory
-
-```
-//npm.pkg.github.com/:_authToken=ASK_FOR_SECRET
-```
-
 Download the dependencies
 
 ```

@@ -39,13 +39,6 @@ const config: HardhatUserConfig = {
           evmVersion: 'london',
         },
       },
-      {
-        version: '0.8.11', // for ecosystem reserve contracts
-        settings: {
-          optimizer: { enabled: true, runs: 25000 },
-          evmVersion: 'london',
-        },
-      },
     ],
   },
   tenderly: {

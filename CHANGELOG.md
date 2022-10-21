@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.20.0](https://github.com/aave/aave-v3-periphery/compare/v1.19.2...v1.20.0) (2022-10-21)
+
+
+### Features
+
+* Add ability to specify collector ([79c2377](https://github.com/aave/aave-v3-periphery/commit/79c23779a567b95110020fa5a9d0d9d938f2d6b8))
+* Add Treasury Controller contract ([8a536b6](https://github.com/aave/aave-v3-periphery/commit/8a536b67f08f840ab1134a3fdeccd842cb67b27e))
+
+
+### Bug Fixes
+
+* Adjust treasury contracts to reflect mainnet deployment ([e0580a8](https://github.com/aave/aave-v3-periphery/commit/e0580a81a83fa4e217b9f18a891e58c63deb1f3b))
+* Fix README docs ([abd7465](https://github.com/aave/aave-v3-periphery/commit/abd7465a83cde8133083d10b0aa8f8f1a1445441))
+* Fix version of aave-deploy ([e946268](https://github.com/aave/aave-v3-periphery/commit/e9462689046bee725c002d710565b0a999614137))
+* Move ecosystem contracts to treasury folder ([e84c6a4](https://github.com/aave/aave-v3-periphery/commit/e84c6a4bed4b69727f6f22611b6c2e6ffc907e44))
+* Remove unused sol compiler from hh config ([5d7574e](https://github.com/aave/aave-v3-periphery/commit/5d7574e2326c0151176c9ecfced6466ff24e9c8b))
+
 ## [1.19.2](https://github.com/aave/aave-v3-periphery/compare/v1.10.0...v1.19.2) (2022-08-03)
 
 

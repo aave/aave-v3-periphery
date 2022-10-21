@@ -62,5 +62,5 @@ interface IStreamable {
 
   function cancelStream(uint256 streamId) external returns (bool);
 
-  function initialize(address fundsAdmin) external;
+  function initialize(uint256 proposalId, address aaveGovernanceV2) external;
 }

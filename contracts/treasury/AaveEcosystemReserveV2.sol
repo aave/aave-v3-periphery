@@ -7,6 +7,10 @@ import {AdminControlledEcosystemReserve} from './AdminControlledEcosystemReserve
 import {ReentrancyGuard} from './libs/ReentrancyGuard.sol';
 import {SafeERC20} from './libs/SafeERC20.sol';
 
+interface IAaveGovernanceV2 {
+  function submitVote(uint256 proposalId, bool support) external;
+}
+
 /**
  * @title AaveEcosystemReserve v2
  * @notice Stores ERC20 tokens of an ecosystem reserve, adding streaming capabilities.
@@ -56,10 +60,15 @@ contract AaveEcosystemReserveV2 is AdminControlledEcosystemReserve, ReentrancyGu
   }
 
   /*** Contract Logic Starts Here */
-
-  function initialize(address fundsAdmin) external initializer {
-    _nextStreamId = 100000;
-    _setFundsAdmin(fundsAdmin);
+  /**
+   * @dev initializes the ecosystem reserve with the logic to vote on proposal id
+   * @param proposalId id of the proposal which the ecosystem will vote on
+   * @param aaveGovernanceV2 address of the aave governance
+   */
+  function initialize(uint256 proposalId, address aaveGovernanceV2) external initializer {
+    // voting process
+    IAaveGovernanceV2 aaveGov = IAaveGovernanceV2(aaveGovernanceV2);
+    aaveGov.submitVote(proposalId, true);
   }
 
   /*** View Functions ***/

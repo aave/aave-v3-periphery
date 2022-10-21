@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.11;
+pragma solidity ^0.8.10;
 
+import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStreamable} from './interfaces/IStreamable.sol';
-import {IERC20} from './interfaces/IERC20.sol';
-
-import './libs/ReentrancyGuard.sol';
-import './libs/SafeERC20.sol';
-
-import './AdminControlledEcosystemReserve.sol';
+import {AdminControlledEcosystemReserve} from './AdminControlledEcosystemReserve.sol';
+import {ReentrancyGuard} from './libs/ReentrancyGuard.sol';
+import {SafeERC20} from './libs/SafeERC20.sol';
 
 /**
  * @title AaveEcosystemReserve v2

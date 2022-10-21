@@ -1,17 +1,12 @@
-/**
- *Submitted for verification at Etherscan.io on 2022-05-02
- */
-
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.11;
+pragma solidity ^0.8.10;
 
-import './interfaces/IStreamable.sol';
-import './interfaces/IERC20.sol';
-import './interfaces/IAdminControlledEcosystemReserve.sol';
-
-import './libs/VersionedInitializable.sol';
-import './libs/Address.sol';
-import './libs/SafeERC20.sol';
+import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IAdminControlledEcosystemReserve} from './interfaces/IAdminControlledEcosystemReserve.sol';
+import {VersionedInitializable} from './libs/VersionedInitializable.sol';
+import {SafeERC20} from './libs/SafeERC20.sol';
+import {ReentrancyGuard} from './libs/ReentrancyGuard.sol';
+import {Address} from './libs/Address.sol';
 
 /**
  * @title AdminControlledEcosystemReserve

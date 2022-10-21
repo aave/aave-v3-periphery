@@ -32,11 +32,15 @@ const mainnetFork = MAINNET_FORK
 // export hardhat config
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.10',
-    settings: {
-      optimizer: { enabled: true, runs: 25000 },
-      evmVersion: 'london',
-    },
+    compilers: [
+      {
+        version: '0.8.10',
+        settings: {
+          optimizer: { enabled: true, runs: 25000 },
+          evmVersion: 'london',
+        },
+      },
+    ],
   },
   tenderly: {
     project: TENDERLY_PROJECT,

@@ -9,7 +9,6 @@ import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
-
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {IWETHGateway} from './interfaces/IWETHGateway.sol';
 import {DataTypesHelper} from '../libraries/DataTypesHelper.sol';
@@ -117,16 +116,16 @@ contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
   /**
    * @dev borrow WETH, unwraps to ETH and send both the ETH and DebtTokens to msg.sender, via `approveDelegation` and onBehalf argument in `Pool.borrow`.
    * @param amount the amount of ETH to borrow
-   * @param interesRateMode the interest rate mode
+   * @param interestRateMode the interest rate mode
    * @param referralCode integrators are assigned a referral code and can potentially receive rewards
    */
   function borrowETH(
     address,
     uint256 amount,
-    uint256 interesRateMode,
+    uint256 interestRateMode,
     uint16 referralCode
   ) external override {
-    POOL.borrow(address(WETH), amount, interesRateMode, referralCode, msg.sender);
+    POOL.borrow(address(WETH), amount, interestRateMode, referralCode, msg.sender);
     WETH.withdraw(amount);
     _safeTransferETH(msg.sender, amount);
   }
@@ -157,7 +156,7 @@ contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
     if (amount == type(uint256).max) {
       amountToWithdraw = userBalance;
     }
-    // chosing to permit `amount`and not `amountToWithdraw`, easier for frontends, intregrators.
+    // permit `amount` rather than `amountToWithdraw` to make it easier for front-ends and integrators
     aWETH.permit(msg.sender, address(this), amount, deadline, permitV, permitR, permitS);
     aWETH.transferFrom(msg.sender, address(this), amountToWithdraw);
     POOL.withdraw(address(WETH), amountToWithdraw, address(this));
@@ -192,7 +191,7 @@ contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
 
   /**
    * @dev transfer native Ether from the utility contract, for native Ether recovery in case of stuck Ether
-   * due selfdestructs or transfer ether to pre-computated contract address before deployment.
+   * due selfdestructs or transfer ether to pre-computed contract address before deployment.
    * @param to recipient of the transfer
    * @param amount amount to send
    */

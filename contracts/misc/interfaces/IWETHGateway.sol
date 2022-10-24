@@ -24,7 +24,7 @@ interface IWETHGateway {
   function borrowETH(
     address pool,
     uint256 amount,
-    uint256 interesRateMode,
+    uint256 interestRateMode,
     uint16 referralCode
   ) external;
 

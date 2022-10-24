@@ -3,63 +3,71 @@ pragma solidity 0.8.10;
 
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
-import {IWETH} from './interfaces/IWETH.sol';
-import {IWETHGateway} from './interfaces/IWETHGateway.sol';
+import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {IWETH} from '@aave/core-v3/contracts/misc/interfaces/IWETH.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
+
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {IWETHGateway} from './interfaces/IWETHGateway.sol';
 import {DataTypesHelper} from '../libraries/DataTypesHelper.sol';
 
-contract WETHGateway is IWETHGateway, Ownable {
+/**
+ * @dev This contract is an upgrade of the WETHGateway contract, with immutable pool address.
+ * This contract keeps the same interface of the deprecated WETHGateway contract.
+ */
+contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using GPv2SafeERC20 for IERC20;
 
   IWETH internal immutable WETH;
+  IPool internal immutable POOL;
 
   /**
    * @dev Sets the WETH address and the PoolAddressesProvider address. Infinite approves pool.
    * @param weth Address of the Wrapped Ether contract
    * @param owner Address of the owner of this contract
    **/
-  constructor(address weth, address owner) {
+  constructor(
+    address weth,
+    address owner,
+    IPool pool
+  ) {
     WETH = IWETH(weth);
+    POOL = pool;
     transferOwnership(owner);
-  }
-
-  function authorizePool(address pool) external onlyOwner {
-    WETH.approve(pool, type(uint256).max);
+    IWETH(weth).approve(address(pool), type(uint256).max);
   }
 
   /**
    * @dev deposits WETH into the reserve, using native ETH. A corresponding amount of the overlying asset (aTokens)
    * is minted.
-   * @param pool address of the targeted underlying pool
    * @param onBehalfOf address of the user who will receive the aTokens representing the deposit
    * @param referralCode integrators are assigned a referral code and can potentially receive rewards.
    **/
   function depositETH(
-    address pool,
+    address,
     address onBehalfOf,
     uint16 referralCode
   ) external payable override {
     WETH.deposit{value: msg.value}();
-    IPool(pool).deposit(address(WETH), msg.value, onBehalfOf, referralCode);
+    POOL.deposit(address(WETH), msg.value, onBehalfOf, referralCode);
   }
 
   /**
    * @dev withdraws the WETH _reserves of msg.sender.
-   * @param pool address of the targeted underlying pool
    * @param amount amount of aWETH to withdraw and receive native ETH
    * @param to address of the user who will receive native ETH
    */
   function withdrawETH(
-    address pool,
+    address,
     uint256 amount,
     address to
   ) external override {
-    IAToken aWETH = IAToken(IPool(pool).getReserveData(address(WETH)).aTokenAddress);
+    IAToken aWETH = IAToken(POOL.getReserveData(address(WETH)).aTokenAddress);
     uint256 userBalance = aWETH.balanceOf(msg.sender);
     uint256 amountToWithdraw = amount;
 
@@ -68,27 +76,26 @@ contract WETHGateway is IWETHGateway, Ownable {
       amountToWithdraw = userBalance;
     }
     aWETH.transferFrom(msg.sender, address(this), amountToWithdraw);
-    IPool(pool).withdraw(address(WETH), amountToWithdraw, address(this));
+    POOL.withdraw(address(WETH), amountToWithdraw, address(this));
     WETH.withdraw(amountToWithdraw);
     _safeTransferETH(to, amountToWithdraw);
   }
 
   /**
    * @dev repays a borrow on the WETH reserve, for the specified amount (or for the whole amount, if uint256(-1) is specified).
-   * @param pool address of the targeted underlying pool
    * @param amount the amount to repay, or uint256(-1) if the user wants to repay everything
    * @param rateMode the rate mode to repay
    * @param onBehalfOf the address for which msg.sender is repaying
    */
   function repayETH(
-    address pool,
+    address,
     uint256 amount,
     uint256 rateMode,
     address onBehalfOf
   ) external payable override {
     (uint256 stableDebt, uint256 variableDebt) = DataTypesHelper.getUserCurrentDebt(
       onBehalfOf,
-      IPool(pool).getReserveData(address(WETH))
+      POOL.getReserveData(address(WETH))
     );
 
     uint256 paybackAmount = DataTypes.InterestRateMode(rateMode) ==
@@ -101,7 +108,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     }
     require(msg.value >= paybackAmount, 'msg.value is less than repayment amount');
     WETH.deposit{value: paybackAmount}();
-    IPool(pool).repay(address(WETH), msg.value, rateMode, onBehalfOf);
+    POOL.repay(address(WETH), msg.value, rateMode, onBehalfOf);
 
     // refund remaining dust eth
     if (msg.value > paybackAmount) _safeTransferETH(msg.sender, msg.value - paybackAmount);
@@ -109,25 +116,23 @@ contract WETHGateway is IWETHGateway, Ownable {
 
   /**
    * @dev borrow WETH, unwraps to ETH and send both the ETH and DebtTokens to msg.sender, via `approveDelegation` and onBehalf argument in `Pool.borrow`.
-   * @param pool address of the targeted underlying pool
    * @param amount the amount of ETH to borrow
    * @param interesRateMode the interest rate mode
    * @param referralCode integrators are assigned a referral code and can potentially receive rewards
    */
   function borrowETH(
-    address pool,
+    address,
     uint256 amount,
     uint256 interesRateMode,
     uint16 referralCode
   ) external override {
-    IPool(pool).borrow(address(WETH), amount, interesRateMode, referralCode, msg.sender);
+    POOL.borrow(address(WETH), amount, interesRateMode, referralCode, msg.sender);
     WETH.withdraw(amount);
     _safeTransferETH(msg.sender, amount);
   }
 
   /**
    * @dev withdraws the WETH _reserves of msg.sender.
-   * @param pool address of the targeted underlying pool
    * @param amount amount of aWETH to withdraw and receive native ETH
    * @param to address of the user who will receive native ETH
    * @param deadline validity deadline of permit and so depositWithPermit signature
@@ -136,7 +141,7 @@ contract WETHGateway is IWETHGateway, Ownable {
    * @param permitS S parameter of ERC712 permit sig
    */
   function withdrawETHWithPermit(
-    address pool,
+    address,
     uint256 amount,
     address to,
     uint256 deadline,
@@ -144,7 +149,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     bytes32 permitR,
     bytes32 permitS
   ) external override {
-    IAToken aWETH = IAToken(IPool(pool).getReserveData(address(WETH)).aTokenAddress);
+    IAToken aWETH = IAToken(POOL.getReserveData(address(WETH)).aTokenAddress);
     uint256 userBalance = aWETH.balanceOf(msg.sender);
     uint256 amountToWithdraw = amount;
 
@@ -155,7 +160,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     // chosing to permit `amount`and not `amountToWithdraw`, easier for frontends, intregrators.
     aWETH.permit(msg.sender, address(this), amount, deadline, permitV, permitR, permitS);
     aWETH.transferFrom(msg.sender, address(this), amountToWithdraw);
-    IPool(pool).withdraw(address(WETH), amountToWithdraw, address(this));
+    POOL.withdraw(address(WETH), amountToWithdraw, address(this));
     WETH.withdraw(amountToWithdraw);
     _safeTransferETH(to, amountToWithdraw);
   }
@@ -182,7 +187,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     address to,
     uint256 amount
   ) external onlyOwner {
-    IERC20(token).transfer(to, amount);
+    IERC20(token).safeTransfer(to, amount);
   }
 
   /**

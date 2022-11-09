@@ -63,16 +63,15 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     external
     view
     override
-    returns(uint256, uint256)
+    returns (uint256, uint256)
   {
-    RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[
-      reward
-    ];
-    return _getAssetIndex(
-      rewardData,
-      IScaledBalanceToken(asset).scaledTotalSupply(),
-      10 ** _assets[asset].decimals
-    );
+    RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[reward];
+    return
+      _getAssetIndex(
+        rewardData,
+        IScaledBalanceToken(asset).scaledTotalSupply(),
+        10**_assets[asset].decimals
+      );
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -423,11 +422,15 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     // Add unrealized rewards
     for (uint256 i = 0; i < userAssetBalances.length; i++) {
       if (userAssetBalances[i].userBalance == 0) {
-        continue;
+        unclaimedRewards += _assets[userAssetBalances[i].asset]
+          .rewards[reward]
+          .usersData[user]
+          .accrued;
+      } else {
+        unclaimedRewards +=
+          _getPendingRewards(user, reward, userAssetBalances[i]) +
+          _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
       }
-      unclaimedRewards +=
-        _getPendingRewards(user, reward, userAssetBalances[i]) +
-        _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
     }
 
     return unclaimedRewards;

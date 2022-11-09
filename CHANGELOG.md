@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/aave/aave-v3-periphery/compare/v1.20.0...v1.20.1) (2022-11-09)
+
+
+### Bug Fixes
+
+* Add already accrued rewards ([4dcac4f](https://github.com/aave/aave-v3-periphery/commit/4dcac4f418c515ec59d568f8c4e18644e80cc156))
+
 ## [1.20.0](https://github.com/aave/aave-v3-periphery/compare/v1.19.2...v1.20.0) (2022-10-21)
 
 

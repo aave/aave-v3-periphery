@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.19.2",
+  "version": "1.20.1",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -32,7 +32,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/deploy-v3": "1.27.0",
+    "@aave/deploy-v3": "1.27.0-beta.1",
     "@ethersproject/abi": "^5.1.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
@@ -89,6 +89,6 @@
     "url": "git://github.com/aave/aave-v3-periphery"
   },
   "dependencies": {
-    "@aave/core-v3": "^1.14.3-beta.0"
+    "@aave/core-v3": "1.16.2"
   }
 }

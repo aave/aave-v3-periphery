@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.20.0",
+  "version": "1.20.0-beta.1",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -19,7 +19,7 @@
     "hardhat:matic": "hardhat --network matic",
     "compile": "SKIP_LOAD=true hardhat compile",
     "console:fork": "MAINNET_FORK=true hardhat console",
-    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/weth-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts ./test/paraswap/**.spec.ts",
+    "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/wrapped-token-gateway.spec.ts ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts ./test/paraswap/**.spec.ts",
     "test-incentives": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/rewards/*.spec.ts ./test/rewards/**/*.spec.ts",
     "test-paraswap": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts  ./test/paraswap/*.spec.ts",
     "test-strategies": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test/__setup.spec.ts ./test/rewards/strategies/*.spec.ts",
@@ -32,7 +32,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/deploy-v3": "1.27.0-beta.1",
+    "@aave/deploy-v3": "1.27.0-beta.9",
     "@ethersproject/abi": "^5.1.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",

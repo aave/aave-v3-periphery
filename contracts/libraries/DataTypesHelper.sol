@@ -7,7 +7,7 @@ import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTy
 /**
  * @title DataTypesHelper
  * @author Aave
- * @dev Helper library to track user current debt balance, used by WETHGateway
+ * @dev Helper library to track user current debt balance, used by WrappedTokenGatewayV3
  */
 library DataTypesHelper {
   /**

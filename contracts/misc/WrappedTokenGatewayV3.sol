@@ -10,14 +10,14 @@ import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {IWETHGateway} from './interfaces/IWETHGateway.sol';
+import {IWrappedTokenGatewayV3} from './interfaces/IWrappedTokenGatewayV3.sol';
 import {DataTypesHelper} from '../libraries/DataTypesHelper.sol';
 
 /**
- * @dev This contract is an upgrade of the WETHGateway contract, with immutable pool address.
- * This contract keeps the same interface of the deprecated WETHGateway contract.
+ * @dev This contract is an upgrade of the WrappedTokenGatewayV3 contract, with immutable pool address.
+ * This contract keeps the same interface of the deprecated WrappedTokenGatewayV3 contract.
  */
-contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
+contract WrappedTokenGatewayV3 is IWrappedTokenGatewayV3, Ownable {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using GPv2SafeERC20 for IERC20;
@@ -200,7 +200,7 @@ contract WrappedTokenGatewayV3 is IWETHGateway, Ownable {
   }
 
   /**
-   * @dev Get WETH address used by WETHGateway
+   * @dev Get WETH address used by WrappedTokenGatewayV3
    */
   function getWETHAddress() external view returns (address) {
     return address(WETH);

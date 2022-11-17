@@ -191,7 +191,7 @@ contract WrappedTokenGatewayV3 is IWrappedTokenGatewayV3, Ownable {
 
   /**
    * @dev transfer native Ether from the utility contract, for native Ether recovery in case of stuck Ether
-   * due selfdestructs or transfer ether to pre-computed contract address before deployment.
+   * due to selfdestructs or ether transfers to the pre-computed contract address before deployment.
    * @param to recipient of the transfer
    * @param amount amount to send
    */

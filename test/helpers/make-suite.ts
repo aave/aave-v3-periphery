@@ -32,8 +32,8 @@ import {
   VariableDebtToken,
   WETH9Mocked,
   AaveOracle,
-  getWETHGateway,
-  WETHGateway,
+  getWrappedTokenGateway,
+  WrappedTokenGatewayV3,
   tEthereumAddress,
   getEthersSigners,
   getAaveOracle,
@@ -43,13 +43,13 @@ import {
   getSubTokensByPrefix,
   getPullRewardsStrategy,
   getStakedRewardsStrategy,
-  StakedAaveV3,
   getStakeAave,
   waitForTx,
   MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
   deployMintableERC20,
   getEmissionManager,
+  StakedTokenV2Rev3,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -83,11 +83,11 @@ export interface TestEnv {
   aave: MintableERC20;
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
-  wethGateway: WETHGateway;
+  WrappedTokenGatewayV3: WrappedTokenGatewayV3;
   emissionManager: EmissionManager;
   rewardsController: RewardsController;
   rewardsVault: SignerWithAddress;
-  stakedAave: StakedAaveV3;
+  stakedAave: StakedTokenV2Rev3;
   aaveToken: MintableERC20;
   aDaiMockV2: ATokenMock;
   aWethMockV2: ATokenMock;
@@ -129,11 +129,11 @@ const testEnv: TestEnv = {
   aave: {} as MintableERC20,
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
-  wethGateway: {} as WETHGateway,
+  WrappedTokenGatewayV3: {} as WrappedTokenGatewayV3,
   emissionManager: {} as EmissionManager,
   rewardsController: {} as RewardsController,
   rewardsVault: {} as SignerWithAddress,
-  stakedAave: {} as StakedAaveV3,
+  stakedAave: {} as StakedTokenV2Rev3,
   aaveToken: {} as MintableERC20,
   aDaiMockV2: {} as ATokenMock,
   aWethMockV2: {} as ATokenMock,
@@ -221,7 +221,7 @@ export async function initializeMakeSuite() {
   testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
-  testEnv.wethGateway = await getWETHGateway();
+  testEnv.WrappedTokenGatewayV3 = await getWrappedTokenGateway();
 
   // Added extra reward token
   await hre.deployments.deploy(`EXTRA${TESTNET_REWARD_TOKEN_PREFIX}`, {
@@ -238,7 +238,7 @@ export async function initializeMakeSuite() {
   });
   // Setup Incentives V2 environment
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
-  const rewardsController = ((await getIncentivesV2()) as any) as RewardsController;
+  const rewardsController = (await getIncentivesV2()) as any as RewardsController;
   testEnv.rewardsController = rewardsController;
   testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
     rewardsController.address,
@@ -252,7 +252,8 @@ export async function initializeMakeSuite() {
   testEnv.aAaveMockV2 = await deployATokenMock(rewardsController.address, 'aAaveV2');
   testEnv.aEursMockV2 = await deployATokenMock(rewardsController.address, 'aEursV2', 2);
   testEnv.pullRewardsStrategy = (await getPullRewardsStrategy()) as PullRewardsTransferStrategy;
-  testEnv.stakedTokenStrategy = ((await getStakedRewardsStrategy()) as any) as StakedTokenTransferStrategy;
+  testEnv.stakedTokenStrategy =
+    (await getStakedRewardsStrategy()) as any as StakedTokenTransferStrategy;
   testEnv.rewardToken = await getMintableERC20(rewardTokens[0].artifact.address);
   testEnv.rewardTokens = await bluebird.map(rewardTokens, ({ artifact }) =>
     getMintableERC20(artifact.address)
@@ -267,7 +268,9 @@ export async function initializeMakeSuite() {
   testEnv.rewardsPriceAggregators = await bluebird.map(
     rewardTokens,
     async ({ symbol }) =>
-      (await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)).address
+      (
+        await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)
+      ).address
   );
   await waitForTx(
     await testEnv.aaveToken

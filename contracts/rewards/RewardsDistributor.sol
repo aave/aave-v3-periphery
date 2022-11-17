@@ -33,10 +33,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     _;
   }
 
-  constructor(address emissionManager) {
-    _setEmissionManager(emissionManager);
-  }
-
   /// @inheritdoc IRewardsDistributor
   function getRewardsData(address asset, address reward)
     public
@@ -405,7 +401,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     // Add unrealized rewards
     for (uint256 i = 0; i < userAssetBalances.length; i++) {
       if (userAssetBalances[i].userBalance == 0) {
-        unclaimedRewards += _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
+        unclaimedRewards += _assets[userAssetBalances[i].asset]
+          .rewards[reward]
+          .usersData[user]
+          .accrued;
       } else {
         unclaimedRewards +=
           _getPendingRewards(user, reward, userAssetBalances[i]) +

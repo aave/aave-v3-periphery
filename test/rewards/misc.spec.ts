@@ -10,8 +10,8 @@ import { makeSuite } from '../helpers/make-suite';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import hre from 'hardhat';
 
-makeSuite('AaveIncentivesController misc tests', (testEnv) => {
-  it('constructor should assign correct params', async () => {
+makeSuite('RewardsController misc tests', (testEnv) => {
+  it('Deployment should pass', async () => {
     const peiEmissionManager = RANDOM_ADDRESSES[1];
     const { deployer } = await hre.getNamedAccounts();
 
@@ -21,14 +21,14 @@ makeSuite('AaveIncentivesController misc tests', (testEnv) => {
     }
     const artifact = await hre.deployments.deploy('RewardsController', {
       from: deployer,
-      args: [peiEmissionManager],
+      args: [],
     });
     const rewardsController = (await hre.ethers.getContractAt(
       artifact.abi,
       artifact.address
     )) as RewardsController;
     await expect((await rewardsController.getEmissionManager()).toString()).to.be.equal(
-      peiEmissionManager
+      ZERO_ADDRESS
     );
   });
 

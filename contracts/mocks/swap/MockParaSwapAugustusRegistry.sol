@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.10;
+// SPDX-License-Identifier: AGPL-3.0
+pragma solidity ^0.8.10;
 
 import {IParaSwapAugustusRegistry} from '../../adapters/paraswap/interfaces/IParaSwapAugustusRegistry.sol';
 

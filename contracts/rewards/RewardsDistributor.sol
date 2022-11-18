@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
+import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
@@ -13,28 +14,24 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
   using SafeCast for uint256;
-  // manager of incentives
+  // Manager of incentives
   address internal _emissionManager;
 
-  // asset => AssetData
+  // Map of rewarded asset addresses and their data (assetAddress => assetData)
   mapping(address => RewardsDataTypes.AssetData) internal _assets;
 
-  // reward => enabled
+  // Map of reward assets (rewardAddress => enabled)
   mapping(address => bool) internal _isRewardEnabled;
 
-  // global rewards list
+  // Rewards list
   address[] internal _rewardsList;
 
-  //global assets list
+  // Assets list
   address[] internal _assetsList;
 
   modifier onlyEmissionManager() {
     require(msg.sender == _emissionManager, 'ONLY_EMISSION_MANAGER');
     _;
-  }
-
-  constructor(address emissionManager) {
-    _setEmissionManager(emissionManager);
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -55,6 +52,22 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       _assets[asset].rewards[reward].lastUpdateTimestamp,
       _assets[asset].rewards[reward].distributionEnd
     );
+  }
+
+  /// @inheritdoc IRewardsDistributor
+  function getAssetIndex(address asset, address reward)
+    external
+    view
+    override
+    returns (uint256, uint256)
+  {
+    RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[reward];
+    return
+      _getAssetIndex(
+        rewardData,
+        IScaledBalanceToken(asset).scaledTotalSupply(),
+        10**_assets[asset].decimals
+      );
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -186,7 +199,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
       (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
-        IERC20Detailed(asset).totalSupply(),
+        IScaledBalanceToken(asset).scaledTotalSupply(),
         10**decimals
       );
 
@@ -405,7 +418,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     // Add unrealized rewards
     for (uint256 i = 0; i < userAssetBalances.length; i++) {
       if (userAssetBalances[i].userBalance == 0) {
-        unclaimedRewards += _assets[userAssetBalances[i].asset].rewards[reward].usersData[user].accrued;
+        unclaimedRewards += _assets[userAssetBalances[i].asset]
+          .rewards[reward]
+          .usersData[user]
+          .accrued;
       } else {
         unclaimedRewards +=
           _getPendingRewards(user, reward, userAssetBalances[i]) +
@@ -466,6 +482,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
   /**
    * @dev Calculates the next value of an specific distribution index, with validations
+   * @param rewardData Storage pointer to the distribution reward config
    * @param totalSupply of the asset being rewarded
    * @param assetUnit One unit of asset (10**decimals)
    * @return The new index.

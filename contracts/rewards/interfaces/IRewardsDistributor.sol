@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.10;
+// SPDX-License-Identifier: AGPL-3.0
+pragma solidity ^0.8.10;
 
 /**
  * @title IRewardsDistributor
@@ -115,6 +115,21 @@ interface IRewardsDistributor {
     returns (
       uint256,
       uint256,
+      uint256,
+      uint256
+    );
+
+  /**
+   * @dev Calculates the next value of an specific distribution index, with validations.
+   * @param asset The incentivized asset
+   * @param reward The reward token of the incentivized asset
+   * @return The old index of the asset distribution
+   * @return The new index of the asset distribution
+   **/
+  function getAssetIndex(address asset, address reward)
+    external
+    view
+    returns(
       uint256,
       uint256
     );

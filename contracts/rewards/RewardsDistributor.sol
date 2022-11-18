@@ -14,19 +14,19 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
   using SafeCast for uint256;
-  // manager of incentives
+  // Manager of incentives
   address internal _emissionManager;
 
-  // asset => AssetData
+  // Map of rewarded asset addresses and their data (assetAddress => assetData)
   mapping(address => RewardsDataTypes.AssetData) internal _assets;
 
-  // reward => enabled
+  // Map of reward assets (rewardAddress => enabled)
   mapping(address => bool) internal _isRewardEnabled;
 
-  // global rewards list
+  // Rewards list
   address[] internal _rewardsList;
 
-  //global assets list
+  // Assets list
   address[] internal _assetsList;
 
   modifier onlyEmissionManager() {

@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "1.20.0-beta.1",
+  "version": "1.20.2",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -32,7 +32,7 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/deploy-v3": "1.27.0-beta.9",
+    "@aave/deploy-v3": "1.30.0-beta-rewards.1",
     "@ethersproject/abi": "^5.1.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",

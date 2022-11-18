@@ -34,10 +34,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     _;
   }
 
-  constructor(address emissionManager) {
-    _setEmissionManager(emissionManager);
-  }
-
   /// @inheritdoc IRewardsDistributor
   function getRewardsData(address asset, address reward)
     public

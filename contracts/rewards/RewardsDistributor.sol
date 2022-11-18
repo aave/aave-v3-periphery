@@ -482,6 +482,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
 
   /**
    * @dev Calculates the next value of an specific distribution index, with validations
+   * @param rewardData Storage pointer to the distribution reward config
    * @param totalSupply of the asset being rewarded
    * @param assetUnit One unit of asset (10**decimals)
    * @return The new index.

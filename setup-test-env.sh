@@ -5,11 +5,11 @@
 # the @aave/deploy-v3 package as source of deployment
 # scripts for testing or coverage purposes.
 #
-# A separate  artifacts directory was created 
+# A separate  artifacts directory was created
 # due at running tests all external artifacts
 # located at /artifacts are deleted,  causing
 # the deploy library to not find the external
-# artifacts. 
+# artifacts.
 
 echo "[BASH] Setting up testnet environment"
 
@@ -17,14 +17,14 @@ if [ ! "$COVERAGE" = true ]; then
     # remove hardhat and artifacts cache
     npm run ci:clean
 
-    # compile @aave/core-v3 contracts
+    # compile @mahalend/deploy-v3 contracts
     npm run compile
 else
     echo "[BASH] Skipping compilation to keep coverage artifacts"
 fi
 
 # Copy artifacts into separate directory to allow
-# the hardhat-deploy library load all artifacts without duplicates 
+# the hardhat-deploy library load all artifacts without duplicates
 mkdir -p temp-artifacts/
 cp -r artifacts/* temp-artifacts/
 

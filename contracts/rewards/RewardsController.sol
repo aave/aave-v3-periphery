@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.10;
 
-import {VersionedInitializable} from '@aave/core-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
-import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
-import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
+import {VersionedInitializable} from '@mahalend/deploy-v3/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
+import {SafeCast} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
+import {IScaledBalanceToken} from '@mahalend/deploy-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';

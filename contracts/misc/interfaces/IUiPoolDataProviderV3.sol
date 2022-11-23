@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '@mahalend/deploy-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 
 interface IUiPoolDataProviderV3 {
   struct InterestRates {

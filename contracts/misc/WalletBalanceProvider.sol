@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {Address} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Address.sol';
-import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {Address} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/Address.sol';
+import {IERC20} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 
-import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
-import {ReserveConfiguration} from '@aave/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
-import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {IPoolAddressesProvider} from '@mahalend/deploy-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '@mahalend/deploy-v3/contracts/interfaces/IPool.sol';
+import {GPv2SafeERC20} from '@mahalend/deploy-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {ReserveConfiguration} from '@mahalend/deploy-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
+import {DataTypes} from '@mahalend/deploy-v3/contracts/protocol/libraries/types/DataTypes.sol';
 
 /**
  * @title WalletBalanceProvider contract

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
+import {Ownable} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 import {IStreamable} from './interfaces/IStreamable.sol';
 import {IAdminControlledEcosystemReserve} from './interfaces/IAdminControlledEcosystemReserve.sol';
 import {IAaveEcosystemReserveController} from './interfaces/IAaveEcosystemReserveController.sol';
-import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IERC20} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 
 contract AaveEcosystemReserveController is Ownable, IAaveEcosystemReserveController {
   /**

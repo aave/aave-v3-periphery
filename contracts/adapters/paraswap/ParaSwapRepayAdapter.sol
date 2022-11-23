@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC20WithPermit} from '@aave/core-v3/contracts/interfaces/IERC20WithPermit.sol';
-import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
+import {DataTypes} from '@mahalend/deploy-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {IERC20Detailed} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {IERC20} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IERC20WithPermit} from '@mahalend/deploy-v3/contracts/interfaces/IERC20WithPermit.sol';
+import {IPoolAddressesProvider} from '@mahalend/deploy-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {SafeMath} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
 import {BaseParaSwapBuyAdapter} from './BaseParaSwapBuyAdapter.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';

@@ -1,5 +1,5 @@
 {
-  "name": "@aave/periphery-v3",
+  "name": "@mahalend/periphery-v3",
   "version": "3.0.1",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
@@ -89,6 +89,6 @@
     "url": "git://github.com/aave/aave-v3-periphery"
   },
   "dependencies": {
-    "@aave/core-v3": "1.16.2"
+    "@aave/core-v3": "https://github.com/mahalend/v3-core"
   }
 }

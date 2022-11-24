@@ -2,8 +2,8 @@
 pragma solidity ^0.8.10;
 
 import {ITransferStrategyBase} from '../interfaces/ITransferStrategyBase.sol';
-import {GPv2SafeERC20} from '@mahalend/deploy-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
-import {IERC20} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {GPv2SafeERC20} from '@mahalend/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {IERC20} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 
 /**
  * @title TransferStrategyStorage

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {DataTypes} from '@mahalend/deploy-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {FlashLoanSimpleReceiverBase} from '@mahalend/deploy-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol';
-import {GPv2SafeERC20} from '@mahalend/deploy-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
-import {IERC20} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC20Detailed} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IERC20WithPermit} from '@mahalend/deploy-v3/contracts/interfaces/IERC20WithPermit.sol';
-import {IPoolAddressesProvider} from '@mahalend/deploy-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IPriceOracleGetter} from '@mahalend/deploy-v3/contracts/interfaces/IPriceOracleGetter.sol';
-import {SafeMath} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
-import {Ownable} from '@mahalend/deploy-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
+import {DataTypes} from '@mahalend/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {FlashLoanSimpleReceiverBase} from '@mahalend/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol';
+import {GPv2SafeERC20} from '@mahalend/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {IERC20} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IERC20Detailed} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {IERC20WithPermit} from '@mahalend/core-v3/contracts/interfaces/IERC20WithPermit.sol';
+import {IPoolAddressesProvider} from '@mahalend/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPriceOracleGetter} from '@mahalend/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {SafeMath} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
+import {Ownable} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 
 /**
  * @title BaseParaSwapAdapter

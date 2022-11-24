@@ -1,6 +1,6 @@
 {
   "name": "@mahalend/periphery-v3",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "MahaLend Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -32,8 +32,8 @@
   },
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
-    "@mahalend/deploy-v3": "git+https://github.com/mahalend/v3-deploy.git",
     "@ethersproject/abi": "^5.1.0",
+    "@mahalend/deploy-v3": "git+https://github.com/mahalend/v3-deploy.git",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",

@@ -45,7 +45,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
 
   /**
    * @dev Initialize for RewardsController
-   * @dev It expects an address as argument since its initialize via PoolAddressesProvider._updateImpl()
+   * @dev It expects an address as argument since its initialized via PoolAddressesProvider._updateImpl()
    **/
   function initialize(address) external initializer {}
 

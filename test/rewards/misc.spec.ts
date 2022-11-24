@@ -27,9 +27,7 @@ makeSuite('RewardsController misc tests', (testEnv) => {
       artifact.abi,
       artifact.address
     )) as RewardsController;
-    await expect((await rewardsController.getEmissionManager()).toString()).to.be.equal(
-      ZERO_ADDRESS
-    );
+    await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(ZERO_ADDRESS);
   });
 
   it('Should return same index while multiple asset index updates', async () => {

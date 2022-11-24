@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.0.1](https://github.com/aave/aave-v3-periphery/compare/v1.20.2...v3.0.1) (2022-11-24)
+
+
+### Bug Fixes
+
+* Fix function docs ([3883ae8](https://github.com/aave/aave-v3-periphery/commit/3883ae8b655e09f1fde0033cf104b62ad44537ec))
+* Remove constructor of RewardsController ([4210a75](https://github.com/aave/aave-v3-periphery/commit/4210a75b7cc1cffdf0efb04ad2a0cebe8af641a8))
+* remove deploy args of RewardsController at tests, add deploy beta package ([1c01600](https://github.com/aave/aave-v3-periphery/commit/1c0160045b6edfddd36fb7fbba64a6e8f58e4a1d))
+
+
+### Miscellaneous Chores
+
+* release 3.0.1 ([ddf85ce](https://github.com/aave/aave-v3-periphery/commit/ddf85ce0c01771406807b004aad5ee95054a3c76))
+
 ## [1.20.2](https://github.com/aave/aave-v3-periphery/compare/v1.20.1...v1.20.2) (2022-11-17)
 
 

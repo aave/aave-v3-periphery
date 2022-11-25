@@ -32,7 +32,6 @@ contract EmissionManager is Ownable, IEmissionManager {
    * @param owner The address of the owner
    */
   constructor(address owner) {
-    _rewardsController = IRewardsController(msg.sender);
     transferOwnership(owner);
   }
 

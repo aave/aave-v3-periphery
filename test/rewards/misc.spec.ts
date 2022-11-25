@@ -21,13 +21,15 @@ makeSuite('RewardsController misc tests', (testEnv) => {
     }
     const artifact = await hre.deployments.deploy('RewardsController', {
       from: deployer,
-      args: [],
+      args: [peiEmissionManager],
     });
     const rewardsController = (await hre.ethers.getContractAt(
       artifact.abi,
       artifact.address
     )) as RewardsController;
-    await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(ZERO_ADDRESS);
+    await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(
+      peiEmissionManager
+    );
   });
 
   it('Should return same index while multiple asset index updates', async () => {

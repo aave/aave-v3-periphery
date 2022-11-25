@@ -49,6 +49,7 @@ import {
   TESTNET_PRICE_AGGR_PREFIX,
   deployMintableERC20,
   StakedTokenV2Rev3,
+  impersonateAddress,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -237,7 +238,13 @@ export async function initializeMakeSuite() {
   // Setup Incentives V2 environment
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
   const rewardsController = (await getIncentivesV2()) as any as RewardsController;
-  testEnv.rewardsController = rewardsController;
+
+  const manager = await impersonateAddress(await rewardsController.EMISSION_MANAGER());
+
+  await hre.ethers.provider.send('hardhat_setBalance', [manager.address, '0x56BC75E2D63100000']);
+
+  testEnv.rewardsController = rewardsController.connect(manager.signer);
+
   testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
     rewardsController.address,
     deployer.address

@@ -59,13 +59,8 @@ makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEn
   it('Should setClaimer pass if called by emission manager', async () => {
     const { rewardsController, users, deployer } = testEnv;
     const [userWithRewards, thirdClaimer] = users;
-    const emissionManager = deployer;
 
-    await expect(
-      rewardsController
-        .connect(emissionManager.signer)
-        .setClaimer(userWithRewards.address, thirdClaimer.address)
-    )
+    await expect(rewardsController.setClaimer(userWithRewards.address, thirdClaimer.address))
       .to.emit(rewardsController, 'ClaimerSet')
       .withArgs(userWithRewards.address, thirdClaimer.address);
     await expect(await rewardsController.getClaimer(userWithRewards.address)).to.be.equal(
@@ -127,15 +122,9 @@ makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEn
     const { rewardsController, users, aDaiMockV2, deployer, stakedAave } = testEnv;
     const [, thirdClaimer] = users;
 
-    const emissionManager = deployer;
-
     await waitForTx(await aDaiMockV2.setUserBalanceAndSupply('300000', '30000'));
 
-    await expect(
-      rewardsController
-        .connect(emissionManager.signer)
-        .setClaimer(ZERO_ADDRESS, thirdClaimer.address)
-    )
+    await expect(rewardsController.setClaimer(ZERO_ADDRESS, thirdClaimer.address))
       .to.emit(rewardsController, 'ClaimerSet')
       .withArgs(ZERO_ADDRESS, thirdClaimer.address);
 

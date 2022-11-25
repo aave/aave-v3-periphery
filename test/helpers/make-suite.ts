@@ -246,9 +246,10 @@ export async function initializeMakeSuite() {
   testEnv.rewardsController = rewardsController.connect(manager.signer);
 
   testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
-    rewardsController.address,
     deployer.address
   );
+  await testEnv.emissionManager.setRewardsController(rewardsController.address);
+
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();
   testEnv.aaveToken = testEnv.aave;

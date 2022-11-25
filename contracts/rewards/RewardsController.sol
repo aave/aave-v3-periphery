@@ -41,7 +41,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     _;
   }
 
-  constructor(address emissionManager) RewardsDistributor(emissionManager) {}
+  constructor(address emissionManagerOwner) RewardsDistributor(emissionManagerOwner) {}
 
   /**
    * @dev Initialize for RewardsController

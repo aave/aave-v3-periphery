@@ -6,6 +6,7 @@ import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/
 import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IRewardsDistributor} from './interfaces/IRewardsDistributor.sol';
 import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
+import {EmissionManager} from './EmissionManager.sol';
 
 /**
  * @title RewardsDistributor
@@ -37,8 +38,8 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     _;
   }
 
-  constructor(address emissionManager) {
-    EMISSION_MANAGER = emissionManager;
+  constructor(address emissionManagerOwner) {
+    EMISSION_MANAGER = address(new EmissionManager(emissionManagerOwner));
   }
 
   /// @inheritdoc IRewardsDistributor

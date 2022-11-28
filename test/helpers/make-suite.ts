@@ -50,6 +50,7 @@ import {
   deployMintableERC20,
   StakedTokenV2Rev3,
   impersonateAddress,
+  getEmissionManager,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -245,9 +246,8 @@ export async function initializeMakeSuite() {
 
   testEnv.rewardsController = rewardsController.connect(manager.signer);
 
-  testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
-    deployer.address
-  );
+  testEnv.emissionManager = await getEmissionManager();
+
   await testEnv.emissionManager.setRewardsController(rewardsController.address);
 
   testEnv.rewardsVault = rewardsVault;

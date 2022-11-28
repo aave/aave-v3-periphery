@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.21.1](https://github.com/aave/aave-v3-periphery/compare/v1.20.2...v1.21.1) (2022-11-28)
+
+
+### Features
+
+* readd getter for backwards compatibility ([#129](https://github.com/aave/aave-v3-periphery/issues/129)) ([0202aab](https://github.com/aave/aave-v3-periphery/commit/0202aab32bdc25864714b98d8347f9ef4978bfe8))
+
+
+### Bug Fixes
+
+* Fix function docs ([3883ae8](https://github.com/aave/aave-v3-periphery/commit/3883ae8b655e09f1fde0033cf104b62ad44537ec))
+* Make Rewards contract work with PoolAddressesProvider updateImpl ([#123](https://github.com/aave/aave-v3-periphery/issues/123)) ([63e4000](https://github.com/aave/aave-v3-periphery/commit/63e400008ee18c81cceb846db4f64f9907413b59))
+* Remove constructor of RewardsController ([4210a75](https://github.com/aave/aave-v3-periphery/commit/4210a75b7cc1cffdf0efb04ad2a0cebe8af641a8))
+* remove deploy args of RewardsController at tests, add deploy beta package ([1c01600](https://github.com/aave/aave-v3-periphery/commit/1c0160045b6edfddd36fb7fbba64a6e8f58e4a1d))
+
+
+### Miscellaneous Chores
+
+* release 1.21.0 ([522827e](https://github.com/aave/aave-v3-periphery/commit/522827efc58a06819f8915863e9ee0749b305821))
+* release 1.21.1 ([517bbdf](https://github.com/aave/aave-v3-periphery/commit/517bbdf558e3ca5e30cd6d9cb74a504922e25a01))
+* release 3.0.1 ([ddf85ce](https://github.com/aave/aave-v3-periphery/commit/ddf85ce0c01771406807b004aad5ee95054a3c76))
+
 ## [1.21.0](https://github.com/aave/aave-v3-periphery/compare/v1.20.2...v1.21.0) (2022-11-28)
 
 

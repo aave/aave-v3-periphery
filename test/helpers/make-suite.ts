@@ -48,8 +48,9 @@ import {
   MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
   deployMintableERC20,
-  getEmissionManager,
   StakedTokenV2Rev3,
+  impersonateAddress,
+  getEmissionManager,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -176,7 +177,6 @@ export async function initializeMakeSuite() {
 
   testEnv.configurator = await getPoolConfiguratorProxy();
 
-  const emissionManager = await getEmissionManager();
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
   testEnv.registry = await getPoolAddressesProviderRegistry();
@@ -239,11 +239,17 @@ export async function initializeMakeSuite() {
   // Setup Incentives V2 environment
   const rewardTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
   const rewardsController = (await getIncentivesV2()) as any as RewardsController;
-  testEnv.rewardsController = rewardsController;
-  testEnv.emissionManager = await new EmissionManager__factory(deployer.signer).deploy(
-    rewardsController.address,
-    deployer.address
-  );
+
+  const manager = await impersonateAddress(await rewardsController.EMISSION_MANAGER());
+
+  await hre.ethers.provider.send('hardhat_setBalance', [manager.address, '0x56BC75E2D63100000']);
+
+  testEnv.rewardsController = rewardsController.connect(manager.signer);
+
+  testEnv.emissionManager = await getEmissionManager();
+
+  await testEnv.emissionManager.setRewardsController(rewardsController.address);
+
   testEnv.rewardsVault = rewardsVault;
   testEnv.stakedAave = await getStakeAave();
   testEnv.aaveToken = testEnv.aave;
@@ -288,7 +294,6 @@ export async function initializeMakeSuite() {
       .connect(rewardsVault.signer)
       .transfer(testEnv.stakedTokenStrategy.address, parseEther('30000000000'))
   );
-  await waitForTx(await emissionManager.setEmissionManager(deployer.address));
 }
 
 const setSnapshot = async () => {

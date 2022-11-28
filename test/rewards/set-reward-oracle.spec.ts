@@ -19,9 +19,7 @@ makeSuite('AaveIncentivesControllerV2 setRewardOracle', (testEnv: TestEnv) => {
   it("Revert at setRewardOracle if oracle doesn't have correct interface", async () => {
     const { rewardsController, deployer } = testEnv;
 
-    await expect(
-      rewardsController.connect(deployer.signer).setRewardOracle(ZERO_ADDRESS, ZERO_ADDRESS)
-    ).to.be.reverted;
+    await expect(rewardsController.setRewardOracle(ZERO_ADDRESS, ZERO_ADDRESS)).to.be.reverted;
   });
   it('Revert at setRewardOracle if oracle price is zero', async () => {
     const { rewardsController, deployer, aaveToken } = testEnv;
@@ -29,9 +27,7 @@ makeSuite('AaveIncentivesControllerV2 setRewardOracle', (testEnv: TestEnv) => {
     const zeroPriceOracle = await deployMockAggregator('0');
 
     await expect(
-      rewardsController
-        .connect(deployer.signer)
-        .setRewardOracle(aaveToken.address, zeroPriceOracle.address)
+      rewardsController.setRewardOracle(aaveToken.address, zeroPriceOracle.address)
     ).to.be.revertedWith('ORACLE_MUST_RETURN_PRICE');
   });
   it('Update oracle of a incentivized asset', async () => {
@@ -39,9 +35,10 @@ makeSuite('AaveIncentivesControllerV2 setRewardOracle', (testEnv: TestEnv) => {
 
     const newPriceOracle = await deployMockAggregator(parseEther('600').toString());
 
-    const action = await rewardsController
-      .connect(deployer.signer)
-      .setRewardOracle(stakedAave.address, newPriceOracle.address);
+    const action = await rewardsController.setRewardOracle(
+      stakedAave.address,
+      newPriceOracle.address
+    );
 
     await expect(action)
       .to.emit(rewardsController, 'RewardOracleUpdated')

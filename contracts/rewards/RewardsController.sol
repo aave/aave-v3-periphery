@@ -41,13 +41,13 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     _;
   }
 
+  constructor(address emissionManager) RewardsDistributor(emissionManager) {}
+
   /**
    * @dev Initialize for RewardsController
-   * @param emissionManager address of the EmissionManager
+   * @dev It expects an address as argument since its initialized via PoolAddressesProvider._updateImpl()
    **/
-  function initialize(address emissionManager) external initializer {
-    _setEmissionManager(emissionManager);
-  }
+  function initialize(address) external initializer {}
 
   /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {

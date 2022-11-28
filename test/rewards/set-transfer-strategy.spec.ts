@@ -42,9 +42,10 @@ makeSuite('AaveIncentivesControllerV2 setTransferStrategy', (testEnv: TestEnv) =
       from: deployer.address,
     });
 
-    const action = await rewardsController
-      .connect(deployer.signer)
-      .setTransferStrategy(rewardToken.address, newStrategy.address);
+    const action = await rewardsController.setTransferStrategy(
+      rewardToken.address,
+      newStrategy.address
+    );
 
     await expect(action)
       .to.emit(rewardsController, 'TransferStrategyInstalled')

@@ -46,16 +46,6 @@ interface IRewardsDistributor {
   );
 
   /**
-   * @dev Emitted when the emission manager address is updated.
-   * @param oldEmissionManager The address of the old emission manager
-   * @param newEmissionManager The address of the new emission manager
-   */
-  event EmissionManagerUpdated(
-    address indexed oldEmissionManager,
-    address indexed newEmissionManager
-  );
-
-  /**
    * @dev Sets the end date for the distribution
    * @param asset The asset to incentivize
    * @param reward The reward token that incentives the asset
@@ -126,13 +116,7 @@ interface IRewardsDistributor {
    * @return The old index of the asset distribution
    * @return The new index of the asset distribution
    **/
-  function getAssetIndex(address asset, address reward)
-    external
-    view
-    returns(
-      uint256,
-      uint256
-    );
+  function getAssetIndex(address asset, address reward) external view returns (uint256, uint256);
 
   /**
    * @dev Returns the list of available reward token addresses of an incentivized asset
@@ -191,11 +175,5 @@ interface IRewardsDistributor {
    * @dev Returns the address of the emission manager
    * @return The address of the EmissionManager
    */
-  function getEmissionManager() external view returns (address);
-
-  /**
-   * @dev Updates the address of the emission manager
-   * @param emissionManager The address of the new EmissionManager
-   */
-  function setEmissionManager(address emissionManager) external;
+  function EMISSION_MANAGER() external view returns (address);
 }

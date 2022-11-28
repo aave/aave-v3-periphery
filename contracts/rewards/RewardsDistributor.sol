@@ -14,7 +14,10 @@ import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
  **/
 abstract contract RewardsDistributor is IRewardsDistributor {
   using SafeCast for uint256;
+
   // Manager of incentives
+  address public immutable EMISSION_MANAGER;
+  // Deprecated: This storage slot is kept for backwards compatibility purposes.
   address internal _emissionManager;
 
   // Map of rewarded asset addresses and their data (assetAddress => assetData)
@@ -30,8 +33,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   address[] internal _assetsList;
 
   modifier onlyEmissionManager() {
-    require(msg.sender == _emissionManager, 'ONLY_EMISSION_MANAGER');
+    require(msg.sender == EMISSION_MANAGER, 'ONLY_EMISSION_MANAGER');
     _;
+  }
+
+  constructor(address emissionManager) {
+    EMISSION_MANAGER = emissionManager;
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -532,25 +539,5 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {
     return _assets[asset].decimals;
-  }
-
-  /// @inheritdoc IRewardsDistributor
-  function getEmissionManager() external view returns (address) {
-    return _emissionManager;
-  }
-
-  /// @inheritdoc IRewardsDistributor
-  function setEmissionManager(address emissionManager) external onlyEmissionManager {
-    _setEmissionManager(emissionManager);
-  }
-
-  /**
-   * @dev Updates the address of the emission manager
-   * @param emissionManager The address of the new EmissionManager
-   */
-  function _setEmissionManager(address emissionManager) internal {
-    address previousEmissionManager = _emissionManager;
-    _emissionManager = emissionManager;
-    emit EmissionManagerUpdated(previousEmissionManager, emissionManager);
   }
 }

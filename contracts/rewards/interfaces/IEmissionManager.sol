@@ -93,13 +93,6 @@ interface IEmissionManager {
   function setClaimer(address user, address claimer) external;
 
   /**
-   * @dev Updates the address of the emission manager
-   * @dev Only callable by the owner of the EmissionManager
-   * @param emissionManager The address of the new EmissionManager
-   */
-  function setEmissionManager(address emissionManager) external;
-
-  /**
    * @dev Updates the admin of the reward emission
    * @dev Only callable by the owner of the EmissionManager
    * @param reward The address of the reward token

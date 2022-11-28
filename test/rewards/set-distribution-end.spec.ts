@@ -19,9 +19,11 @@ makeSuite('AaveIncentivesControllerV2 setDistributionEnd', (testEnv: TestEnv) =>
 
     const beforeData = await rewardsController.getRewardsData(aDai.address, stakedAave.address);
 
-    const action = await rewardsController
-      .connect(deployer.signer)
-      .setDistributionEnd(aDai.address, stakedAave.address, '1010');
+    const action = await rewardsController.setDistributionEnd(
+      aDai.address,
+      stakedAave.address,
+      '1010'
+    );
 
     const afterData = await rewardsController.getRewardsData(aDai.address, stakedAave.address);
 

@@ -29,11 +29,9 @@ contract EmissionManager is Ownable, IEmissionManager {
 
   /**
    * Constructor.
-   * @param controller The address of the RewardsController contract
    * @param owner The address of the owner
    */
-  constructor(address controller, address owner) {
-    _rewardsController = IRewardsController(controller);
+  constructor(address owner) {
     transferOwnership(owner);
   }
 
@@ -87,11 +85,6 @@ contract EmissionManager is Ownable, IEmissionManager {
   /// @inheritdoc IEmissionManager
   function setClaimer(address user, address claimer) external override onlyOwner {
     _rewardsController.setClaimer(user, claimer);
-  }
-
-  /// @inheritdoc IEmissionManager
-  function setEmissionManager(address emissionManager) external override onlyOwner {
-    _rewardsController.setEmissionManager(emissionManager);
   }
 
   /// @inheritdoc IEmissionManager

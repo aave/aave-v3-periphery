@@ -176,4 +176,12 @@ interface IRewardsDistributor {
    * @return The address of the EmissionManager
    */
   function EMISSION_MANAGER() external view returns (address);
+
+  /**
+   * @dev Returns the address of the emission manager.
+   * In v3.0.1 the emissionManager mutability changed to be immutable.
+   * This getter is maintained for compatiblity reasons.
+   * @return The address of the EmissionManager
+   */
+  function getEmissionManager() external view returns (address);
 }

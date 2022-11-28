@@ -540,4 +540,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   function getAssetDecimals(address asset) external view returns (uint8) {
     return _assets[asset].decimals;
   }
+
+  /// @inheritdoc IRewardsDistributor
+  function getEmissionManager() external view returns (address) {
+    return EMISSION_MANAGER;
+  }
 }

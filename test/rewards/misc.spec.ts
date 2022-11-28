@@ -30,6 +30,9 @@ makeSuite('RewardsController misc tests', (testEnv) => {
     await expect((await rewardsController.EMISSION_MANAGER()).toString()).to.be.equal(
       peiEmissionManager
     );
+    await expect((await rewardsController.getEmissionManager()).toString()).to.be.equal(
+      peiEmissionManager
+    );
   });
 
   it('Should return same index while multiple asset index updates', async () => {

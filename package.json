@@ -1,6 +1,6 @@
 {
   "name": "@mahalend/periphery-v3",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "MahaLend Protocol V3 periphery smart contracts",
   "files": [
     "contracts",

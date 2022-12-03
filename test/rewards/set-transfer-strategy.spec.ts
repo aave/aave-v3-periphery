@@ -1,5 +1,5 @@
 import { makeSuite, TestEnv } from '../helpers/make-suite';
-import { ZERO_ADDRESS } from '@aave/deploy-v3';
+import { ZERO_ADDRESS } from '@mahalend/deploy-v3';
 import hre from 'hardhat';
 
 const { expect } = require('chai');

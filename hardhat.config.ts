@@ -166,7 +166,7 @@ const config: HardhatUserConfig = {
     contracts: [
       {
         artifacts: './temp-artifacts',
-        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+        deploy: 'node_modules/@mahalend/deploy-v3/dist/deploy',
       },
     ],
   },

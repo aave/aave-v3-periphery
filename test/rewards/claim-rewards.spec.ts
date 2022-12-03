@@ -7,7 +7,7 @@ import {
   increaseTime,
   MAX_UINT_AMOUNT,
   advanceTimeAndBlock,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy-v3';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import { comparatorEngine } from './helpers/comparator-engine';
 import {

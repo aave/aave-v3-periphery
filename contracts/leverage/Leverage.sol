@@ -47,9 +47,13 @@ contract Leverage {
         uint256 availableLoanAmount;
         uint256 interestRateMode;
         uint256 referral;
+        availableLoanAmount =
+            IPriceOracleGetter(poolProvider.getPriceOracle()).getAssetPrice(
+                _reserve
+            ) *
+            _reserveAmount;
         tempCurrency = IPriceOracleGetter(poolProvider.getPriceOracle())
             .BASE_CURRENCY();
-        (, , availableLoanAmount, , , ) = pool.getUserAccountData(msg.sender);
         interestRateMode = 1;
         referral = 0;
         pool.borrow(
@@ -127,28 +131,28 @@ contract Leverage {
         return amounts;
     }
 
-    /**
-     * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
-     * @param _asset The address of the borrowed underlying asset previously borrowed
-     * @param _amount The amount to repay
-     * @param _interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
-     * @param _isETH flag whether the reserve token is ETH
-     **/
-    function _repay(
-        address _asset,
-        uint256 _amount,
-        uint256 _interestRateMode,
-        bool _isETH
-    ) internal {
-        if (_isETH) {
-            _WETHGateway.repayETH(
-                address(_LendingPool),
-                _amount,
-                _interestRateMode,
-                msg.sender
-            );
-        } else {
-            _LendingPool.repay(_asset, _amount, _interestRateMode, msg.sender);
-        }
-    }
+    // /**
+    //  * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
+    //  * @param _asset The address of the borrowed underlying asset previously borrowed
+    //  * @param _amount The amount to repay
+    //  * @param _interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
+    //  * @param _isETH flag whether the reserve token is ETH
+    //  **/
+    // function _repay(
+    //     address _asset,
+    //     uint256 _amount,
+    //     uint256 _interestRateMode,
+    //     bool _isETH
+    // ) internal {
+    //     if (_isETH) {
+    //         _WETHGateway.repayETH(
+    //             address(_LendingPool),
+    //             _amount,
+    //             _interestRateMode,
+    //             msg.sender
+    //         );
+    //     } else {
+    //         _LendingPool.repay(_asset, _amount, _interestRateMode, msg.sender);
+    //     }
+    // }
 }

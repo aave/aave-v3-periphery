@@ -165,8 +165,8 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
       await Bluebird.each(assets, async (asset, index) => {
         await ATokenMock__factory.connect(asset, deployer.signer).handleActionOnAic(
           userAddress,
-          stakedByUser[index],
-          totalSupply[index]
+          totalSupply[index],
+          stakedByUser[index]
         );
       });
 

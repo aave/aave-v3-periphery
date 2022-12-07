@@ -159,15 +159,15 @@ Called by the corresponding asset on transfer hook in order to update the reward
 
 ### Interface
 
-`function handleAction(address user, uint256 userBalance, uint256 totalSupply) external;`
+`function handleAction(address user, uint256 totalSupply, uint256 userBalance) external;`
 
 ### Input parameters
 
 | Parameter Name | Type    | Description                                                |
 | -------------- | ------- | ---------------------------------------------------------- |
 | user           | address | The address of the user whose asset balance has changed    |
-| userBalance    | uint256 | The previous user balance prior to balance change          |
 | totalSupply    | uint256 | The total supply of the asset prior to user balance change |
+| userBalance    | uint256 | The previous user balance prior to balance change          |
 
 ## claimRewards
 

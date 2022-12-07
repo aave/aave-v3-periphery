@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.5](https://github.com/aave/aave-v3-periphery/compare/v1.21.4...v1.21.5) (2022-12-07)
+
+
+### Bug Fixes
+
+* add registry url to actions/setup-node@v1 ([7695376](https://github.com/aave/aave-v3-periphery/commit/769537678a2fb4eec02e55dd5cf75f88ef13455a))
+
 ## [1.21.4](https://github.com/aave/aave-v3-periphery/compare/v1.21.3...v1.21.4) (2022-12-07)
 
 

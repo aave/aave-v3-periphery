@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.4](https://github.com/aave/aave-v3-periphery/compare/v1.21.3...v1.21.4) (2022-12-07)
+
+
+### Bug Fixes
+
+* publish npm at action ([992dda2](https://github.com/aave/aave-v3-periphery/commit/992dda25a5df000b7efe218051d18a2ef157621b))
+
 ## [1.21.3](https://github.com/aave/aave-v3-periphery/compare/v1.21.2...v1.21.3) (2022-12-07)
 
 

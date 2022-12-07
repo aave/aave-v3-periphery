@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           scope: '@aave'
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
       - run: npm publish

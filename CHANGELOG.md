@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.2](https://github.com/aave/aave-v3-periphery/compare/v1.21.1...v1.21.2) (2022-12-07)
+
+
+### Bug Fixes
+
+* Fix parameters of IRewardsController handleAction function ([8fa6e83](https://github.com/aave/aave-v3-periphery/commit/8fa6e8374e4c4e2f22422b9f920a881b282c545f))
+
 ## [1.21.1](https://github.com/aave/aave-v3-periphery/compare/v1.20.2...v1.21.1) (2022-11-28)
 
 

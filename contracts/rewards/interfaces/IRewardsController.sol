@@ -111,14 +111,15 @@ interface IRewardsController is IRewardsDistributor {
 
   /**
    * @dev Called by the corresponding asset on transfer hook in order to update the rewards distribution.
-   * @param user The address of the user whose asset balance has changed 
-   * @param userBalance The previous user balance prior to balance change 
+   * @dev The units of `totalSupply` and `userBalance` should be the same.
+   * @param user The address of the user whose asset balance has changed
    * @param totalSupply The total supply of the asset prior to user balance change
+   * @param userBalance The previous user balance prior to balance change
    **/
   function handleAction(
     address user,
-    uint256 userBalance,
-    uint256 totalSupply
+    uint256 totalSupply,
+    uint256 userBalance
   ) external;
 
   /**

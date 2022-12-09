@@ -7,8 +7,9 @@ import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
 import {IWrappedTokenGatewayV3} from "./interface/IWrappedTokenGatewayV3.sol";
 import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
 import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
+import {Ownable} from "./access/Ownable.sol";
 
-contract Leverage {
+contract Leverage is Ownable {
     //main configuration parameters
     IPool public POOL;
     IWrappedTokenGatewayV3 public WETH_GATEWAY;
@@ -17,13 +18,13 @@ contract Leverage {
     address public DAI;
     address public ARTH;
 
-    constructor(
+    function init(
         address _poolProviderAddress,
         address _wethGatewayAddress,
         address _curveSwaps,
         address _daiAddress,
         address _arthAddress
-    ) {
+    ) external onlyOwner {
         POOL_PROVIDER = IPoolAddressesProvider(_poolProviderAddress);
         POOL = IPool(POOL_PROVIDER.getPool());
         WETH_GATEWAY = IWrappedTokenGatewayV3(_wethGatewayAddress);

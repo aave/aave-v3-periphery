@@ -1,78 +1,77 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import "./interface/IERC20.sol";
-import "./interface/IPool.sol";
-import "./interface/IPoolAddressesProvider.sol";
-import "./interface/IWrappedTokenGatewayV3.sol";
-import "./interface/IUniswapV2Router01.sol";
-import "./interface/IPriceOracleGetter.sol";
+import {IERC20} from "./interface/IERC20.sol";
+import {IPool} from "./interface/IPool.sol";
+import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
+import {IWrappedTokenGatewayV3} from "./interface/IWrappedTokenGatewayV3.sol";
+import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
+import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
 
 contract Leverage {
     //main configuration parameters
-    ILendingPool public pool;
-    IWrappedTokenGatewayV3 public wethGateway;
-    IUniswapV2Router01 public uniswapRouter;
-    IPoolAddressesProvider public poolProvider;
+    IPool public POOL;
+    IWrappedTokenGatewayV3 public WETH_GATEWAY;
+    ICurveSwaps public CURVE_SWAP;
+    IPoolAddressesProvider public POOL_PROVIDER;
+    address public DAI;
+    address public ARTH;
 
     constructor(
         address _poolProviderAddress,
         address _wethGatewayAddress,
-        address _uniswapRouterAddress
+        address _curveSwaps,
+        address _daiAddress,
+        address _arthAddress
     ) {
-        poolProvider = IPoolAddressesProvider(_poolProviderAddress);
-        pool = ILendingPool(poolProvider.getLendingPool());
-        wethGateway = IWrappedTokenGatewayV3(_wethGatewayAddress);
-        uniswapRouter = IUniswapV2Router01(_uniswapRouterAddress);
+        POOL_PROVIDER = IPoolAddressesProvider(_poolProviderAddress);
+        POOL = IPool(POOL_PROVIDER.getPool());
+        WETH_GATEWAY = IWrappedTokenGatewayV3(_wethGatewayAddress);
+        CURVE_SWAP = ICurveSwaps(_curveSwaps);
+        DAI = _daiAddress;
+        ARTH = _arthAddress;
     }
 
     /**
      * @notice main function of this contract
      * @param _reserve reserve token to deposit
      * @param _reserveAmount reserve amount to deposit
-     * @param _loan loan token to borrow
      * @param _isETH flag whether the reserve token is ETH
      **/
     function takeLeverage(
         address _reserve,
         uint256 _reserveAmount,
-        address _loan,
         bool _isETH
-    ) external payable returns (uint _loanAmount) {
+    ) external payable {
         // first deposit
         _deposit(_reserve, _reserveAmount, address(this), _isETH);
 
         // first borrow
-        address tempCurrency;
         uint256 availableLoanAmount;
         uint256 interestRateMode;
-        uint256 referral;
+        uint16 referral;
+        IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
+            POOL_PROVIDER.getPriceOracle()
+        );
         availableLoanAmount =
-            IPriceOracleGetter(poolProvider.getPriceOracle()).getAssetPrice(
-                _reserve
-            ) *
-            _reserveAmount;
-        tempCurrency = IPriceOracleGetter(poolProvider.getPriceOracle())
-            .BASE_CURRENCY();
+            (PRICE_ORACLE_GETTER.getAssetPrice(_reserve) * _reserveAmount) /
+            PRICE_ORACLE_GETTER.getAssetPrice(ARTH);
         interestRateMode = 1;
         referral = 0;
-        pool.borrow(
-            tempCurrency,
+        POOL.borrow(
+            ARTH,
             availableLoanAmount,
             interestRateMode,
             referral,
             address(this)
         );
 
-        // swap on uniswap
-        uint256[] memory swapAmounts = _swap(
-            _stable,
-            _reserve,
-            availableLoanAmount
-        );
+        // swap on curve swap
+        uint256 firstSwapAmount = _swap(ARTH, DAI, availableLoanAmount);
+        uint256 secondSwapAmount = _swap(DAI, _reserve, firstSwapAmount);
 
         // second desposit
-        _deposit(_reserve, swapAmounts, msg.sender, _isETH);
+        _deposit(_reserve, secondSwapAmount, msg.sender, _isETH);
     }
 
     /**
@@ -87,72 +86,51 @@ contract Leverage {
         address _onBehalfOf,
         bool _isETH
     ) internal returns (address, uint256) {
-        uint256 referral = 0;
+        uint16 referral = 0;
         if (_isETH) {
-            _WETHGateway.depositETH{value: msg.value}(
-                address(pool),
+            WETH_GATEWAY.depositETH{value: msg.value}(
+                address(POOL),
                 _onBehalfOf,
                 referral
             );
-            return (address(_WETHGateway), msg.value);
+            return (address(WETH_GATEWAY), msg.value);
         } else {
             IERC20(_reserve).transferFrom(
                 msg.sender,
                 address(this),
                 _reserveAmount
             );
-            pool.deposit(_reserve, _reserveAmount, _onBehalfOf, referral);
+            POOL.deposit(_reserve, _reserveAmount, _onBehalfOf, referral);
             return (_reserve, _reserveAmount);
         }
     }
 
     /**
-     * @notice Swap on uniswap
-     * @param _addressA
-     * @param _addressB
-     * @param _amountA
+     * @notice Swap on curve swap
+     * @param _tokenIn token to send
+     * @param _tokenOut token to receive
+     * @param _amountA amount of _tokenIn
      **/
     function _swap(
-        address _addressA,
-        address _addressB,
+        address _tokenIn,
+        address _tokenOut,
         uint256 _amountA
-    ) internal returns (uint256[] memory) {
-        address[] memory path = new address[](3);
-        path[0] = _addressA;
-        path[1] = uniswapRouter.WETH();
-        path[2] = _addressB;
-        uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
+    ) internal returns (uint256) {
+        uint256 expectReceive;
+        address[] memory tmp = new address[](0);
+        (, expectReceive) = CURVE_SWAP.get_best_rate(
+            _tokenIn,
+            _tokenOut,
             _amountA,
-            0,
-            path,
-            msg.sender,
-            block.timestamp
+            tmp
         );
-        return amounts;
+        uint256 amountOut = CURVE_SWAP.exchange_with_best_rate(
+            _tokenIn,
+            _tokenOut,
+            _amountA,
+            (expectReceive * 94) / 100,
+            address(this)
+        );
+        return amountOut;
     }
-
-    // /**
-    //  * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
-    //  * @param _asset The address of the borrowed underlying asset previously borrowed
-    //  * @param _amount The amount to repay
-    //  * @param _interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
-    //  * @param _isETH flag whether the reserve token is ETH
-    //  **/
-    // function _repay(
-    //     address _asset,
-    //     uint256 _amount,
-    //     uint256 _interestRateMode,
-    //     bool _isETH
-    // ) internal {
-    //     if (_isETH) {
-    //         _WETHGateway.repayETH(
-    //             address(_LendingPool),
-    //             _amount,
-    //             _interestRateMode,
-    //             msg.sender
-    //         );
-    //     } else {
-    //         _LendingPool.repay(_asset, _amount, _interestRateMode, msg.sender);
-    //     }
-    // }
 }

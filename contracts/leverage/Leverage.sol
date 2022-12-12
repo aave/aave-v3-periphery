@@ -4,30 +4,30 @@ pragma solidity ^0.8.10;
 import {IERC20} from "./interface/IERC20.sol";
 import {IPool} from "./interface/IPool.sol";
 import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
-import {IWrappedTokenGatewayV3} from "./interface/IWrappedTokenGatewayV3.sol";
 import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
+import {IWETH9} from "./interface/IWETH9.sol";
 import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
 import {Ownable} from "./access/Ownable.sol";
 
 contract Leverage is Ownable {
     //main configuration parameters
     IPool public POOL;
-    IWrappedTokenGatewayV3 public WETH_GATEWAY;
+    IWETH9 public WETH9;
     ICurveSwaps public CURVE_SWAP;
     IPoolAddressesProvider public POOL_PROVIDER;
     address public DAI;
     address public ARTH;
 
     function init(
-        address _poolProviderAddress,
-        address _wethGatewayAddress,
+        address _poolProvider,
+        address payable _weth9,
         address _curveSwaps,
         address _daiAddress,
         address _arthAddress
     ) external onlyOwner {
-        POOL_PROVIDER = IPoolAddressesProvider(_poolProviderAddress);
+        POOL_PROVIDER = IPoolAddressesProvider(_poolProvider);
         POOL = IPool(POOL_PROVIDER.getPool());
-        WETH_GATEWAY = IWrappedTokenGatewayV3(_wethGatewayAddress);
+        WETH9 = IWETH9(_weth9);
         CURVE_SWAP = ICurveSwaps(_curveSwaps);
         DAI = _daiAddress;
         ARTH = _arthAddress;
@@ -89,12 +89,9 @@ contract Leverage is Ownable {
     ) internal returns (address, uint256) {
         uint16 referral = 0;
         if (_isETH) {
-            WETH_GATEWAY.depositETH{value: msg.value}(
-                address(POOL),
-                _onBehalfOf,
-                referral
-            );
-            return (address(WETH_GATEWAY), msg.value);
+            WETH9.deposit{value: msg.value}();
+            POOL.deposit(address(WETH9), msg.value, _onBehalfOf, referral);
+            return (address(WETH9), msg.value);
         } else {
             IERC20(_reserve).transferFrom(
                 msg.sender,

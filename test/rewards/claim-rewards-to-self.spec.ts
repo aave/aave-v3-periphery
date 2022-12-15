@@ -4,7 +4,7 @@ import {
   waitForTx,
   MAX_UINT_AMOUNT,
   advanceTimeAndBlock,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy-v3';
 import { BigNumber } from 'ethers';
 import { makeSuite } from '../helpers/make-suite';
 import { comparatorEngine } from './helpers/comparator-engine';

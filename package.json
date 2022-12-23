@@ -85,6 +85,6 @@
     "url": "git://github.com/aave/aave-v3-periphery"
   },
   "dependencies": {
-    "@aave/core-v3": "https://github.com/aave/aave-v3-core#feat/3.0.1"
+    "@aave/core-v3": "1.16.2-beta.5"
   }
 }

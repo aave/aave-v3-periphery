@@ -524,15 +524,15 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@mahalend/core@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@mahalend/core/-/core-2.0.0.tgz#be218c07706676b7269040a642eb85c66a69f893"
-  integrity sha512-2SGCt+1lWITSVlODLhPQkHxp9+tuU9mBFRi77eOVtew2hl1BWLfHQFxPsoDkA+4KSohqNpw2RkSLWwZVHfQTDA==
+"@mahalend/core@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@mahalend/core/-/core-4.0.0.tgz#58c6bd7a88ee54c1fccf056163efb2b30b4893e3"
+  integrity sha512-BT6vsMwvI6h7ZqJTooGXZ8P3fw2worP0pmr5OQwhDl2SN0BU/GIeLEJ1jdYg4s2P25epDY1RTdsMHpRKo3g9Sg==
 
-"@mahalend/deploy@2.3.2":
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@mahalend/deploy/-/deploy-2.3.2.tgz#a8087d69017aa2ba0eb072813a0e9859dbb11ea1"
-  integrity sha512-xM9xS4JI3OJz7tHMEOmYrWNpXE0Ymx/Wd3cwe7i+Iw4AZQixqyaSHCqayxltYTm0ymWZAvkRt1o5scXljmpX7Q==
+"@mahalend/deploy@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@mahalend/deploy/-/deploy-4.0.0.tgz#fc69ed4f38d350553478dad7f5b603493959df89"
+  integrity sha512-wnvHCms7414Psd/2Uny5qemj09LXj9eL7ikdVhSr0dRirCijt2+AumN4kp3wh0FKrREIL5MLvtf7lATbJ1//2A==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"

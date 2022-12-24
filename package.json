@@ -34,7 +34,6 @@
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@ethersproject/abi": "^5.1.0",
-    "@mahalend/core": "^4.0.0",
     "@mahalend/deploy": "^4.5.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
@@ -77,6 +76,9 @@
     "ts-node": "10.9.1",
     "typechain": "^5.1.2",
     "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@mahalend/core": "^4.0.0"
   },
   "husky": {
     "hooks": {

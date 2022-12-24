@@ -82,7 +82,7 @@ const config: HardhatUserConfig = {
     main: {
       url: 'https://cloudflare-eth.com',
       accounts: {
-        mnemonic: 'fox sight canyon orphan hotel grow hedgehog build bless august weather swarm',
+        mnemonic: process.env.MNEMONIC,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,

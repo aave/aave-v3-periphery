@@ -532,11 +532,10 @@
     axios-curlirize "^1.3.7"
     tmp-promise "^3.0.2"
 
-"@mahalend/deploy-v3@git+https://github.com/mahalend/v3-deploy.git":
-  version "1.50.0"
-  resolved "git+https://github.com/mahalend/v3-deploy.git#89882a16872a363e4ad403fac1e5adadde686029"
-  dependencies:
-    defender-relay-client "^1.11.1"
+"@mahalend/deploy-v3@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@mahalend/deploy-v3/-/deploy-v3-2.3.2.tgz#a8087d69017aa2ba0eb072813a0e9859dbb11ea1"
+  integrity sha512-xM9xS4JI3OJz7tHMEOmYrWNpXE0Ymx/Wd3cwe7i+Iw4AZQixqyaSHCqayxltYTm0ymWZAvkRt1o5scXljmpX7Q==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
@@ -3406,7 +3405,7 @@ defender-base-client@1.37.0:
     lodash "^4.17.19"
     node-fetch "^2.6.0"
 
-defender-relay-client@^1.11.1, defender-relay-client@^1.4.2:
+defender-relay-client@^1.4.2:
   version "1.37.0"
   resolved "https://registry.yarnpkg.com/defender-relay-client/-/defender-relay-client-1.37.0.tgz#e6db1cccd8924b2e91e89635d88bf50099c28afc"
   integrity sha512-c2V1AxPmnRC8Gj62cI2WQFJR4GECPoktbiGf/+l37Wxrnh38f4My/o6nZ/tqGkGt4kt8kzfmqciI2lNiUtlPDA==

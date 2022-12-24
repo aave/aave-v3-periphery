@@ -1,7 +1,7 @@
 {
-  "name": "@mahalend/periphery-v3",
+  "name": "@mahalend/periphery",
   "version": "3.3.1",
-  "description": "MahaLend Protocol V3 periphery smart contracts",
+  "description": "MahaLend Protocol periphery smart contracts",
   "files": [
     "contracts",
     "artifacts",
@@ -34,6 +34,7 @@
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "@ethersproject/abi": "^5.1.0",
+    "@mahalend/core": "2.0.0",
     "@mahalend/deploy-v3": "2.3.2",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.1.0",
@@ -84,15 +85,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mahalend/v3-periphery.git"
-  },
-  "dependencies": {
-    "@mahalend/core-v3": "git+https://github.com/mahalend/v3-core.git"
+    "url": "git@github.com:mahalend/contracts-periphery.git"
   },
   "bugs": {
-    "url": "https://github.com/mahalend/v3-periphery/issues"
+    "url": "https://github.com/mahalend/contracts-periphery/issues"
   },
-  "homepage": "https://github.com/mahalend/v3-periphery#readme",
+  "homepage": "https://github.com/mahalend/contracts-periphery#readme",
   "main": ".solcover.js",
   "directories": {
     "doc": "docs",

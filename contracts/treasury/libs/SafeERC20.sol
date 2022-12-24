@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-import {IERC20} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IERC20} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from './Address.sol';
 
 /**

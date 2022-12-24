@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {SafeMath} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
-import {PercentageMath} from '@mahalend/core-v3/contracts/protocol/libraries/math/PercentageMath.sol';
-import {IPoolAddressesProvider} from '@mahalend/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IERC20Detailed} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {SafeMath} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
+import {PercentageMath} from '@mahalend/core/contracts/protocol/libraries/math/PercentageMath.sol';
+import {IPoolAddressesProvider} from '@mahalend/core/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IERC20Detailed} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {BaseParaSwapAdapter} from './BaseParaSwapAdapter.sol';

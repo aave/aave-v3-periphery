@@ -1,5 +1,5 @@
 import { makeSuite, TestEnv } from '../helpers/make-suite';
-import { ZERO_ADDRESS, waitForTx } from '@mahalend/deploy-v3';
+import { ZERO_ADDRESS, waitForTx } from '@mahalend/deploy';
 
 const { expect } = require('chai');
 

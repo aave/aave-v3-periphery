@@ -8,7 +8,7 @@ import {
   MAX_UINT_AMOUNT,
   ERC20__factory,
   advanceTimeAndBlock,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import {
   assetDataComparator,
@@ -259,7 +259,7 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
             );
         }
 
-        let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
+        const expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
         );
         expect(unclaimedRewardsStorageAfter[i].toString()).to.be.equal(

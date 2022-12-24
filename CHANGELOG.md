@@ -60,7 +60,7 @@
 - port Paraswap Repay Adapter from Aave V2 to Aave V3, add tests ([d1887a8](https://github.com/aave/aave-v3-periphery/commit/d1887a8e90b0d59ba98c27102045cd287e341ddf))
 - removed duplicated import ([cb2eba8](https://github.com/aave/aave-v3-periphery/commit/cb2eba824811322f6db12b09fd2cb149bd9d1b90))
 - rename script release please origin ([a87dd68](https://github.com/aave/aave-v3-periphery/commit/a87dd688a567540151fb0db8ec5f09399a523d5a))
-- use latest aave@deploy-v3 and aave@core package, use the Test market at tests ([4b3a8f4](https://github.com/aave/aave-v3-periphery/commit/4b3a8f488e3520d85093a908ea898e845e16cbc3))
+- use latest aave@deploy and aave@core package, use the Test market at tests ([4b3a8f4](https://github.com/aave/aave-v3-periphery/commit/4b3a8f488e3520d85093a908ea898e845e16cbc3))
 - use simple flash loan ([e715175](https://github.com/aave/aave-v3-periphery/commit/e715175c899f95dcde98099965aad2fabdbdc1f2))
 
 ### Bug Fixes
@@ -139,7 +139,7 @@
 - port Paraswap Repay Adapter from Aave V2 to Aave V3, add tests ([d1887a8](https://github.com/aave/aave-v3-periphery/commit/d1887a8e90b0d59ba98c27102045cd287e341ddf))
 - removed duplicated import ([cb2eba8](https://github.com/aave/aave-v3-periphery/commit/cb2eba824811322f6db12b09fd2cb149bd9d1b90))
 - rename script release please origin ([a87dd68](https://github.com/aave/aave-v3-periphery/commit/a87dd688a567540151fb0db8ec5f09399a523d5a))
-- use latest aave@deploy-v3 and aave@core package, use the Test market at tests ([4b3a8f4](https://github.com/aave/aave-v3-periphery/commit/4b3a8f488e3520d85093a908ea898e845e16cbc3))
+- use latest aave@deploy and aave@core package, use the Test market at tests ([4b3a8f4](https://github.com/aave/aave-v3-periphery/commit/4b3a8f488e3520d85093a908ea898e845e16cbc3))
 - use simple flash loan ([e715175](https://github.com/aave/aave-v3-periphery/commit/e715175c899f95dcde98099965aad2fabdbdc1f2))
 
 ### Bug Fixes

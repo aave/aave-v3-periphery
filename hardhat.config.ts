@@ -53,10 +53,10 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: 'types',
     externalArtifacts: [
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/**/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/**/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
     ],
   },
   gasReporter: {
@@ -182,7 +182,7 @@ const config: HardhatUserConfig = {
     contracts: [
       {
         artifacts: './temp-artifacts',
-        deploy: 'node_modules/@mahalend/deploy-v3/dist/deploy',
+        deploy: 'node_modules/@mahalend/deploy/dist/deploy',
       },
     ],
   },

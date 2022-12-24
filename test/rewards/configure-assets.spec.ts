@@ -1,6 +1,6 @@
 import { RewardsController } from './../../types/RewardsController.d';
 import hre from 'hardhat';
-import { getBlockTimestamp, increaseTime, waitForTx } from '@mahalend/deploy-v3';
+import { getBlockTimestamp, increaseTime, waitForTx } from '@mahalend/deploy';
 import { BigNumberish } from 'ethers';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
 import { CompareRules } from './helpers/comparator-engine';

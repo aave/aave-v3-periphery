@@ -529,9 +529,9 @@
   resolved "https://registry.yarnpkg.com/@mahalend/core/-/core-2.0.0.tgz#be218c07706676b7269040a642eb85c66a69f893"
   integrity sha512-2SGCt+1lWITSVlODLhPQkHxp9+tuU9mBFRi77eOVtew2hl1BWLfHQFxPsoDkA+4KSohqNpw2RkSLWwZVHfQTDA==
 
-"@mahalend/deploy-v3@2.3.2":
+"@mahalend/deploy@2.3.2":
   version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@mahalend/deploy-v3/-/deploy-v3-2.3.2.tgz#a8087d69017aa2ba0eb072813a0e9859dbb11ea1"
+  resolved "https://registry.yarnpkg.com/@mahalend/deploy/-/deploy-2.3.2.tgz#a8087d69017aa2ba0eb072813a0e9859dbb11ea1"
   integrity sha512-xM9xS4JI3OJz7tHMEOmYrWNpXE0Ymx/Wd3cwe7i+Iw4AZQixqyaSHCqayxltYTm0ymWZAvkRt1o5scXljmpX7Q==
 
 "@metamask/eth-sig-util@^4.0.0":

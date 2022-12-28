@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.22.0](https://github.com/aave/aave-v3-periphery/compare/v1.21.5...v1.22.0) (2022-12-28)
+
+
+### Features
+
+* Add Faucet contracts to periphery ([#144](https://github.com/aave/aave-v3-periphery/issues/144)) ([ec151d9](https://github.com/aave/aave-v3-periphery/commit/ec151d969c2c91224fc5771d5a1783b238e683ef))
+
+
+### Bug Fixes
+
+* set REVISION of proxy implementations to 1 by default ([#143](https://github.com/aave/aave-v3-periphery/issues/143)) ([1f6abcd](https://github.com/aave/aave-v3-periphery/commit/1f6abcd7da3483bd3c54a78b9e4e28064e784307))
+
 ## [1.21.5](https://github.com/aave/aave-v3-periphery/compare/v1.21.4...v1.21.5) (2022-12-07)
 
 

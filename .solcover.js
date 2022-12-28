@@ -1,6 +1,7 @@
 const cp = require('child_process');
 
 module.exports = {
+  configureYulOptimizer: true,
   skipFiles: [
     './mocks',
     './misc/UiIncentiveDataProvider.sol',

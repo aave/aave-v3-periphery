@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.23.0](https://github.com/aave/aave-v3-periphery/compare/v1.22.0...v1.23.0) (2022-12-28)
+
+
+### Miscellaneous Chores
+
+* release 1.23.0 ([fd5b00e](https://github.com/aave/aave-v3-periphery/commit/fd5b00ef87d336edda0001baead18a4461c28686))
+
 ## [1.22.0](https://github.com/aave/aave-v3-periphery/compare/v1.21.5...v1.22.0) (2022-12-28)
 
 

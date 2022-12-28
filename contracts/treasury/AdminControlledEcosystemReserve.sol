@@ -24,7 +24,7 @@ abstract contract AdminControlledEcosystemReserve is
 
   address internal _fundsAdmin;
 
-  uint256 public constant REVISION = 4;
+  uint256 public constant REVISION = 1;
 
   /// @inheritdoc IAdminControlledEcosystemReserve
   address public constant ETH_MOCK_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

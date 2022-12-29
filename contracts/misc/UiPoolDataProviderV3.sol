@@ -36,23 +36,6 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     marketReferenceCurrencyPriceInUsdProxyAggregator = _marketReferenceCurrencyPriceInUsdProxyAggregator;
   }
 
-  function getInterestRateStrategySlopes(DefaultReserveInterestRateStrategy interestRateStrategy)
-    internal
-    view
-    returns (InterestRates memory)
-  {
-    InterestRates memory interestRates;
-    interestRates.variableRateSlope1 = interestRateStrategy.getVariableRateSlope1();
-    interestRates.variableRateSlope2 = interestRateStrategy.getVariableRateSlope2();
-    interestRates.stableRateSlope1 = interestRateStrategy.getStableRateSlope1();
-    interestRates.stableRateSlope2 = interestRateStrategy.getStableRateSlope2();
-    interestRates.baseStableBorrowRate = interestRateStrategy.getBaseStableBorrowRate();
-    interestRates.baseVariableBorrowRate = interestRateStrategy.getBaseVariableBorrowRate();
-    interestRates.optimalUsageRatio = interestRateStrategy.OPTIMAL_USAGE_RATIO();
-
-    return interestRates;
-  }
-
   function getReservesList(IPoolAddressesProvider provider)
     public
     view
@@ -148,17 +131,49 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
         reserveData.isPaused
       ) = reserveConfigurationMap.getFlags();
 
-      InterestRates memory interestRates = getInterestRateStrategySlopes(
+      // interest rates
+      try
         DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
-      );
-
-      reserveData.variableRateSlope1 = interestRates.variableRateSlope1;
-      reserveData.variableRateSlope2 = interestRates.variableRateSlope2;
-      reserveData.stableRateSlope1 = interestRates.stableRateSlope1;
-      reserveData.stableRateSlope2 = interestRates.stableRateSlope2;
-      reserveData.baseStableBorrowRate = interestRates.baseStableBorrowRate;
-      reserveData.baseVariableBorrowRate = interestRates.baseVariableBorrowRate;
-      reserveData.optimalUsageRatio = interestRates.optimalUsageRatio;
+          .getVariableRateSlope1()
+      returns (uint256 res) {
+        reserveData.variableRateSlope1 = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .getVariableRateSlope2()
+      returns (uint256 res) {
+        reserveData.variableRateSlope2 = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .getStableRateSlope1()
+      returns (uint256 res) {
+        reserveData.stableRateSlope1 = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .getStableRateSlope2()
+      returns (uint256 res) {
+        reserveData.stableRateSlope2 = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .getBaseStableBorrowRate()
+      returns (uint256 res) {
+        reserveData.baseStableBorrowRate = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .getBaseVariableBorrowRate()
+      returns (uint256 res) {
+        reserveData.baseVariableBorrowRate = res;
+      } catch {}
+      try
+        DefaultReserveInterestRateStrategy(reserveData.interestRateStrategyAddress)
+          .OPTIMAL_USAGE_RATIO()
+      returns (uint256 res) {
+        reserveData.optimalUsageRatio = res;
+      } catch {}
 
       // v3 only
       reserveData.eModeCategoryId = uint8(eModeCategoryId);
@@ -166,7 +181,9 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
       reserveData.debtCeilingDecimals = poolDataProvider.getDebtCeilingDecimals();
       (reserveData.borrowCap, reserveData.supplyCap) = reserveConfigurationMap.getCaps();
 
-      try poolDataProvider.getFlashLoanEnabled(reserveData.underlyingAsset) returns (bool flashLoanEnabled) {
+      try poolDataProvider.getFlashLoanEnabled(reserveData.underlyingAsset) returns (
+        bool flashLoanEnabled
+      ) {
         reserveData.flashLoanEnabled = flashLoanEnabled;
       } catch (bytes memory) {
         reserveData.flashLoanEnabled = true;

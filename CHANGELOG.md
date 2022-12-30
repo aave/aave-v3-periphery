@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.1](https://github.com/aave/aave-v3-periphery/compare/v1.23.0...v1.23.1) (2022-12-30)
+
+
+### Bug Fixes
+
+* Fix fetching of IR data from UiPoolDataProvider ([e3865c2](https://github.com/aave/aave-v3-periphery/commit/e3865c2ac052fe204ca1435ba2f9c15d02aedad9))
+* Fix UiIncentiveProvider with 0 incentivesController ([5ddc801](https://github.com/aave/aave-v3-periphery/commit/5ddc8015e226ae23b9d7f9c565c24474a7ac7c6b))
+
 ## [1.23.0](https://github.com/aave/aave-v3-periphery/compare/v1.22.0...v1.23.0) (2022-12-28)
 
 

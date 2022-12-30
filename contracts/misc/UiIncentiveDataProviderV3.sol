@@ -108,12 +108,11 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
       IRewardsController vTokenIncentiveController = IRewardsController(
         address(IncentivizedERC20(baseData.variableDebtTokenAddress).getIncentivesController())
       );
-      address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(
-        baseData.variableDebtTokenAddress
-      );
       RewardInfo[] memory vRewardsInformation;
-
       if (address(vTokenIncentiveController) != address(0)) {
+        address[] memory vTokenRewardAddresses = vTokenIncentiveController.getRewardsByAsset(
+          baseData.variableDebtTokenAddress
+        );
         vRewardsInformation = new RewardInfo[](vTokenRewardAddresses.length);
         for (uint256 j = 0; j < vTokenRewardAddresses.length; ++j) {
           RewardInfo memory rewardInformation;
@@ -163,12 +162,11 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
       IRewardsController sTokenIncentiveController = IRewardsController(
         address(IncentivizedERC20(baseData.stableDebtTokenAddress).getIncentivesController())
       );
-      address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(
-        baseData.stableDebtTokenAddress
-      );
       RewardInfo[] memory sRewardsInformation;
-
       if (address(sTokenIncentiveController) != address(0)) {
+        address[] memory sTokenRewardAddresses = sTokenIncentiveController.getRewardsByAsset(
+          baseData.stableDebtTokenAddress
+        );
         sRewardsInformation = new RewardInfo[](sTokenRewardAddresses.length);
         for (uint256 j = 0; j < sTokenRewardAddresses.length; ++j) {
           RewardInfo memory rewardInformation;

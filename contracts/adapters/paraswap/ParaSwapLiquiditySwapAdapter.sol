@@ -149,7 +149,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
    * @param flashLoanAmount Amount of the flash loan i.e. maximum amount to swap
    * @param premium Fee of the flash loan
    * @param initiator Account that initiated the flash loan
-   * @param assetToSwapFrom Address of the underyling asset to be swapped from
+   * @param assetToSwapFrom Address of the underlying asset to be swapped from
    * @param assetToSwapTo Address of the underlying asset to be swapped to and deposited
    * @param minAmountToReceive Min amount to be received from the swap
    */

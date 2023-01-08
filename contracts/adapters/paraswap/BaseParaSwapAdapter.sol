@@ -129,7 +129,7 @@ abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
   }
 
   /**
-   * @dev Emergency rescue for token stucked on this contract, as failsafe mechanism
+   * @dev Emergency rescue for token stuck on this contract, as failsafe mechanism
    * - Funds should never remain in this contract more time than during transactions
    * - Only callable by the owner
    */

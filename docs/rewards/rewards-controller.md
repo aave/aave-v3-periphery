@@ -20,7 +20,7 @@ The users can claim all the rewards or an individual reward per transaction, wit
 | Role Name          | Access                             | Description                                                                                                                                                                                                                                                                                                                                                                                                                          |
 |--------------------|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Emission Manager   | Immutable                          | Allows to setup the emission configuration of the different rewards and enabling the *Authorized Claimer* role for an address. Declared at RewardsDistribution contract as immutable at constructor.                                                                                                                                                                                                                                 |
-| Authorized Claimer | Mutable by *Emission Manager* role | Allows whitelisted addresses to claim on behalf of another specified address. Useful for contracts that hold tokens that are incentivized but don't have any native logic to claim Liquidity Mining rewards. Declared at RewardsController contract, at the `_authorizedClaimers` internal mapping. Addreses can be enabled or disabled as *Authorized Claimer* via `setClaimer` function, only callable by *Emission Manager* role. |
+| Authorized Claimer | Mutable by *Emission Manager* role | Allows whitelisted addresses to claim on behalf of another specified address. Useful for contracts that hold tokens that are incentivized but don't have any native logic to claim Liquidity Mining rewards. Declared at RewardsController contract, at the `_authorizedClaimers` internal mapping. Addresses can be enabled or disabled as *Authorized Claimer* via `setClaimer` function, only callable by *Emission Manager* role. |
 
 # External Methods
 
@@ -52,7 +52,7 @@ Add a TransferStrategy contract that determines the logic and the source of the 
 | Parameter Name   | Type    | Description                                   |
 | ---------------- | ------- | --------------------------------------------- |
 | reward           | address | The address of the reward token               |
-| transferStrategy | address | The address of the TransferStratregy contract |
+| transferStrategy | address | The address of the TransferStrategy contract |
 
 ## setRewardOracle
 

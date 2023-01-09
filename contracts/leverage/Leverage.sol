@@ -1,90 +1,144 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {IERC20} from "./interface/IERC20.sol";
+import {IERC20Detailed} from "./interface/IERC20Detailed.sol";
 import {IPool} from "./interface/IPool.sol";
 import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
-import {ICurveAddressesProvider} from "./interface/ICurveAddressesProvider.sol";
 import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
-import {IWETH9} from "./interface/IWETH9.sol";
+import {IWETH} from "./interface/IWETH.sol";
 import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
 import {Ownable} from "./access/Ownable.sol";
 
+library DataTypes {
+    struct LeverageSwapParams {
+        address[9] route_first;
+        uint256[3][4] params_first;
+        address[9] route_second;
+        uint256[3][4] params_second;
+    }
+}
+
 contract Leverage is Ownable {
     //main configuration parameters
-    address public POOL_PROVIDER;
-    address public POOL;
-    address public CURVE_SWAPS;
-    address payable public WETH9;
-    address public ARTH;
+    address public ADDR_poolProvider;
+    address public ADDR_pool;
+    address public ADDR_curveSwap;
+    address payable public ADDR_weth;
+    address public ADDR_arth;
 
-    mapping(address => mapping(address => uint256)) public userBalances;
-    address[] reserveList = new address[](0);
-
-    function init(
+    constructor(
         address _poolProvider,
         address _curveProvider,
-        address payable _weth9,
+        address payable _weth,
         address _arthAddress
-    ) external onlyOwner {
-        POOL_PROVIDER = _poolProvider;
-        POOL = IPoolAddressesProvider(POOL_PROVIDER).getPool();
-        CURVE_SWAPS = ICurveAddressesProvider(_curveProvider).get_address(2);
-        WETH9 = _weth9;
-        ARTH = _arthAddress;
+    ) {
+        ADDR_poolProvider = _poolProvider;
+        ADDR_pool = IPoolAddressesProvider(ADDR_poolProvider).getPool();
+        ADDR_curveSwap = _curveProvider;
+        ADDR_weth = _weth;
+        ADDR_arth = _arthAddress;
     }
 
-    /**
-     * @notice Deposit token to lendingPool
-     * @param _reserve reserve token to deposit
-     * @param _reserveAmount reserve amount to deposit
-     * @param _onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
-     **/
-    function _deposit(
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function calcLoanableBaseForReserve(
         address _reserve,
-        uint256 _reserveAmount,
-        address _onBehalfOf,
-        bool _isETH
-    ) internal returns (address, uint256) {
-        uint16 referral = 0;
-        if (_isETH) {
-            IWETH9(WETH9).deposit{value: msg.value}();
-            IPool(POOL).deposit(WETH9, msg.value, _onBehalfOf, referral);
-            return (WETH9, msg.value);
-        } else {
-            IERC20(_reserve).transferFrom(
-                msg.sender,
-                address(this),
-                _reserveAmount
-            );
-            IPool(POOL).deposit(
-                _reserve,
-                _reserveAmount,
-                _onBehalfOf,
-                referral
-            );
-            return (_reserve, _reserveAmount);
+        uint256 _reserveAmount
+    ) public view returns (uint256 _baseAmount) {
+        uint256 reserveBase = calcAssetAmountToBase(_reserve, _reserveAmount);
+        (, , , , uint256 ltv, ) = IPool(ADDR_pool).getUserAccountData(
+            address(this)
+        );
+
+        _baseAmount = (reserveBase * ltv) / 10000;
+    }
+
+    function calcAssetAmountToBase(
+        address _asset,
+        uint256 _assetAmount
+    ) public view returns (uint256 baseAmount) {
+        uint8 decimal;
+        decimal = IERC20Detailed(_asset).decimals();
+        IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
+            IPoolAddressesProvider(ADDR_poolProvider).getPriceOracle()
+        );
+        uint256 price = PRICE_ORACLE_GETTER.getAssetPrice(_asset);
+        baseAmount = (_assetAmount * price) / (10 ** decimal);
+    }
+
+    function calcBaseAmountToAsset(
+        address _asset,
+        uint256 _baseAmount
+    ) public view returns (uint256 assetAmount) {
+        uint8 decimal;
+        decimal = IERC20Detailed(_asset).decimals();
+        IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
+            IPoolAddressesProvider(ADDR_poolProvider).getPriceOracle()
+        );
+        uint256 price = PRICE_ORACLE_GETTER.getAssetPrice(_asset);
+        assetAmount = (_baseAmount * (10 ** decimal)) / price;
+    }
+
+    function checkCanBeReserved(
+        address _asset
+    ) public view returns (bool _possible) {
+        _possible = false;
+        address[] memory reserveList = IPool(ADDR_pool).getReservesList();
+        for (uint i = 0; i < reserveList.length; i++) {
+            if (reserveList[i] == _asset) {
+                _possible = true;
+            }
         }
     }
 
-    /**
-     * @notice Swap on curve swap
-     * @param _route curve swap route data
-     * @param _swap_params params for swap
-     * @param _amount amount to send
-     **/
-    function _swap_new(
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function getWithdrawableBase()
+        public
+        view
+        returns (uint256 _withdrawableAmount)
+    {
+        (, , uint256 borrowableBase, , uint256 ltv, ) = IPool(ADDR_pool)
+            .getUserAccountData(address(this));
+        _withdrawableAmount = (borrowableBase * 10000) / ltv;
+    }
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function _depositToPool(
+        address _asset,
+        uint256 _amount,
+        address _onBehalfOf
+    ) internal {
+        uint16 referral = 0;
+        IERC20Detailed(_asset).approve(ADDR_pool, _amount);
+        IPool(ADDR_pool).supply(_asset, _amount, _onBehalfOf, referral);
+    }
+
+    function _swapOnCurve(
         address[9] memory _route,
         uint256[3][4] memory _swap_params,
         uint256 _amount
     ) internal returns (uint256 amountOut) {
-        amountOut = ICurveSwaps(CURVE_SWAPS).get_exchange_multiple_amount(
+        address[4] memory _pools;
+        amountOut = ICurveSwaps(ADDR_curveSwap).get_exchange_multiple_amount(
             _route,
             _swap_params,
             _amount
         );
-        address[4] memory _pools;
-        ICurveSwaps(CURVE_SWAPS).exchange_multiple(
+        ICurveSwaps(ADDR_curveSwap).exchange_multiple(
             _route,
             _swap_params,
             _amount,
@@ -95,158 +149,290 @@ contract Leverage is Ownable {
         return amountOut;
     }
 
-    /**
-     * @notice get available loan amount for reserve amount.
-     * @param _reserve reserve token address
-     * @param _loan loan token address
-     * @param _reserveAmount amount of _reserve
-     **/
-    function _calcAvailalbleLoanAmount(
-        address _reserve,
-        address _loan,
-        uint256 _reserveAmount
-    ) internal view returns (uint256 _loanAmount) {
-        IPriceOracleGetter PRICE_ORACLE_GETTER;
-        uint256 reservePrice;
-        uint256 loanPrice;
-        uint256 ltv;
-        (, , , , ltv, ) = IPool(POOL).getUserAccountData(address(this));
-        PRICE_ORACLE_GETTER = IPriceOracleGetter(
-            IPoolAddressesProvider(POOL_PROVIDER).getPriceOracle()
-        );
-        reservePrice = PRICE_ORACLE_GETTER.getAssetPrice(_reserve);
-        loanPrice = PRICE_ORACLE_GETTER.getAssetPrice(_loan);
-        _loanAmount =
-            (((reservePrice * _reserveAmount) / loanPrice) * ltv) /
-            100;
-    }
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    /**
-     * @notice add funds of user
-     * @param _token token address
-     * @param _amount amount of _token
-     **/
-    function _addUserBalances(address _token, uint256 _amount) internal {
-        userBalances[msg.sender][_token] += _amount;
-    }
-
-    /**
-     * @notice remove funds of users
-     **/
-    function _removeUserBalances() internal {
-        for (uint i = 0; i < reserveList.length; i++) {
-            address token = reserveList[i];
-            userBalances[msg.sender][token] = 0;
-        }
-    }
-
-    /**
-     * @notice add new token to reserveList
-     * @param _token token address
-     **/
-    function _updateReserveList(
-        address _token
-    ) internal returns (bool _alreadyExist) {
-        for (uint i = 0; i < reserveList.length; i++) {
-            if (reserveList[i] == _token) {
-                _alreadyExist = true;
-                break;
-            }
-        }
-        reserveList.push(_token);
-        _alreadyExist = false;
-    }
-
-    /**
-     * @notice deposit reserve to leverage
-     * @param _reserve reserve token to deposit
-     * @param _reserveAmount reserve amount to deposit
-     * @param _isETH flag whether the reserve token is ETH
-     * @param _route_arth_to_dai route for arth_to_dai
-     * @param _swap_params_arth_to_dai swap_params forarth_to_dai
-     * @param _route_arth_to_reserve route for arth_to_reserve
-     * @param _swap_params_arth_to_reserve swap_params forarth_to_reserve
-     * **/
-    function depositLeverage(
-        address _reserve,
-        uint256 _reserveAmount,
-        bool _isETH,
-        address[9] memory _route_arth_to_dai,
-        uint256[3][4] memory _swap_params_arth_to_dai,
-        address[9] memory _route_arth_to_reserve,
-        uint256[3][4] memory _swap_params_arth_to_reserve
-    ) external payable {
-        // first deposit
-        (_reserve, _reserveAmount) = _deposit(
-            _reserve,
-            _reserveAmount,
-            address(this),
-            _isETH
-        );
-
-        // borrow
-        uint256 availableLoanAmount;
+    function _borrowFromPool(
+        address _asset,
+        uint256 _amount,
+        address _borrower
+    ) internal {
         uint256 interestRateMode = 1;
-        uint16 referral = 0;
-        availableLoanAmount = _calcAvailalbleLoanAmount(
-            _reserve,
-            ARTH,
-            _reserveAmount
-        );
-        IPool(POOL).borrow(
-            ARTH,
-            availableLoanAmount,
+        uint16 referralCode = 0;
+        address onBehalfOf = address(this);
+        IPool(ADDR_pool).borrow(
+            _asset,
+            _amount,
             interestRateMode,
-            referral,
+            referralCode,
+            onBehalfOf
+        );
+        if (_borrower != onBehalfOf) {
+            IERC20Detailed(_asset).transfer(_borrower, _amount);
+        }
+    }
+
+    // function _deleverage() returns () {}
+
+    function _repayToPool(
+        address _asset,
+        uint256 _amount,
+        address _repayer
+    ) internal returns (uint256 _finalRepaid) {
+        uint256 interestRateMode = 1;
+        address onBehalfOf = address(this);
+        IERC20Detailed(_asset).approve(ADDR_pool, _amount);
+        _finalRepaid = IPool(ADDR_pool).repay(
+            _asset,
+            _amount,
+            interestRateMode,
+            onBehalfOf
+        );
+        if (_repayer != onBehalfOf) {
+            IERC20Detailed(_asset).transfer(_repayer, _amount - _finalRepaid);
+        }
+    }
+
+    function _withdrawFromPool(
+        address _asset,
+        uint256 _amount,
+        address _withdrawer
+    ) internal returns (uint256 _withdrawn) {
+        address onBehalfOf = address(this);
+        _withdrawn = IPool(ADDR_pool).withdraw(_asset, _amount, onBehalfOf);
+        if (_withdrawer != onBehalfOf) {
+            IERC20Detailed(_asset).transfer(_withdrawer, _withdrawn);
+        }
+    }
+
+    function _leverage(
+        address _asset,
+        uint256 _amount,
+        uint256 _maxDeposit,
+        DataTypes.LeverageSwapParams calldata _params
+    ) internal returns (uint256 _deposited, uint256 _borrowed) {
+        require(checkCanBeReserved(_asset), "This asset can't be reserved.");
+        // deposit Reserve to pool
+        _depositToPool(_asset, _amount, address(this));
+        _deposited += _amount;
+        // borrow ARTH from pool
+        uint256 loanableBase = calcLoanableBaseForReserve(_asset, _amount);
+        uint256 maxDepositBase = calcAssetAmountToBase(_asset, _maxDeposit);
+        if (maxDepositBase < loanableBase) {
+            loanableBase = maxDepositBase;
+        }
+        uint256 loanableAmount = calcBaseAmountToAsset(ADDR_arth, loanableBase);
+        _borrowFromPool(ADDR_arth, loanableAmount, address(this));
+        _borrowed = loanableAmount;
+        // sell ARTH for DAI on curvefi
+        uint256 boughtAmount = _swapOnCurve(
+            _params.route_first,
+            _params.params_first,
+            loanableAmount
+        );
+        // sell DAI for Reserve on curvefi
+        boughtAmount = _swapOnCurve(
+            _params.route_first,
+            _params.params_first,
+            boughtAmount
+        );
+        // deposit Reserve to pool again
+        _depositToPool(_asset, boughtAmount, address(this));
+        _deposited += boughtAmount;
+    }
+
+    function _deleverage(
+        address _asset,
+        DataTypes.LeverageSwapParams calldata _params
+    ) internal returns (uint256 _withdrawn, uint256 _repaid) {
+        // withdraw Reserve from pool
+        uint256 withdrawableBase = getWithdrawableBase();
+        _withdrawFromPool(
+            _asset,
+            calcBaseAmountToAsset(_asset, withdrawableBase),
             address(this)
         );
-
-        // swap on curve swap
-        uint256 firstSwapAmount = _swap_new(
-            _route_arth_to_dai,
-            _swap_params_arth_to_dai,
-            availableLoanAmount
+        _withdrawn = IERC20Detailed(_asset).balanceOf(address(this));
+        // sell Reserve for DAI on curvefi
+        uint256 boughtAmount = _swapOnCurve(
+            _params.route_first,
+            _params.params_first,
+            _withdrawn
         );
-        uint256 secondSwapAmount = _swap_new(
-            _route_arth_to_reserve,
-            _swap_params_arth_to_reserve,
-            firstSwapAmount
+        // sell DAI for ARTH on curvefi
+        boughtAmount = _swapOnCurve(
+            _params.route_first,
+            _params.params_first,
+            boughtAmount
         );
-
-        // second desposit
-        _deposit(_reserve, secondSwapAmount, address(this), _isETH);
-
-        // update user balances and reserve list
-        _addUserBalances(_reserve, secondSwapAmount);
-        _updateReserveList(_reserve);
+        // repay ARTH to pool
+        boughtAmount = IERC20Detailed(ADDR_arth).balanceOf(address(this));
+        _repaid = _repayToPool(ADDR_arth, boughtAmount, address(this));
+        // withdraw Reserve again
+        withdrawableBase = getWithdrawableBase();
+        _withdrawn += _withdrawFromPool(
+            _asset,
+            calcBaseAmountToAsset(_asset, withdrawableBase),
+            address(this)
+        );
     }
 
-    /**
-     * @notice withdraw total loan from leverage
-     * @param _loan loan token to withdraw
-     **/
-    function withdrawLeverage(
-        address _loan
-    ) external returns (uint256 totalLoanAmount) {
-        uint256 interestRateMode = 1;
-        uint16 referral = 0;
-        for (uint i = 0; i < reserveList.length; i++) {
-            address reservedToken = reserveList[i];
-            uint256 balance = userBalances[msg.sender][reservedToken];
-            if (balance > 0) {
-                totalLoanAmount += _calcAvailalbleLoanAmount(
-                    reservedToken,
-                    _loan,
-                    balance
-                );
-            }
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function _withdrawLockedETH(uint256 _amount, address _onBehalfOf) internal {
+        if (_amount == type(uint256).max) {
+            _amount = address(this).balance;
+            payable(_onBehalfOf).transfer(_amount);
         }
-        IPool(POOL).borrow(
-            _loan,
-            totalLoanAmount,
-            interestRateMode,
-            referral,
-            msg.sender
+    }
+
+    function _withdrawLockedAsset(
+        address _asset,
+        uint256 _amount,
+        address _onBehalfOf
+    ) internal {
+        if (_amount == type(uint256).max) {
+            _amount = IERC20Detailed(_asset).balanceOf(_onBehalfOf);
+        }
+        IERC20Detailed(_asset).transfer(_onBehalfOf, _amount);
+    }
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function borrow(uint256 _amount) external onlyOwner {
+        if (_amount == type(uint256).max) {
+            (, , uint256 borrowableBase, , , ) = IPool(ADDR_pool)
+                .getUserAccountData(address(this));
+            _amount = calcBaseAmountToAsset(ADDR_arth, borrowableBase);
+        }
+        _borrowFromPool(ADDR_arth, _amount, msg.sender);
+    }
+
+    function repay(uint256 _amount) external onlyOwner {
+        if (_amount == type(uint256).max) {
+            (, uint256 totalDebtBase, , , , ) = IPool(ADDR_pool)
+                .getUserAccountData(address(this));
+            _amount = calcBaseAmountToAsset(ADDR_arth, totalDebtBase);
+        }
+        IERC20Detailed(ADDR_arth).transferFrom(
+            msg.sender,
+            address(this),
+            _amount
         );
+        _repayToPool(ADDR_arth, _amount, msg.sender);
+    }
+
+    function withdraw(address _asset, uint256 _amount) external onlyOwner {
+        if (_amount == type(uint256).max) {
+            uint256 withdrawableBase = getWithdrawableBase();
+            _amount = calcBaseAmountToAsset(ADDR_arth, withdrawableBase);
+        }
+        _withdrawFromPool(_asset, _amount, msg.sender);
+    }
+
+    function leverage(
+        address _asset,
+        uint256 _amount,
+        uint8 _leverageRatio,
+        DataTypes.LeverageSwapParams calldata _params,
+        bool _isETH
+    ) external payable onlyOwner {
+        require(
+            _leverageRatio >= 100,
+            "The leverage ratio must be greater than or equal to 100."
+        );
+        require(
+            _leverageRatio <= 700,
+            "The leverage ratio must be less than or equal to 700."
+        );
+        if (_isETH) {
+            IWETH(ADDR_weth).deposit{value: msg.value}();
+            IWETH(ADDR_weth).approve(ADDR_pool, _amount);
+            _asset = ADDR_weth;
+        }
+        IERC20Detailed(_asset).transferFrom(msg.sender, address(this), _amount);
+        uint256 maxDeposit = (_amount * _leverageRatio) / 100;
+        uint256 depositedTotal;
+        uint256 borrowedTotal;
+        while (maxDeposit > depositedTotal) {
+            (, , _amount, , , ) = IPool(ADDR_pool).getUserAccountData(
+                address(this)
+            );
+            _amount = calcBaseAmountToAsset(ADDR_arth, _amount);
+            IPool(ADDR_pool).borrow(ADDR_arth, _amount, 1, 0, address(this));
+            (uint256 deposited, uint256 borrowed) = _leverage(
+                _asset,
+                _amount,
+                maxDeposit - depositedTotal,
+                _params
+            );
+            depositedTotal += deposited;
+            borrowedTotal += borrowed;
+        }
+    }
+
+    function deleverage(
+        address _asset,
+        uint256 _amount,
+        DataTypes.LeverageSwapParams calldata _params
+    ) external onlyOwner {
+        (
+            uint256 totalCollateralBase,
+            uint256 totalDebtBase,
+            uint256 availableBorrowsBase,
+            ,
+            ,
+
+        ) = IPool(ADDR_pool).getUserAccountData(address(this));
+        uint256 remainBalance = IERC20Detailed(ADDR_arth).balanceOf(
+            address(this)
+        );
+        IERC20Detailed(_asset).transferFrom(msg.sender, address(this), _amount);
+        availableBorrowsBase += calcAssetAmountToBase(ADDR_arth, remainBalance);
+        remainBalance = IERC20Detailed(_asset).balanceOf(address(this));
+        availableBorrowsBase += calcAssetAmountToBase(_asset, remainBalance);
+        require(
+            availableBorrowsBase * 7 > totalDebtBase,
+            "Too much debt. Need more asset to deleverage."
+        );
+        while (totalCollateralBase > 0) {
+            _deleverage(_asset, _params);
+        }
+        uint256 balanceAsset = IERC20Detailed(_asset).balanceOf(address(this));
+        if (balanceAsset > 0) {
+            IERC20Detailed(_asset).transfer(msg.sender, balanceAsset);
+        }
+        balanceAsset = IERC20Detailed(ADDR_arth).balanceOf(address(this));
+        if (balanceAsset > 0) {
+            IERC20Detailed(ADDR_arth).transfer(msg.sender, balanceAsset);
+        }
+    }
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    function withdrawLockedAsset(
+        address _asset,
+        uint256 _amount
+    ) external onlyOwner {
+        _withdrawLockedAsset(_asset, _amount, msg.sender);
+    }
+
+    function withdrawLockedETH(uint256 _amount) external onlyOwner {
+        _withdrawLockedETH(_amount, msg.sender);
     }
 }

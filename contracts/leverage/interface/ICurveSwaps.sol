@@ -7,12 +7,14 @@ pragma solidity ^0.8.0;
  * @notice Interface for the Curve Swaps.
  **/
 interface ICurveSwaps {
+    function get_calculator(address _pool) external view returns (address);
+
     function exchange_multiple(
         address[9] memory _route,
         uint256[3][4] memory _swap_params,
         uint256 _amount,
         uint256 _expected
-    ) external payable;
+    ) external payable returns (uint256);
 
     function exchange_multiple(
         address[9] memory _route,
@@ -20,7 +22,7 @@ interface ICurveSwaps {
         uint256 _amount,
         uint256 _expected,
         address[4] memory _pools
-    ) external payable;
+    ) external payable returns (uint256);
 
     function exchange_multiple(
         address[9] memory _route,
@@ -29,7 +31,7 @@ interface ICurveSwaps {
         uint256 _expected,
         address[4] memory _pools,
         address _receiver
-    ) external payable;
+    ) external payable returns (uint256);
 
     function get_exchange_multiple_amount(
         address[9] memory _route,

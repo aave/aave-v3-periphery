@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Ownable} from "./access/Ownable.sol";
+import {ICurveSwapProvider} from "./interface/ICurveSwapProvider.sol";
 import {Leverage} from "./Leverage.sol";
 
 contract LeverageRegistry is Ownable {
@@ -20,7 +21,7 @@ contract LeverageRegistry is Ownable {
         address _arthAddress
     ) {
         ADDR_poolProvider = _poolProvider;
-        ADDR_curveSwap = _curveProvider;
+        ADDR_curveSwap = ICurveSwapProvider(_curveProvider).get_address(2);
         ADDR_weth = _weth;
         ADDR_arth = _arthAddress;
     }

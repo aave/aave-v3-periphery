@@ -7,7 +7,7 @@ import {
   increaseTime,
   MAX_UINT_AMOUNT,
   advanceTimeAndBlock,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import { RANDOM_ADDRESSES } from '../helpers/constants';
 import { comparatorEngine } from './helpers/comparator-engine';
 import {
@@ -73,7 +73,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
     to,
     emissionPerSecond,
   } of getRewardsBalanceScenarios) {
-    let amountToClaim = _amountToClaim;
+    const amountToClaim = _amountToClaim;
     it(caseName, async () => {
       const { timestamp } = await hre.ethers.provider.getBlock('latest');
       const timePerTest = 31536000;
@@ -230,7 +230,7 @@ makeSuite('Incentives Controller V2 claimRewards tests', (testEnv) => {
 
       // ------- Distribution Manager tests END -----
 
-      let unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);
+      const unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);
 
       let expectedClaimedAmount: BigNumber;
       if (unclaimedRewardsCalc.lte(amountToClaim)) {

@@ -4,7 +4,7 @@ import {
   PullRewardsTransferStrategy__factory,
   waitForTx,
   ZERO_ADDRESS,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import { RANDOM_ADDRESSES } from '../../helpers/constants';
 import hre from 'hardhat';
 import { parseEther } from '@ethersproject/units';

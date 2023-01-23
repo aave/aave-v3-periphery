@@ -13,7 +13,7 @@ import {
   parseUnitsFromToken,
   tEthereumAddress,
   waitForTx,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import { MockParaSwapAugustusRegistry__factory, MockParaSwapAugustus__factory } from '../../types';
 import { MockParaSwapAugustus } from '../../types/MockParaSwapAugustus';
 import { MockParaSwapAugustusRegistry } from '../../types/MockParaSwapAugustusRegistry';

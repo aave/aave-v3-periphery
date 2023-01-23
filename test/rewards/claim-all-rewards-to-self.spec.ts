@@ -7,7 +7,7 @@ import {
   MAX_UINT_AMOUNT,
   ERC20__factory,
   advanceTimeAndBlock,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import {
   assetDataComparator,
   getRewards,

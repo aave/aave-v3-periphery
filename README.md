@@ -1,6 +1,6 @@
-# MahaLend Protocol V3 Periphery
+# MahaLend Protocol Periphery
 
-This repository contains the Rewards Controller contract that allows to incentivize assets with multiple rewards in Aave V3 markets, UI helpers and others external smart contracts utilities related with the MahaLend Protocol V3.
+This repository contains the Rewards Controller contract that allows to incentivize assets with multiple rewards in MahaLend markets, UI helpers and others external smart contracts utilities related with the MahaLend Protocol.
 
 ## Getting started
 

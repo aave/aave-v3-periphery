@@ -50,7 +50,7 @@ import {
   deployMintableERC20,
   getEmissionManager,
   StakedTokenV2Rev3,
-} from '@mahalend/deploy-v3';
+} from '@mahalend/deploy';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
 import { EmissionManager, EmissionManager__factory } from '../../types';

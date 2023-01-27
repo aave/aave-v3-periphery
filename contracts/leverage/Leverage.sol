@@ -8,8 +8,9 @@ import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
 import {IWETH} from "./interface/IWETH.sol";
 import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
 import {Ownable} from "./access/Ownable.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
 
-library DataTypes {
+library LeverageDataTypes {
     struct LeverageSwapParams {
         address[9] route_first;
         uint256[3][4] params_first;
@@ -25,6 +26,9 @@ contract Leverage is Ownable {
     address public ADDR_curveSwap;
     address payable public ADDR_weth;
     address public ADDR_arth;
+
+    uint16 MIN_LEVERAGE_RATIO = 100;
+    uint16 MAX_LEVERAGE_RATIO = 500;
 
     constructor(
         address _poolProvider,
@@ -104,6 +108,16 @@ contract Leverage is Ownable {
             .getUserAccountData(address(this));
         _withdrawableAmount = (borrowableBase * 10000) / ltv;
     }
+
+    // function getAtokenBalanceForReserve(
+    //     address _asset
+    // ) internal returns (uint256 _atokenBalance) {
+    //     DataTypes.ReserveData memory reserveData = IPool(ADDR_pool)
+    //         .getReserveData(_asset);
+    //     _atokenBalance = IERC20Detailed(reserveData.aTokenAddress).balanceOf(
+    //         address(this)
+    //     );
+    // }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -192,7 +206,7 @@ contract Leverage is Ownable {
         address _asset,
         uint256 _amount,
         uint256 _maxDeposit,
-        DataTypes.LeverageSwapParams calldata _params
+        LeverageDataTypes.LeverageSwapParams calldata _params
     ) internal returns (uint256 _deposited, uint256 _borrowed) {
         require(checkCanBeReserved(_asset), "This asset can't be reserved.");
         // deposit Reserve to pool
@@ -215,8 +229,8 @@ contract Leverage is Ownable {
         );
         // sell DAI for Reserve on curvefi
         boughtAmount = _swapOnCurve(
-            _params.route_first,
-            _params.params_first,
+            _params.route_second,
+            _params.params_second,
             boughtAmount
         );
         // deposit Reserve to pool again
@@ -226,7 +240,7 @@ contract Leverage is Ownable {
 
     function _deleverage(
         address _asset,
-        DataTypes.LeverageSwapParams calldata _params
+        LeverageDataTypes.LeverageSwapParams calldata _params
     ) internal returns (uint256 _withdrawn, uint256 _repaid) {
         // withdraw Reserve from pool
         uint256 withdrawableBase = getWithdrawableBase();
@@ -244,8 +258,8 @@ contract Leverage is Ownable {
         );
         // sell DAI for ARTH on curvefi
         boughtAmount = _swapOnCurve(
-            _params.route_first,
-            _params.params_first,
+            _params.route_second,
+            _params.params_second,
             boughtAmount
         );
         // repay ARTH to pool
@@ -318,17 +332,17 @@ contract Leverage is Ownable {
     function leverage(
         address _asset,
         uint256 _amount,
-        uint8 _leverageRatio,
-        DataTypes.LeverageSwapParams calldata _params,
+        uint16 _leverageRatio,
+        LeverageDataTypes.LeverageSwapParams calldata _params,
         bool _isETH
     ) external payable onlyOwner {
         require(
-            _leverageRatio >= 100,
-            "The leverage ratio must be greater than or equal to 100."
+            _leverageRatio >= MIN_LEVERAGE_RATIO,
+            "The leverage ratio must be greater than or equal to MIN_LEVERAGE_RATIO."
         );
         require(
-            _leverageRatio <= 700,
-            "The leverage ratio must be less than or equal to 700."
+            _leverageRatio <= MAX_LEVERAGE_RATIO,
+            "The leverage ratio must be less than or equal to MAX_LEVERAGE_RATIO."
         );
         if (_isETH) {
             IWETH(ADDR_weth).deposit{value: msg.value}();
@@ -337,32 +351,44 @@ contract Leverage is Ownable {
         }
         IERC20Detailed(_asset).transferFrom(msg.sender, address(this), _amount);
 
-        _leverage(_asset, _amount, _amount, _params);
-
-        // uint256 maxDeposit = (_amount * _leverageRatio) / 100;
-        // uint256 depositedTotal;
-        // uint256 borrowedTotal;
-        // while (maxDeposit > depositedTotal) {
-        //     (, , _amount, , , ) = IPool(ADDR_pool).getUserAccountData(
-        //         address(this)
-        //     );
-        //     _amount = calcBaseAmountToAsset(ADDR_arth, _amount);
-        //     IPool(ADDR_pool).borrow(ADDR_arth, _amount, 1, 0, address(this));
-        //     (uint256 deposited, uint256 borrowed) = _leverage(
-        //         _asset,
-        //         _amount,
-        //         maxDeposit - depositedTotal,
-        //         _params
-        //     );
-        //     depositedTotal += deposited;
-        //     borrowedTotal += borrowed;
-        // }
+        // _leverage(_asset, _amount, _amount, _params);
+        uint256 maxDeposit = (_amount * _leverageRatio) / 100;
+        uint256 depositedTotal;
+        uint256 borrowedTotal;
+        while (maxDeposit > depositedTotal) {
+            uint256 _amountLoanable;
+            (, , _amountLoanable, , , ) = IPool(ADDR_pool).getUserAccountData(
+                address(this)
+            );
+            if (_amountLoanable > 0) {
+                _amountLoanable = calcBaseAmountToAsset(
+                    _asset,
+                    _amountLoanable
+                );
+                IPool(ADDR_pool).borrow(
+                    _asset,
+                    _amountLoanable,
+                    1,
+                    0,
+                    address(this)
+                );
+                _amount = _amountLoanable;
+            }
+            (uint256 deposited, uint256 borrowed) = _leverage(
+                _asset,
+                _amount,
+                maxDeposit - depositedTotal,
+                _params
+            );
+            depositedTotal += deposited;
+            borrowedTotal += borrowed;
+        }
     }
 
     function deleverage(
         address _asset,
         uint256 _amount,
-        DataTypes.LeverageSwapParams calldata _params
+        LeverageDataTypes.LeverageSwapParams calldata _params
     ) external onlyOwner {
         (
             uint256 totalCollateralBase,

@@ -1,4 +1,4 @@
-import { tEthereumAddress, tStringTokenSmallUnits } from '@aave/deploy-v3';
+import { tEthereumAddress, tStringTokenSmallUnits } from '@mahalend/deploy';
 import { BigNumberish, ethers } from 'ethers';
 import { signTypedData_v4 } from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {IERC20Detailed} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IPoolAddressesProvider} from '@mahalend/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '@mahalend/core-v3/contracts/interfaces/IPool.sol';
-import {IAaveOracle} from '@mahalend/core-v3/contracts/interfaces/IAaveOracle.sol';
-import {IAToken} from '@mahalend/core-v3/contracts/interfaces/IAToken.sol';
-import {IVariableDebtToken} from '@mahalend/core-v3/contracts/interfaces/IVariableDebtToken.sol';
-import {IStableDebtToken} from '@mahalend/core-v3/contracts/interfaces/IStableDebtToken.sol';
-import {DefaultReserveInterestRateStrategy} from '@mahalend/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
-import {AaveProtocolDataProvider} from '@mahalend/core-v3/contracts/misc/AaveProtocolDataProvider.sol';
-import {WadRayMath} from '@mahalend/core-v3/contracts/protocol/libraries/math/WadRayMath.sol';
-import {ReserveConfiguration} from '@mahalend/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
-import {UserConfiguration} from '@mahalend/core-v3/contracts/protocol/libraries/configuration/UserConfiguration.sol';
-import {DataTypes} from '@mahalend/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {IERC20Detailed} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {IPoolAddressesProvider} from '@mahalend/core/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '@mahalend/core/contracts/interfaces/IPool.sol';
+import {IAaveOracle} from '@mahalend/core/contracts/interfaces/IAaveOracle.sol';
+import {IAToken} from '@mahalend/core/contracts/interfaces/IAToken.sol';
+import {IVariableDebtToken} from '@mahalend/core/contracts/interfaces/IVariableDebtToken.sol';
+import {IStableDebtToken} from '@mahalend/core/contracts/interfaces/IStableDebtToken.sol';
+import {DefaultReserveInterestRateStrategy} from '@mahalend/core/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol';
+import {AaveProtocolDataProvider} from '@mahalend/core/contracts/misc/AaveProtocolDataProvider.sol';
+import {WadRayMath} from '@mahalend/core/contracts/protocol/libraries/math/WadRayMath.sol';
+import {ReserveConfiguration} from '@mahalend/core/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
+import {UserConfiguration} from '@mahalend/core/contracts/protocol/libraries/configuration/UserConfiguration.sol';
+import {DataTypes} from '@mahalend/core/contracts/protocol/libraries/types/DataTypes.sol';
 import {IEACAggregatorProxy} from './interfaces/IEACAggregatorProxy.sol';
 import {IERC20DetailedBytes} from './interfaces/IERC20DetailedBytes.sol';
 import {IUiPoolDataProviderV3} from './interfaces/IUiPoolDataProviderV3.sol';

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {Address} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/Address.sol';
-import {IERC20} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {Address} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/Address.sol';
+import {IERC20} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 
-import {IPoolAddressesProvider} from '@mahalend/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '@mahalend/core-v3/contracts/interfaces/IPool.sol';
-import {GPv2SafeERC20} from '@mahalend/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
-import {ReserveConfiguration} from '@mahalend/core-v3/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
-import {DataTypes} from '@mahalend/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
+import {IPoolAddressesProvider} from '@mahalend/core/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '@mahalend/core/contracts/interfaces/IPool.sol';
+import {GPv2SafeERC20} from '@mahalend/core/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {ReserveConfiguration} from '@mahalend/core/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
+import {DataTypes} from '@mahalend/core/contracts/protocol/libraries/types/DataTypes.sol';
 
 /**
  * @title WalletBalanceProvider contract

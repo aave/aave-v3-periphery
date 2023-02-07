@@ -4,7 +4,7 @@ import {
   waitForTx,
   MAX_UINT_AMOUNT,
   advanceTimeAndBlock,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy';
 import { BigNumber } from 'ethers';
 import { makeSuite } from '../helpers/make-suite';
 import { comparatorEngine } from './helpers/comparator-engine';
@@ -58,7 +58,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
     amountToClaim: _amountToClaim,
     emissionPerSecond,
   } of getRewardsBalanceScenarios) {
-    let amountToClaim = _amountToClaim;
+    const amountToClaim = _amountToClaim;
     it(caseName, async () => {
       const { timestamp } = await hre.ethers.provider.getBlock('latest');
       const timePerTest = 31536000;
@@ -212,7 +212,7 @@ makeSuite('AaveIncentivesController claimRewardsToSelf tests', (testEnv) => {
       }
       // ------- Distribution Manager tests END -----
 
-      let unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);
+      const unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);
 
       let expectedClaimedAmount: BigNumber;
       if (unclaimedRewardsCalc.lte(amountToClaim)) {

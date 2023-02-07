@@ -8,7 +8,7 @@ import {
   parseUnitsFromToken,
   StableDebtToken,
   tEthereumAddress,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy';
 import {
   MockParaSwapAugustusRegistry__factory,
   MockParaSwapAugustus__factory,

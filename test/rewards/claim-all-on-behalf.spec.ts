@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { waitForTx, getBlockTimestamp, ZERO_ADDRESS } from '@aave/deploy-v3';
+import { waitForTx, getBlockTimestamp, ZERO_ADDRESS } from '@mahalend/deploy';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
 
 makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEnv) => {

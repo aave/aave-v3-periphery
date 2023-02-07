@@ -7,7 +7,7 @@ import {
   getVariableDebtToken,
   MAX_UINT_AMOUNT,
   waitForTx,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 declare let hre: HardhatRuntimeEnvironment;

@@ -13,7 +13,7 @@ import 'hardhat-dependency-compiler';
 import 'hardhat-deploy';
 
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
+dotenv.config();
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const MAINNET_FORK = process.env.MAINNET_FORK === 'true';
@@ -21,6 +21,9 @@ const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || '';
 const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || '';
 const TENDERLY_FORK_NETWORK_ID = process.env.TENDERLY_FORK_NETWORK_ID || '1';
 const REPORT_GAS = process.env.REPORT_GAS === 'true';
+
+const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
+// const POLYGONSCAN_KEY = process.env.POLYGONSCAN_KEY || '';
 
 const mainnetFork = MAINNET_FORK
   ? {
@@ -50,10 +53,10 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: 'types',
     externalArtifacts: [
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/**/**/**/*[!dbg].json',
-      'node_modules/@mahalend/deploy-v3/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/**/**/**/*[!dbg].json',
+      'node_modules/@mahalend/deploy/artifacts/contracts/mocks/tokens/WETH9Mocked.sol/WETH9Mocked.json',
     ],
   },
   gasReporter: {
@@ -75,6 +78,15 @@ const config: HardhatUserConfig = {
       })),
       forking: mainnetFork,
       allowUnlimitedContractSize: true,
+    },
+    main: {
+      url: 'https://cloudflare-eth.com',
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
     },
     ganache: {
       url: 'http://ganache:8545',
@@ -122,51 +134,55 @@ const config: HardhatUserConfig = {
   // Need to compile aave-v3 contracts due no way to import external artifacts for hre.ethers
   dependencyCompiler: {
     paths: [
-      '@mahalend/core-v3/contracts/protocol/configuration/PoolAddressesProviderRegistry.sol',
-      '@mahalend/core-v3/contracts/protocol/configuration/PoolAddressesProvider.sol',
-      '@mahalend/core-v3/contracts/misc/AaveOracle.sol',
-      '@mahalend/core-v3/contracts/protocol/tokenization/AToken.sol',
-      '@mahalend/core-v3/contracts/protocol/tokenization/DelegationAwareAToken.sol',
-      '@mahalend/core-v3/contracts/protocol/tokenization/StableDebtToken.sol',
-      '@mahalend/core-v3/contracts/protocol/tokenization/VariableDebtToken.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/GenericLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/ValidationLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/ReserveLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/SupplyLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/EModeLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/BorrowLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/BridgeLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/logic/FlashLoanLogic.sol',
-      '@mahalend/core-v3/contracts/protocol/pool/Pool.sol',
-      '@mahalend/core-v3/contracts/protocol/pool/PoolConfigurator.sol',
-      '@mahalend/core-v3/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol',
-      '@mahalend/core-v3/contracts/dependencies/openzeppelin/upgradeability/InitializableAdminUpgradeabilityProxy.sol',
-      '@mahalend/core-v3/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol',
-      '@mahalend/core-v3/contracts/deployments/ReservesSetupHelper.sol',
-      '@mahalend/core-v3/contracts/misc/AaveProtocolDataProvider.sol',
-      '@mahalend/core-v3/contracts/protocol/configuration/ACLManager.sol',
-      '@mahalend/core-v3/contracts/dependencies/weth/WETH9.sol',
-      '@mahalend/core-v3/contracts/mocks/helpers/MockIncentivesController.sol',
-      '@mahalend/core-v3/contracts/mocks/helpers/MockReserveConfiguration.sol',
-      '@mahalend/core-v3/contracts/mocks/oracle/CLAggregators/MockAggregator.sol',
-      '@mahalend/core-v3/contracts/mocks/tokens/MintableERC20.sol',
-      '@mahalend/core-v3/contracts/mocks/flashloan/MockFlashLoanReceiver.sol',
-      '@mahalend/core-v3/contracts/mocks/tokens/WETH9Mocked.sol',
-      '@mahalend/core-v3/contracts/mocks/upgradeability/MockVariableDebtToken.sol',
-      '@mahalend/core-v3/contracts/mocks/upgradeability/MockAToken.sol',
-      '@mahalend/core-v3/contracts/mocks/upgradeability/MockStableDebtToken.sol',
-      '@mahalend/core-v3/contracts/mocks/upgradeability/MockInitializableImplementation.sol',
-      '@mahalend/core-v3/contracts/mocks/helpers/MockPool.sol',
-      '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol',
-      '@mahalend/core-v3/contracts/mocks/oracle/PriceOracle.sol',
-      '@mahalend/core-v3/contracts/mocks/tokens/MintableDelegationERC20.sol',
+      '@mahalend/core/contracts/protocol/configuration/PoolAddressesProviderRegistry.sol',
+      '@mahalend/core/contracts/protocol/configuration/PoolAddressesProvider.sol',
+      '@mahalend/core/contracts/misc/AaveOracle.sol',
+      '@mahalend/core/contracts/protocol/tokenization/AToken.sol',
+      '@mahalend/core/contracts/protocol/tokenization/DelegationAwareAToken.sol',
+      '@mahalend/core/contracts/protocol/tokenization/StableDebtToken.sol',
+      '@mahalend/core/contracts/protocol/tokenization/VariableDebtToken.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/GenericLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/ValidationLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/ReserveLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/SupplyLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/EModeLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/BorrowLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/BridgeLogic.sol',
+      '@mahalend/core/contracts/protocol/libraries/logic/FlashLoanLogic.sol',
+      '@mahalend/core/contracts/protocol/pool/Pool.sol',
+      '@mahalend/core/contracts/protocol/pool/PoolConfigurator.sol',
+      '@mahalend/core/contracts/protocol/pool/DefaultReserveInterestRateStrategy.sol',
+      '@mahalend/core/contracts/dependencies/openzeppelin/upgradeability/InitializableAdminUpgradeabilityProxy.sol',
+      '@mahalend/core/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol',
+      '@mahalend/core/contracts/deployments/ReservesSetupHelper.sol',
+      '@mahalend/core/contracts/misc/AaveProtocolDataProvider.sol',
+      '@mahalend/core/contracts/protocol/configuration/ACLManager.sol',
+      '@mahalend/core/contracts/dependencies/weth/WETH9.sol',
+      '@mahalend/core/contracts/mocks/helpers/MockIncentivesController.sol',
+      '@mahalend/core/contracts/mocks/helpers/MockReserveConfiguration.sol',
+      '@mahalend/core/contracts/mocks/oracle/CLAggregators/MockAggregator.sol',
+      '@mahalend/core/contracts/mocks/tokens/MintableERC20.sol',
+      '@mahalend/core/contracts/mocks/flashloan/MockFlashLoanReceiver.sol',
+      '@mahalend/core/contracts/mocks/tokens/WETH9Mocked.sol',
+      '@mahalend/core/contracts/mocks/upgradeability/MockVariableDebtToken.sol',
+      '@mahalend/core/contracts/mocks/upgradeability/MockAToken.sol',
+      '@mahalend/core/contracts/mocks/upgradeability/MockStableDebtToken.sol',
+      '@mahalend/core/contracts/mocks/upgradeability/MockInitializableImplementation.sol',
+      '@mahalend/core/contracts/mocks/helpers/MockPool.sol',
+      '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol',
+      '@mahalend/core/contracts/mocks/oracle/PriceOracle.sol',
+      '@mahalend/core/contracts/mocks/tokens/MintableDelegationERC20.sol',
     ],
+  },
+  etherscan: {
+    customChains: [],
+    apiKey: ETHERSCAN_KEY,
   },
   external: {
     contracts: [
       {
         artifacts: './temp-artifacts',
-        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+        deploy: 'node_modules/@mahalend/deploy/dist/deploy',
       },
     ],
   },

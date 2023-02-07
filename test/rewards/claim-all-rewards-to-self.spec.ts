@@ -7,7 +7,7 @@ import {
   MAX_UINT_AMOUNT,
   ERC20__factory,
   advanceTimeAndBlock,
-} from '@aave/deploy-v3';
+} from '@mahalend/deploy';
 import {
   assetDataComparator,
   getRewards,
@@ -171,7 +171,9 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       const assetDataBefore = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
+          (
+            await getRewardsData(rewardsController, [assets[index]], [reward])
+          )[0]
       );
 
       const action = await rewardsController.claimAllRewardsToSelf(assets);
@@ -189,7 +191,9 @@ makeSuite('Incentives Controller V2 claimRewards to self tests', (testEnv) => {
       const assetDataAfter = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
+          (
+            await getRewardsData(rewardsController, [assets[index]], [reward])
+          )[0]
       );
 
       const unclaimedRewardsStorageAfter = await Bluebird.map(rewards, (reward) =>

@@ -2,7 +2,7 @@ import { makeSuite, TestEnv } from '../../helpers/make-suite';
 import { RANDOM_ADDRESSES } from '../../helpers/constants';
 import hre from 'hardhat';
 import { StakedTokenTransferStrategy__factory } from '../../../types';
-import { getERC20, MAX_UINT_AMOUNT, waitForTx } from '@aave/deploy-v3';
+import { getERC20, MAX_UINT_AMOUNT, waitForTx } from '@mahalend/deploy';
 import { parseEther } from 'ethers/lib/utils';
 
 const { expect } = require('chai');

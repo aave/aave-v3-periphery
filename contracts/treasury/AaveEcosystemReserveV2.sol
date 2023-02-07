@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import {IERC20} from '@mahalend/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IERC20} from '@mahalend/core/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStreamable} from './interfaces/IStreamable.sol';
 import {AdminControlledEcosystemReserve} from './AdminControlledEcosystemReserve.sol';
 import {ReentrancyGuard} from './libs/ReentrancyGuard.sol';

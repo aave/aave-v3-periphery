@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {IERC20Detailed} from "./interface/IERC20Detailed.sol";
+import {IERC20Metadata} from "./interface/IERC20Metadata.sol";
 import {IPool} from "./interface/IPool.sol";
-import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
 import {ICurveSwaps} from "./interface/ICurveSwaps.sol";
 import {IWETH} from "./interface/IWETH.sol";
 import {IPriceOracleGetter} from "./interface/IPriceOracleGetter.sol";
 import {Ownable} from "./access/Ownable.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
-import {WadRayMath} from "./libraries/math/WadRayMath.sol";
-import {PercentageMath} from "./libraries/math/PercentageMath.sol";
 
 library LeverageDataTypes {
     struct LeverageSwapParams {
@@ -22,12 +19,9 @@ library LeverageDataTypes {
 }
 
 contract Leverage is Ownable {
-    using WadRayMath for uint256;
-    using PercentageMath for uint256;
-
     //main configuration parameters
-    address public ADDR_poolProvider;
     address public ADDR_pool;
+    address public ADDR_priceOracle;
     address public ADDR_curveSwap;
     address payable public ADDR_weth;
     address public ADDR_arth;
@@ -38,16 +32,17 @@ contract Leverage is Ownable {
     address public currentLeverageAsset = address(0);
 
     constructor(
-        address _poolProvider,
+        address _pool,
+        address _priceOracle,
         address _curveSwap,
         address payable _weth,
-        address _arthAddress
+        address _arth
     ) {
-        ADDR_poolProvider = _poolProvider;
-        ADDR_pool = IPoolAddressesProvider(ADDR_poolProvider).getPool();
+        ADDR_pool = _pool;
+        ADDR_priceOracle = _priceOracle;
         ADDR_curveSwap = _curveSwap;
         ADDR_weth = _weth;
-        ADDR_arth = _arthAddress;
+        ADDR_arth = _arth;
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,9 +64,9 @@ contract Leverage is Ownable {
         uint256 _assetAmount
     ) public view returns (uint256 baseAmount) {
         uint8 decimal;
-        decimal = IERC20Detailed(_asset).decimals();
+        decimal = IERC20Metadata(_asset).decimals();
         IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
-            IPoolAddressesProvider(ADDR_poolProvider).getPriceOracle()
+            ADDR_priceOracle
         );
         uint256 price = PRICE_ORACLE_GETTER.getAssetPrice(_asset);
         baseAmount = (_assetAmount * price) / (10 ** decimal);
@@ -82,9 +77,9 @@ contract Leverage is Ownable {
         uint256 _baseAmount
     ) public view returns (uint256 assetAmount) {
         uint8 decimal;
-        decimal = IERC20Detailed(_asset).decimals();
+        decimal = IERC20Metadata(_asset).decimals();
         IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
-            IPoolAddressesProvider(ADDR_poolProvider).getPriceOracle()
+            ADDR_priceOracle
         );
         uint256 price = PRICE_ORACLE_GETTER.getAssetPrice(_asset);
         assetAmount = (_baseAmount * (10 ** decimal)) / price;
@@ -104,34 +99,12 @@ contract Leverage is Ownable {
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    function getMaxWithdrawableBase()
-        public
-        view
-        returns (uint256 _withdrawableAmount)
-    {
-        (
-            ,
-            uint256 totalDebtBase,
-            ,
-            uint256 currentLiquidationThreshold,
-            ,
-            uint256 healthFactor
-        ) = IPool(ADDR_pool).getUserAccountData(address(this));
-        if (healthFactor > 101e16) {
-            _withdrawableAmount = (healthFactor - 1e18 + 1)
-                .wadMul(totalDebtBase)
-                .percentDiv(currentLiquidationThreshold);
-        } else {
-            _withdrawableAmount = 0;
-        }
-    }
-
     function getAtokenBalanceForReserve(
         address _asset
     ) internal view returns (uint256 _aTokenBalance) {
         DataTypes.ReserveData memory reserveData = IPool(ADDR_pool)
             .getReserveData(_asset);
-        _aTokenBalance = IERC20Detailed(reserveData.aTokenAddress).balanceOf(
+        _aTokenBalance = IERC20Metadata(reserveData.aTokenAddress).balanceOf(
             address(this)
         );
     }
@@ -141,7 +114,7 @@ contract Leverage is Ownable {
     ) internal view returns (uint256 _aTokenBalance) {
         DataTypes.ReserveData memory reserveData = IPool(ADDR_pool)
             .getReserveData(_asset);
-        _aTokenBalance = IERC20Detailed(reserveData.stableDebtTokenAddress)
+        _aTokenBalance = IERC20Metadata(reserveData.stableDebtTokenAddress)
             .balanceOf(address(this));
     }
 
@@ -153,7 +126,7 @@ contract Leverage is Ownable {
         address _onBehalfOf
     ) internal {
         uint16 referral = 0;
-        IERC20Detailed(_asset).approve(ADDR_pool, _amount);
+        IERC20Metadata(_asset).approve(ADDR_pool, _amount);
         IPool(ADDR_pool).supply(_asset, _amount, _onBehalfOf, referral);
     }
 
@@ -162,7 +135,7 @@ contract Leverage is Ownable {
         uint256[3][4] memory _swap_params,
         uint256 _amount
     ) internal returns (uint256 amountOut) {
-        IERC20Detailed(_route[0]).approve(ADDR_curveSwap, _amount);
+        IERC20Metadata(_route[0]).approve(ADDR_curveSwap, _amount);
         amountOut = ICurveSwaps(ADDR_curveSwap).exchange_multiple(
             _route,
             _swap_params,
@@ -194,7 +167,7 @@ contract Leverage is Ownable {
             onBehalfOf
         );
         if (_borrower != onBehalfOf) {
-            IERC20Detailed(_asset).transfer(_borrower, _amount);
+            IERC20Metadata(_asset).transfer(_borrower, _amount);
         }
         return _amount;
     }
@@ -206,7 +179,7 @@ contract Leverage is Ownable {
     ) internal returns (uint256 _repaid) {
         uint256 interestRateMode = 1;
         address onBehalfOf = address(this);
-        IERC20Detailed(_asset).approve(ADDR_pool, _amount);
+        IERC20Metadata(_asset).approve(ADDR_pool, _amount);
         _repaid = IPool(ADDR_pool).repay(
             _asset,
             _amount,
@@ -214,7 +187,7 @@ contract Leverage is Ownable {
             onBehalfOf
         );
         if (_repayer != onBehalfOf) {
-            IERC20Detailed(_asset).transfer(_repayer, _amount - _repaid);
+            IERC20Metadata(_asset).transfer(_repayer, _amount - _repaid);
         }
     }
 
@@ -223,14 +196,23 @@ contract Leverage is Ownable {
         uint256 _amount,
         address _withdrawer
     ) internal returns (uint256 _withdrawn) {
-        // if (_amount == type(uint256).max) {
-        //     uint256 withdrawableBase = getMaxWithdrawableBase();
-        //     _amount = calcBaseAmountToAsset(ADDR_arth, withdrawableBase);
-        // }
         address onBehalfOf = address(this);
+        if (_amount == type(uint256).max) {
+            (
+                ,
+                uint256 totalDebtBase,
+                uint256 availableBorrowsBase,
+                ,
+                ,
+
+            ) = IPool(ADDR_pool).getUserAccountData(address(this));
+            if (totalDebtBase != 0) {
+                _amount = calcBaseAmountToAsset(_asset, availableBorrowsBase);
+            }
+        }
         _withdrawn = IPool(ADDR_pool).withdraw(_asset, _amount, onBehalfOf);
         if (_withdrawer != onBehalfOf) {
-            IERC20Detailed(_asset).transfer(_withdrawer, _withdrawn);
+            IERC20Metadata(_asset).transfer(_withdrawer, _withdrawn);
         }
     }
 
@@ -253,7 +235,7 @@ contract Leverage is Ownable {
         // sell DAI for Reserve on curvefi
         _swapOnCurve(_params.route_second, _params.params_second, amount_temp);
         // deposit available Reserve to pool again
-        amount_temp = IERC20Detailed(_asset).balanceOf(address(this));
+        amount_temp = IERC20Metadata(_asset).balanceOf(address(this));
         _depositToPool(_asset, amount_temp, address(this));
         return amount_temp;
     }
@@ -262,7 +244,7 @@ contract Leverage is Ownable {
         address _asset,
         LeverageDataTypes.LeverageSwapParams calldata _params
     ) internal returns (uint256 _withdrawn) {
-        uint256 amount_temp = IERC20Detailed(_asset).balanceOf(address(this));
+        uint256 amount_temp = IERC20Metadata(_asset).balanceOf(address(this));
         // sell available Reserve for DAI on curvefi
         amount_temp = _swapOnCurve(
             _params.route_first,
@@ -272,7 +254,7 @@ contract Leverage is Ownable {
         // sell DAI for ARTH on curvefi
         _swapOnCurve(_params.route_second, _params.params_second, amount_temp);
         // repay available ARTH to pool
-        amount_temp = IERC20Detailed(ADDR_arth).balanceOf(address(this));
+        amount_temp = IERC20Metadata(ADDR_arth).balanceOf(address(this));
         _repayToPool(ADDR_arth, amount_temp, address(this));
         // withdraw Reserve again
         _withdrawn = _withdrawFromPool(
@@ -297,9 +279,9 @@ contract Leverage is Ownable {
         address _onBehalfOf
     ) internal {
         if (_amount == type(uint256).max) {
-            _amount = IERC20Detailed(_asset).balanceOf(_onBehalfOf);
+            _amount = IERC20Metadata(_asset).balanceOf(_onBehalfOf);
         }
-        IERC20Detailed(_asset).transfer(_onBehalfOf, _amount);
+        IERC20Metadata(_asset).transfer(_onBehalfOf, _amount);
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -318,7 +300,7 @@ contract Leverage is Ownable {
                 .getUserAccountData(address(this));
             _amount = calcBaseAmountToAsset(_asset, totalDebtBase);
         }
-        IERC20Detailed(_asset).transferFrom(msg.sender, address(this), _amount);
+        IERC20Metadata(_asset).transferFrom(msg.sender, address(this), _amount);
         _repayToPool(_asset, _amount, msg.sender);
     }
 
@@ -339,7 +321,7 @@ contract Leverage is Ownable {
             _amount = msg.value;
             IWETH(payable(_asset)).deposit{value: _amount}();
         } else {
-            IERC20Detailed(_asset).transferFrom(
+            IERC20Metadata(_asset).transferFrom(
                 msg.sender,
                 address(this),
                 _amount
@@ -360,7 +342,7 @@ contract Leverage is Ownable {
         require(checkCanBeReserved(_asset), "This asset can't be reserved.");
         // Begin leverage.
         uint256 maxDeposit = (_amount * _leverageRatio) / 100;
-        _amount = IERC20Detailed(_asset).balanceOf(address(this));
+        _amount = IERC20Metadata(_asset).balanceOf(address(this));
         _depositToPool(_asset, _amount, address(this));
         uint256 depositedTotal = _amount;
         while (maxDeposit > depositedTotal) {
@@ -370,6 +352,8 @@ contract Leverage is Ownable {
         // set current leverage asset
         currentLeverageAsset = _asset;
     }
+
+    event Deleverage(uint256, uint256);
 
     function deleverage(
         uint256 _amount,
@@ -387,7 +371,7 @@ contract Leverage is Ownable {
             _amount = msg.value;
             IWETH(payable(_asset)).deposit{value: _amount}();
         } else {
-            IERC20Detailed(_asset).transferFrom(
+            IERC20Metadata(_asset).transferFrom(
                 msg.sender,
                 address(this),
                 _amount
@@ -398,27 +382,36 @@ contract Leverage is Ownable {
         while (getAtokenBalanceForReserve(_asset) > 0) {
             _deleverage(_asset, _paramsForDeleverage);
         }
+        emit Deleverage(
+            IERC20Metadata(ADDR_arth).balanceOf(address(this)),
+            IERC20Metadata(_asset).balanceOf(address(this))
+        );
         // Send deleveraged asset to user.
-        uint256 balanceAsset = IERC20Detailed(ADDR_arth).balanceOf(
+        uint256 balanceRemainAsset = IERC20Metadata(ADDR_arth).balanceOf(
             address(this)
         );
-        if (balanceAsset > 0) {
+        if (balanceRemainAsset > 0) {
             // sell ARTH for DAI on curvefi
-            balanceAsset = _swapOnCurve(
+            balanceRemainAsset = _swapOnCurve(
                 _paramsForRecoverAsset.route_first,
                 _paramsForRecoverAsset.params_first,
-                balanceAsset
+                balanceRemainAsset
             );
             // sell DAI for Reserve on curvefi
             _swapOnCurve(
                 _paramsForRecoverAsset.route_second,
                 _paramsForRecoverAsset.params_second,
-                balanceAsset
+                balanceRemainAsset
             );
         }
-        balanceAsset = IERC20Detailed(_asset).balanceOf(address(this));
-        if (balanceAsset > 0) {
-            IERC20Detailed(ADDR_arth).transfer(msg.sender, balanceAsset);
+        balanceRemainAsset = IERC20Metadata(_asset).balanceOf(address(this));
+        if (balanceRemainAsset > 0) {
+            if (_isETH) {
+                IWETH(ADDR_weth).withdraw(balanceRemainAsset);
+                _withdrawLockedETH(type(uint256).max, msg.sender);
+            } else {
+                _withdrawLockedAsset(_asset, type(uint256).max, msg.sender);
+            }
         }
         // remove current leverage asset
         currentLeverageAsset = address(0);

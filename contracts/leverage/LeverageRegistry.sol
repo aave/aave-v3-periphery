@@ -3,13 +3,15 @@ pragma solidity ^0.8.10;
 
 import {Ownable} from "./access/Ownable.sol";
 import {ICurveSwapProvider} from "./interface/ICurveSwapProvider.sol";
+import {IPoolAddressesProvider} from "./interface/IPoolAddressesProvider.sol";
 import {Leverage} from "./Leverage.sol";
 
 contract LeverageRegistry is Ownable {
     mapping(address => address) public leverageList;
     event CreateLeverage(address creator, address new_leverage);
 
-    address public ADDR_poolProvider;
+    address public ADDR_pool;
+    address public ADDR_priceOracle;
     address public ADDR_curveSwap;
     address payable public ADDR_weth;
     address public ADDR_arth;
@@ -18,17 +20,20 @@ contract LeverageRegistry is Ownable {
         address _poolProvider,
         address _curveProvider,
         address payable _weth,
-        address _arthAddress
+        address _arth
     ) {
-        ADDR_poolProvider = _poolProvider;
+        ADDR_pool = IPoolAddressesProvider(_poolProvider).getPool();
+        ADDR_priceOracle = IPoolAddressesProvider(_poolProvider)
+            .getPriceOracle();
         ADDR_curveSwap = ICurveSwapProvider(_curveProvider).get_address(2);
         ADDR_weth = _weth;
-        ADDR_arth = _arthAddress;
+        ADDR_arth = _arth;
     }
 
     function createLeverage() external {
         Leverage new_leverage = new Leverage(
-            ADDR_poolProvider,
+            ADDR_pool,
+            ADDR_priceOracle,
             ADDR_curveSwap,
             ADDR_weth,
             ADDR_arth

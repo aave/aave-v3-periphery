@@ -45,24 +45,10 @@ contract Leverage is Ownable {
         ADDR_arth = _arth;
     }
 
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    function calcLoanableBaseForReserve(
-        address _reserve,
-        uint256 _reserveAmount
-    ) public view returns (uint256 _baseAmount) {
-        uint256 reserveBase = calcAssetAmountToBase(_reserve, _reserveAmount);
-        (, , , , uint256 ltv, ) = IPool(ADDR_pool).getUserAccountData(
-            address(this)
-        );
-
-        _baseAmount = (reserveBase * ltv) / 10000;
-    }
-
     function calcAssetAmountToBase(
         address _asset,
         uint256 _assetAmount
-    ) public view returns (uint256 baseAmount) {
+    ) external view returns (uint256 baseAmount) {
         uint8 decimal;
         decimal = IERC20Metadata(_asset).decimals();
         IPriceOracleGetter PRICE_ORACLE_GETTER = IPriceOracleGetter(
@@ -85,20 +71,6 @@ contract Leverage is Ownable {
         assetAmount = (_baseAmount * (10 ** decimal)) / price;
     }
 
-    function checkCanBeReserved(
-        address _asset
-    ) public view returns (bool _possible) {
-        _possible = false;
-        address[] memory reserveList = IPool(ADDR_pool).getReservesList();
-        for (uint i = 0; i < reserveList.length; i++) {
-            if (reserveList[i] == _asset) {
-                _possible = true;
-            }
-        }
-    }
-
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     function getAtokenBalanceForReserve(
         address _asset
     ) internal view returns (uint256 _aTokenBalance) {
@@ -108,17 +80,6 @@ contract Leverage is Ownable {
             address(this)
         );
     }
-
-    function getDebtTokenBalanceForReserve(
-        address _asset
-    ) internal view returns (uint256 _aTokenBalance) {
-        DataTypes.ReserveData memory reserveData = IPool(ADDR_pool)
-            .getReserveData(_asset);
-        _aTokenBalance = IERC20Metadata(reserveData.stableDebtTokenAddress)
-            .balanceOf(address(this));
-    }
-
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     function _depositToPool(
         address _asset,
@@ -143,8 +104,6 @@ contract Leverage is Ownable {
             0
         );
     }
-
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     function _borrowFromPool(
         address _asset,
@@ -264,8 +223,6 @@ contract Leverage is Ownable {
         );
     }
 
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     function _withdrawLockedETH(uint256 _amount, address _onBehalfOf) internal {
         if (_amount == type(uint256).max) {
             _amount = address(this).balance;
@@ -283,8 +240,6 @@ contract Leverage is Ownable {
         }
         IERC20Metadata(_asset).transfer(_onBehalfOf, _amount);
     }
-
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     function borrow(
         address _asset,
@@ -339,7 +294,6 @@ contract Leverage is Ownable {
             "The leverage ratio must be greater than or equal to MIN_LEVERAGE_RATIO and must be less than or equal to MAX_LEVERAGE_RATIO."
         );
         require(_amount > 0, "Amount should be greater than 0.");
-        require(checkCanBeReserved(_asset), "This asset can't be reserved.");
         // Begin leverage.
         uint256 maxDeposit = (_amount * _leverageRatio) / 100;
         _amount = IERC20Metadata(_asset).balanceOf(address(this));
@@ -416,8 +370,6 @@ contract Leverage is Ownable {
         // remove current leverage asset
         currentLeverageAsset = address(0);
     }
-
-    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     function withdrawLockedAsset(
         address _asset,

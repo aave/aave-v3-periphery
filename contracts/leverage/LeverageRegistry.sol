@@ -9,6 +9,8 @@ import {Leverage} from "./Leverage.sol";
 contract LeverageRegistry is Ownable {
     mapping(address => address) public leverageList;
     event CreateLeverage(address creator, address new_leverage);
+    event RemoveLeverage(address creator);
+    event TransferLeverage(address owner, address new_owner);
 
     address public ADDR_pool;
     address public ADDR_priceOracle;
@@ -41,6 +43,11 @@ contract LeverageRegistry is Ownable {
         leverageList[msg.sender] = address(new_leverage);
         new_leverage.transferOwnership(msg.sender);
         emit CreateLeverage(msg.sender, address(new_leverage));
+    }
+
+    function removeLeverage() external {
+        leverageList[msg.sender] = address(0);
+        emit RemoveLeverage(msg.sender);
     }
 
     function getLeverageOf(

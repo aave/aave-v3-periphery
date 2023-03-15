@@ -4,7 +4,7 @@
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
-    "artifacts/contracts"
+    "artifacts"
   ],
   "scripts": {
     "run-env": "npm i && tail -f /dev/null",

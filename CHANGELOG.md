@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/aave/aave-v3-periphery/compare/v2.0.0...v2.0.1) (2023-03-15)
+
+
+### Bug Fixes
+
+* publish all artifacts files, required by hardhat-deploy to store solidity input ([01814cb](https://github.com/aave/aave-v3-periphery/commit/01814cb6a3a91a93dbfa39c1c01a925d3c71695a))
+
 ## [2.0.0](https://github.com/aave/aave-v3-periphery/compare/v1.23.1...v2.0.0) (2023-01-12)
 
 

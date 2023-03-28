@@ -8,6 +8,8 @@ declare let hre: HardhatRuntimeEnvironment;
 
 makeSuite('Faucet', (testEnv: TestEnv) => {
   const mintAmount = parseEther('100');
+  const maxMintAmount = parseEther('10000');
+
   let faucetOwnable;
   before(async () => {
     // Enforce permissioned mode as disabled for deterministic test suite
@@ -15,7 +17,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     const { deployer } = await hre.getNamedAccounts();
     const factory = await hre.ethers.getContractFactory('Faucet');
 
-    faucetOwnable = await factory.deploy(deployer, false);
+    faucetOwnable = await factory.deploy(deployer, false, maxMintAmount);
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
@@ -70,6 +72,22 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       );
 
       await expect(await dai.balanceOf(user.address)).eq(mintAmount);
+    });
+
+    it('Mint function should revert with values over 10,000', async () => {
+      const maxCapacityThresholdMint = parseEther('10001');
+
+      const {
+        users: [, , , user],
+        dai,
+        deployer,
+      } = testEnv;
+
+      await expect(
+        faucetOwnable
+          .connect(deployer.signer)
+          .mint(dai.address, user.address, maxCapacityThresholdMint)
+      ).to.be.revertedWith('Error: Mint limit transaction exceeded');
     });
 
     it('Getter isPermissioned should return true', async () => {

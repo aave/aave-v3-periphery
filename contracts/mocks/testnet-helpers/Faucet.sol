@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {IFaucet} from './IFaucet.sol';
 import {TestnetERC20} from './TestnetERC20.sol';
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title Faucet
@@ -46,6 +47,11 @@ contract Faucet is IFaucet, Ownable {
     uint256 amount
   ) external override onlyOwnerIfPermissioned returns (uint256) {
     uint8 decimals = TestnetERC20(token).decimals();
+
+    uint256 amountInSmallestUnit = amount * (10**uint256(decimals));
+
+    console.log('amount in small units %s', amountInSmallestUnit);
+
     require(amount < _maxMintAmountPerTx, 'Error: Mint limit transaction exceeded');
 
     TestnetERC20(token).mint(to, amount);

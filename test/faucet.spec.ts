@@ -42,6 +42,22 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Getter isPermissioned should return false', async () => {
       await expect(await faucetOwnable.isPermissioned()).is.equal(false);
     });
+
+    it('Mint function should revert with values over 10,000', async () => {
+      const maxCapacityThresholdMint = parseEther('10001');
+
+      const {
+        users: [, , , user],
+        dai,
+        deployer,
+      } = testEnv;
+
+      await expect(
+        faucetOwnable
+          .connect(deployer.signer)
+          .mint(dai.address, user.address, maxCapacityThresholdMint)
+      ).to.be.revertedWith('Error: Mint limit transaction exceeded');
+    });
   });
 
   describe('Permissioned mode: enabled', () => {
@@ -72,22 +88,6 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       );
 
       await expect(await dai.balanceOf(user.address)).eq(mintAmount);
-    });
-
-    it('Mint function should revert with values over 10,000', async () => {
-      const maxCapacityThresholdMint = parseEther('10001');
-
-      const {
-        users: [, , , user],
-        dai,
-        deployer,
-      } = testEnv;
-
-      await expect(
-        faucetOwnable
-          .connect(deployer.signer)
-          .mint(dai.address, user.address, maxCapacityThresholdMint)
-      ).to.be.revertedWith('Error: Mint limit transaction exceeded');
     });
 
     it('Getter isPermissioned should return true', async () => {

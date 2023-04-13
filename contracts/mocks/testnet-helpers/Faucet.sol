@@ -16,18 +16,12 @@ contract Faucet is IFaucet, Ownable {
   bool internal _permissioned;
 
   // Maximum amount of tokens per mint allowed
-  uint256 private _maxMintAmountPerTx;
+  uint256 private constant MAX_MINT_AMOUNT = 10000;
 
-  constructor(
-    address owner,
-    bool permissioned,
-    uint256 maxMintAmountPerTx
-  ) {
+  constructor(address owner, bool permissioned) {
     require(owner != address(0));
     transferOwnership(owner);
-
     _permissioned = permissioned;
-    _maxMintAmountPerTx = maxMintAmountPerTx;
   }
 
   /**
@@ -48,11 +42,9 @@ contract Faucet is IFaucet, Ownable {
   ) external override onlyOwnerIfPermissioned returns (uint256) {
     uint8 decimals = TestnetERC20(token).decimals();
 
-    uint256 amountInSmallestUnit = amount * (10**uint256(decimals));
+    uint256 maximumAmountinUnits = MAX_MINT_AMOUNT * (10**uint256(decimals));
 
-    console.log('amount in small units %s', amountInSmallestUnit);
-
-    require(amount < _maxMintAmountPerTx, 'Error: Mint limit transaction exceeded');
+    require(amount < maximumAmountinUnits, 'Error: Mint limit transaction exceeded');
 
     TestnetERC20(token).mint(to, amount);
     return amount;

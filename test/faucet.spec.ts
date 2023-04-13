@@ -17,7 +17,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     const { deployer } = await hre.getNamedAccounts();
     const factory = await hre.ethers.getContractFactory('Faucet');
 
-    faucetOwnable = await factory.deploy(deployer, false, maxMintAmount);
+    faucetOwnable = await factory.deploy(deployer, false);
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
@@ -41,6 +41,21 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
     it('Getter isPermissioned should return false', async () => {
       await expect(await faucetOwnable.isPermissioned()).is.equal(false);
+    });
+
+    it('Mint function should mint tokens within limit', async () => {
+      const withinLimitThreshold = parseEther('100');
+
+      const {
+        users: [, , , user],
+        dai,
+        deployer,
+      } = testEnv;
+
+      await faucetOwnable
+        .connect(deployer.signer)
+        .mint(dai.address, user.address, withinLimitThreshold);
+      await expect(await dai.balanceOf(user.address)).eq(withinLimitThreshold);
     });
 
     it('Mint function should revert with values over 10,000', async () => {
@@ -77,17 +92,20 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     });
 
     it('Mint function can only be called by owner', async () => {
+      const mintAmount = parseEther('100');
       const {
         users: [, , , user],
         dai,
         deployer,
       } = testEnv;
 
+      const initialBalance = await dai.balanceOf(user.address);
+
       await waitForTx(
         await faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, mintAmount)
       );
 
-      await expect(await dai.balanceOf(user.address)).eq(mintAmount);
+      await expect(await dai.balanceOf(user.address)).eq(initialBalance.add(mintAmount));
     });
 
     it('Getter isPermissioned should return true', async () => {

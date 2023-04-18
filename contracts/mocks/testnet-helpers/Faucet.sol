@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {IFaucet} from './IFaucet.sol';
 import {TestnetERC20} from './TestnetERC20.sol';
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
-import 'hardhat/console.sol';
 
 /**
  * @title Faucet
@@ -16,7 +15,7 @@ contract Faucet is IFaucet, Ownable {
   bool internal _permissioned;
 
   // Maximum amount of tokens per mint allowed
-  uint256 private constant MAX_MINT_AMOUNT = 10000;
+  uint256 public constant MAX_MINT_AMOUNT = 10000;
 
   constructor(address owner, bool permissioned) {
     require(owner != address(0));

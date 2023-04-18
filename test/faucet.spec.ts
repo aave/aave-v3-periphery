@@ -44,13 +44,15 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     });
 
     it('Mint function should mint tokens within limit', async () => {
-      const withinLimitThreshold = parseEther('100');
-
       const {
         users: [, , , user],
         dai,
         deployer,
       } = testEnv;
+
+      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const thresholdValue = threshold.toNumber();
+      const withinLimitThreshold = parseEther((thresholdValue - 1).toString());
 
       await faucetOwnable
         .connect(deployer.signer)
@@ -58,19 +60,19 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       await expect(await dai.balanceOf(user.address)).eq(withinLimitThreshold);
     });
 
-    it('Mint function should revert with values over 10,000', async () => {
-      const maxCapacityThresholdMint = parseEther('10001');
-
+    it('Mint function should revert with values over the limit', async () => {
       const {
         users: [, , , user],
         dai,
         deployer,
       } = testEnv;
 
+      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const thresholdValue = threshold.toNumber();
+      const maxLimitThreshold = parseEther((thresholdValue + 1).toString());
+
       await expect(
-        faucetOwnable
-          .connect(deployer.signer)
-          .mint(dai.address, user.address, maxCapacityThresholdMint)
+        faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, maxLimitThreshold)
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
     });
   });

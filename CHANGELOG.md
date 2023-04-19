@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/aave/aave-v3-periphery/compare/v2.0.1...v2.1.0) (2023-04-19)
+
+
+### Features
+
+* Add a mint amount limit and ownership transfer function to Faucet  ([#162](https://github.com/aave/aave-v3-periphery/issues/162)) ([b52f6c4](https://github.com/aave/aave-v3-periphery/commit/b52f6c483373f1c9a1478af9e076a08fda6bf67c))
+
 ## [2.0.1](https://github.com/aave/aave-v3-periphery/compare/v2.0.0...v2.0.1) (2023-03-15)
 
 

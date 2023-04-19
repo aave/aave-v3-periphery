@@ -64,7 +64,6 @@
     "hardhat-deploy": "^0.9.4",
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^6.0.0",
-    "is-core-module": "2.11.0",
     "lowdb": "1.0.0",
     "prettier": "2.7.1",
     "prettier-plugin-solidity": "1.0.0-dev.23",

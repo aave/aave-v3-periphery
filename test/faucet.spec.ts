@@ -54,7 +54,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
       const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
       const thresholdValue = threshold.toNumber();
-      const withinLimitThreshold = parseEther((thresholdValue - 1).toString());
+      const withinLimitThreshold = parseEther((thresholdValue).toString());
 
       await faucetOwnable
         .connect(deployer.signer)

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import {IFaucet} from './IFaucet.sol';
-import {TestnetERC20} from './TestnetERC20.sol';
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
+import {TestnetERC20} from './TestnetERC20.sol';
+import {IFaucet} from './IFaucet.sol';
 
 /**
  * @title Faucet
@@ -39,11 +39,10 @@ contract Faucet is IFaucet, Ownable {
     address to,
     uint256 amount
   ) external override onlyOwnerIfPermissioned returns (uint256) {
-    uint8 decimals = TestnetERC20(token).decimals();
-
-    uint256 maximumAmountinUnits = MAX_MINT_AMOUNT * (10**uint256(decimals));
-
-    require(amount < maximumAmountinUnits, 'Error: Mint limit transaction exceeded');
+    require(
+      amount < MAX_MINT_AMOUNT * (10 ** TestnetERC20(token).decimals()),
+      'Error: Mint limit transaction exceeded'
+    );
 
     TestnetERC20(token).mint(to, amount);
     return amount;

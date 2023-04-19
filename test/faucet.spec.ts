@@ -1,16 +1,17 @@
-import { getFirstSigner, waitForTx } from '@aave/deploy-v3';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ONE_ADDRESS, evmRevert, evmSnapshot, waitForTx } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { Ownable__factory, TestnetERC20__factory } from '../types';
 
 declare let hre: HardhatRuntimeEnvironment;
 
 makeSuite('Faucet', (testEnv: TestEnv) => {
   const mintAmount = parseEther('100');
-  const maxMintAmount = parseEther('10000');
 
   let faucetOwnable;
+
   before(async () => {
     // Enforce permissioned mode as disabled for deterministic test suite
 
@@ -21,6 +22,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
+
   describe('Permissioned mode: disabled', () => {
     before(async () => {
       // Enforce permissioned mode as disabled for deterministic test suite
@@ -139,5 +141,42 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     await waitForTx(await faucetOwnable.connect(deployer.signer).setPermissioned(true));
 
     expect(await faucetOwnable.isPermissioned()).equal(true);
+  });
+
+  it('Transfer ownership should revert if not owner', async () => {
+    const {
+      deployer,
+      users: [user1],
+    } = testEnv;
+
+    const childContract = await new TestnetERC20__factory(deployer.signer).deploy(
+      'CHILD',
+      'CHILD',
+      18,
+      faucetOwnable.address
+    );
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+    await expect(
+      faucetOwnable
+        .connect(user1.signer)
+        .transferOwnershipOfChild([childContract.address], ONE_ADDRESS)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+  });
+
+  it('Transfer ownership of child to another address', async () => {
+    const { deployer } = testEnv;
+
+    const childContract = await new TestnetERC20__factory(deployer.signer).deploy(
+      'CHILD',
+      'CHILD',
+      18,
+      faucetOwnable.address
+    );
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+    await faucetOwnable
+      .connect(deployer.signer)
+      .transferOwnershipOfChild([childContract.address], ONE_ADDRESS);
+    expect(await childContract.owner()).to.be.eq(ONE_ADDRESS);
   });
 });

@@ -57,4 +57,14 @@ contract Faucet is IFaucet, Ownable {
   function isPermissioned() external view override returns (bool) {
     return _permissioned;
   }
+
+  /// @inheritdoc IFaucet
+  function transferOwnershipOfChild(
+    address[] calldata childContracts,
+    address newOwner
+  ) external override onlyOwner {
+    for (uint256 i = 0; i < childContracts.length; i++) {
+      Ownable(childContracts[i]).transferOwnership(newOwner);
+    }
+  }
 }

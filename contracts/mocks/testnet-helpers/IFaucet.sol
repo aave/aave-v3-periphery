@@ -9,11 +9,7 @@ interface IFaucet {
    * @param amount The amount of tokens to mint
    * @return The amount minted
    **/
-  function mint(
-    address token,
-    address to,
-    uint256 amount
-  ) external returns (uint256);
+  function mint(address token, address to, uint256 amount) external returns (uint256);
 
   /**
    * @notice Enable or disable the need of authentication to call `mint` function
@@ -26,4 +22,11 @@ interface IFaucet {
    * @return Returns a boolean, if true the mode is enabled, if false is disabled
    */
   function isPermissioned() external view returns (bool);
+
+  /**
+   * @notice Transfer the ownership of child contracts
+   * @param childContracts A list of child contract addresses
+   * @param newOwner The address of the new owner
+   */
+  function transferOwnershipOfChild(address[] calldata childContracts, address newOwner) external;
 }

@@ -1,14 +1,17 @@
-import { getFirstSigner, waitForTx } from '@aave/deploy-v3';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ONE_ADDRESS, evmRevert, evmSnapshot, waitForTx } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { Ownable__factory, TestnetERC20__factory } from '../types';
 
 declare let hre: HardhatRuntimeEnvironment;
 
 makeSuite('Faucet', (testEnv: TestEnv) => {
   const mintAmount = parseEther('100');
+
   let faucetOwnable;
+
   before(async () => {
     // Enforce permissioned mode as disabled for deterministic test suite
 
@@ -19,6 +22,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
+
   describe('Permissioned mode: disabled', () => {
     before(async () => {
       // Enforce permissioned mode as disabled for deterministic test suite
@@ -40,6 +44,39 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Getter isPermissioned should return false', async () => {
       await expect(await faucetOwnable.isPermissioned()).is.equal(false);
     });
+
+    it('Mint function should mint tokens within limit', async () => {
+      const {
+        users: [, , , user],
+        dai,
+        deployer,
+      } = testEnv;
+
+      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const thresholdValue = threshold.toNumber();
+      const withinLimitThreshold = parseEther((thresholdValue).toString());
+
+      await faucetOwnable
+        .connect(deployer.signer)
+        .mint(dai.address, user.address, withinLimitThreshold);
+      await expect(await dai.balanceOf(user.address)).eq(withinLimitThreshold);
+    });
+
+    it('Mint function should revert with values over the limit', async () => {
+      const {
+        users: [, , , user],
+        dai,
+        deployer,
+      } = testEnv;
+
+      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const thresholdValue = threshold.toNumber();
+      const maxLimitThreshold = parseEther((thresholdValue + 1).toString());
+
+      await expect(
+        faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, maxLimitThreshold)
+      ).to.be.revertedWith('Error: Mint limit transaction exceeded');
+    });
   });
 
   describe('Permissioned mode: enabled', () => {
@@ -59,17 +96,20 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     });
 
     it('Mint function can only be called by owner', async () => {
+      const mintAmount = parseEther('100');
       const {
         users: [, , , user],
         dai,
         deployer,
       } = testEnv;
 
+      const initialBalance = await dai.balanceOf(user.address);
+
       await waitForTx(
         await faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, mintAmount)
       );
 
-      await expect(await dai.balanceOf(user.address)).eq(mintAmount);
+      await expect(await dai.balanceOf(user.address)).eq(initialBalance.add(mintAmount));
     });
 
     it('Getter isPermissioned should return true', async () => {
@@ -101,5 +141,42 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     await waitForTx(await faucetOwnable.connect(deployer.signer).setPermissioned(true));
 
     expect(await faucetOwnable.isPermissioned()).equal(true);
+  });
+
+  it('Transfer ownership should revert if not owner', async () => {
+    const {
+      deployer,
+      users: [user1],
+    } = testEnv;
+
+    const childContract = await new TestnetERC20__factory(deployer.signer).deploy(
+      'CHILD',
+      'CHILD',
+      18,
+      faucetOwnable.address
+    );
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+    await expect(
+      faucetOwnable
+        .connect(user1.signer)
+        .transferOwnershipOfChild([childContract.address], ONE_ADDRESS)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+  });
+
+  it('Transfer ownership of child to another address', async () => {
+    const { deployer } = testEnv;
+
+    const childContract = await new TestnetERC20__factory(deployer.signer).deploy(
+      'CHILD',
+      'CHILD',
+      18,
+      faucetOwnable.address
+    );
+    expect(await childContract.owner()).to.be.eq(faucetOwnable.address);
+    await faucetOwnable
+      .connect(deployer.signer)
+      .transferOwnershipOfChild([childContract.address], ONE_ADDRESS);
+    expect(await childContract.owner()).to.be.eq(ONE_ADDRESS);
   });
 });

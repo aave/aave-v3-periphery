@@ -40,7 +40,7 @@ contract Faucet is IFaucet, Ownable {
     uint256 amount
   ) external override onlyOwnerIfPermissioned returns (uint256) {
     require(
-      amount < MAX_MINT_AMOUNT * (10 ** TestnetERC20(token).decimals()),
+      amount <= MAX_MINT_AMOUNT * (10 ** TestnetERC20(token).decimals()),
       'Error: Mint limit transaction exceeded'
     );
 

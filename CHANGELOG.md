@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/aave/aave-v3-periphery/compare/v2.2.0...v2.3.0) (2023-04-20)
+
+
+### Features
+
+* deploy ([#169](https://github.com/aave/aave-v3-periphery/issues/169)) ([896e082](https://github.com/aave/aave-v3-periphery/commit/896e08237d64e8aceb68a3772ae531fbb7b96867))
+
 ## [2.2.0](https://github.com/aave/aave-v3-periphery/compare/v2.1.0...v2.2.0) (2023-04-20)
 
 

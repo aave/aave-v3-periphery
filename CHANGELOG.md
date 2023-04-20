@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/aave/aave-v3-periphery/compare/v2.1.0...v2.2.0) (2023-04-20)
+
+
+### Features
+
+* remove doc link ([#167](https://github.com/aave/aave-v3-periphery/issues/167)) ([c9dc231](https://github.com/aave/aave-v3-periphery/commit/c9dc2314c5aa5a5b5754a5675378a8844b62be05))
+
 ## [2.1.0](https://github.com/aave/aave-v3-periphery/compare/v2.0.1...v2.1.0) (2023-04-19)
 
 

@@ -60,4 +60,11 @@ abstract contract ReentrancyGuard {
     // https://eips.ethereum.org/EIPS/eip-2200)
     _status = _NOT_ENTERED;
   }
+
+  /**
+   * @dev As we use the guard with the proxy we need to init it with the empty value
+   */
+  function _initGuard() internal {
+    _status = _NOT_ENTERED;
+  }
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/aave/aave-v3-periphery/compare/v2.3.0...v2.4.0) (2023-05-26)
+
+
+### Features
+
+* Add control to block mints in Faucet ([#172](https://github.com/aave/aave-v3-periphery/issues/172)) ([19ce4be](https://github.com/aave/aave-v3-periphery/commit/19ce4be7fc2d4364147be907a171afa0c75826e1))
+
 ## [2.3.0](https://github.com/aave/aave-v3-periphery/compare/v2.2.0...v2.3.0) (2023-04-20)
 
 

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
 import { ONE_ADDRESS, evmRevert, evmSnapshot, waitForTx } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { Ownable__factory, TestnetERC20__factory } from '../types';
+import { TestnetERC20__factory } from '../types';
 
 declare let hre: HardhatRuntimeEnvironment;
 
@@ -28,6 +28,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       // Enforce permissioned mode as disabled for deterministic test suite
       await waitForTx(await faucetOwnable.setPermissioned(false));
     });
+
     it('Mint can be called by anyone', async () => {
       const {
         users: [user],
@@ -54,7 +55,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
       const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
       const thresholdValue = threshold.toNumber();
-      const withinLimitThreshold = parseEther((thresholdValue).toString());
+      const withinLimitThreshold = parseEther(thresholdValue.toString());
 
       await faucetOwnable
         .connect(deployer.signer)
@@ -76,6 +77,45 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       await expect(
         faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, maxLimitThreshold)
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
+    });
+
+    it('Non-owner tries to deactivate minting (revert expected)', async () => {
+      const {
+        users: [, , user],
+        dai,
+      } = testEnv;
+
+      await expect(
+        faucetOwnable.connect(user.signer).setMintable(dai.address, false)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+
+    it('Owner deactivates mint', async () => {
+      const {
+        deployer,
+        users: [user],
+        dai,
+      } = testEnv;
+
+      expect(await faucetOwnable.isMintable(dai.address)).to.be.true;
+      await waitForTx(await faucetOwnable.connect(deployer.signer).setMintable(dai.address, false));
+      expect(await faucetOwnable.isMintable(dai.address)).to.be.false;
+
+      await expect(
+        faucetOwnable.connect(user.signer).mint(dai.address, user.address, 1)
+      ).to.be.revertedWith('Error: not mintable');
+
+      expect(await faucetOwnable.isMintable(dai.address)).to.be.false;
+      await waitForTx(await faucetOwnable.connect(deployer.signer).setMintable(dai.address, true));
+      expect(await faucetOwnable.isMintable(dai.address)).to.be.true;
+
+      const balanceBefore = await dai.balanceOf(user.address);
+      expect(await faucetOwnable.connect(user.signer).mint(dai.address, user.address, 1));
+      expect(await dai.balanceOf(user.address)).eq(balanceBefore.add(1));
+    });
+
+    it('Getter isPermissioned should return false', async () => {
+      await expect(await faucetOwnable.isPermissioned()).is.equal(false);
     });
   });
 

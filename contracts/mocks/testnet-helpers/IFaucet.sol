@@ -3,6 +3,12 @@ pragma solidity ^0.8.0;
 
 interface IFaucet {
   /**
+   * @notice Returns the maximum amount of tokens per mint allowed
+   * @return The maximum amount of tokens per mint allowed
+   */
+  function MAX_MINT_AMOUNT() external pure returns (uint256);
+
+  /**
    * @notice Function to mint Testnet tokens to the destination address
    * @param token The address of the token to perform the mint
    * @param to The address to send the minted tokens
@@ -22,6 +28,20 @@ interface IFaucet {
    * @return Returns a boolean, if true the mode is enabled, if false is disabled
    */
   function isPermissioned() external view returns (bool);
+
+  /**
+   * @notice Enable or disable the minting of the faucet asset
+   * @param asset The address of the asset
+   * @param active True to enable, false to disable
+   */
+  function setMintable(address asset, bool active) external;
+
+  /**
+   * @notice Returns whether the asset is mintable
+   * @param asset The address of the asset
+   * @return True if the asset is mintable, false otherwise
+   */
+  function isMintable(address asset) external view returns (bool);
 
   /**
    * @notice Transfer the ownership of child contracts

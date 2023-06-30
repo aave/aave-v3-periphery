@@ -9,6 +9,8 @@ import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {BaseParaSwapAdapter} from './BaseParaSwapAdapter.sol';
 
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
+
 /**
  * @title BaseParaSwapBuyAdapter
  * @notice Implements the logic for buying tokens on ParaSwap
@@ -40,8 +42,8 @@ abstract contract BaseParaSwapBuyAdapter is BaseParaSwapAdapter {
   function _buyOnParaSwap(
     uint256 toAmountOffset,
     bytes memory paraswapData,
-    IERC20Detailed assetToSwapFrom,
-    IERC20Detailed assetToSwapTo,
+    IERC20Metadata assetToSwapFrom,
+    IERC20Metadata assetToSwapTo,
     uint256 maxAmountToSwap,
     uint256 amountToReceive
   ) internal returns (uint256 amountSold) {

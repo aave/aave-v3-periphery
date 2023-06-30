@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.10;
 
-import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+// import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IERC20WithPermit} from '@aave/core-v3/contracts/interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
@@ -9,6 +9,10 @@ import {BaseParaSwapSellAdapter} from './BaseParaSwapSellAdapter.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';
 import {ReentrancyGuard} from '../../dependencies/openzeppelin/ReentrancyGuard.sol';
+
+import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 
 /**
  * @title ParaSwapLiquiditySwapAdapter
@@ -55,9 +59,9 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     uint256 flashLoanAmount = amount;
     uint256 premiumLocal = premium;
     address initiatorLocal = initiator;
-    IERC20Detailed assetToSwapFrom = IERC20Detailed(asset);
+    IERC20Metadata assetToSwapFrom = IERC20Metadata(asset);
     (
-      IERC20Detailed assetToSwapTo,
+      IERC20Metadata assetToSwapTo,
       uint256 minAmountToReceive,
       uint256 swapAllBalanceOffset,
       bytes memory swapCalldata,
@@ -65,7 +69,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       PermitSignature memory permitParams
     ) = abi.decode(
         params,
-        (IERC20Detailed, uint256, uint256, bytes, IParaSwapAugustus, PermitSignature)
+        (IERC20Metadata, uint256, uint256, bytes, IParaSwapAugustus, PermitSignature)
       );
 
     _swapLiquidity(
@@ -98,8 +102,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
    * @param permitParams Struct containing the permit signatures, set to all zeroes if not used
    */
   function swapAndDeposit(
-    IERC20Detailed assetToSwapFrom,
-    IERC20Detailed assetToSwapTo,
+    IERC20Metadata assetToSwapFrom,
+    IERC20Metadata assetToSwapTo,
     uint256 amountToSwap,
     uint256 minAmountToReceive,
     uint256 swapAllBalanceOffset,
@@ -135,8 +139,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       minAmountToReceive
     );
 
-    assetToSwapTo.approve(address(POOL), 0);
-    assetToSwapTo.approve(address(POOL), amountReceived);
+    SafeERC20.forceApprove(assetToSwapTo, address(POOL), 0);
+    SafeERC20.forceApprove(assetToSwapTo, address(POOL), amountReceived);
     POOL.deposit(address(assetToSwapTo), amountReceived, msg.sender, 0);
   }
 
@@ -161,8 +165,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     uint256 flashLoanAmount,
     uint256 premium,
     address initiator,
-    IERC20Detailed assetToSwapFrom,
-    IERC20Detailed assetToSwapTo,
+    IERC20Metadata assetToSwapFrom,
+    IERC20Metadata assetToSwapTo,
     uint256 minAmountToReceive
   ) internal {
     IERC20WithPermit aToken = IERC20WithPermit(
@@ -189,8 +193,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       minAmountToReceive
     );
 
-    assetToSwapTo.approve(address(POOL), 0);
-    assetToSwapTo.approve(address(POOL), amountReceived);
+    SafeERC20.forceApprove(assetToSwapTo, address(POOL), 0);
+    SafeERC20.forceApprove(assetToSwapTo, address(POOL), amountReceived);
     POOL.deposit(address(assetToSwapTo), amountReceived, initiator, 0);
 
     _pullATokenAndWithdraw(
@@ -202,7 +206,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     );
 
     // Repay flash loan
-    assetToSwapFrom.approve(address(POOL), 0);
-    assetToSwapFrom.approve(address(POOL), flashLoanAmount.add(premium));
+    SafeERC20.forceApprove(assetToSwapFrom, address(POOL), 0);
+    SafeERC20.forceApprove(assetToSwapFrom, address(POOL), flashLoanAmount.add(premium));
   }
 }

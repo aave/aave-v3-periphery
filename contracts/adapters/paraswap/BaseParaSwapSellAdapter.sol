@@ -9,6 +9,9 @@ import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {BaseParaSwapAdapter} from './BaseParaSwapAdapter.sol';
 
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
+import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+
 /**
  * @title BaseParaSwapSellAdapter
  * @notice Implements the logic for selling tokens on ParaSwap
@@ -43,8 +46,8 @@ abstract contract BaseParaSwapSellAdapter is BaseParaSwapAdapter {
     uint256 fromAmountOffset,
     bytes memory swapCalldata,
     IParaSwapAugustus augustus,
-    IERC20Detailed assetToSwapFrom,
-    IERC20Detailed assetToSwapTo,
+    IERC20Metadata assetToSwapFrom,
+    IERC20Metadata assetToSwapTo,
     uint256 amountToSwap,
     uint256 minAmountToReceive
   ) internal returns (uint256 amountReceived) {
@@ -70,8 +73,8 @@ abstract contract BaseParaSwapSellAdapter is BaseParaSwapAdapter {
     uint256 balanceBeforeAssetTo = assetToSwapTo.balanceOf(address(this));
 
     address tokenTransferProxy = augustus.getTokenTransferProxy();
-    assetToSwapFrom.approve(tokenTransferProxy, 0);
-    assetToSwapFrom.approve(tokenTransferProxy, amountToSwap);
+    SafeERC20.forceApprove(assetToSwapFrom, tokenTransferProxy, 0);
+    SafeERC20.forceApprove(assetToSwapFrom, tokenTransferProxy, amountToSwap);
 
     if (fromAmountOffset != 0) {
       // Ensure 256 bit (32 bytes) fromAmount value is within bounds of the

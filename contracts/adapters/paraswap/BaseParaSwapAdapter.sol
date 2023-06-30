@@ -5,12 +5,13 @@ import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTy
 import {FlashLoanSimpleReceiverBase} from '@aave/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol';
 import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IERC20WithPermit} from '@aave/core-v3/contracts/interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
 import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
+
+import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 
 /**
  * @title BaseParaSwapAdapter
@@ -20,7 +21,7 @@ import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contrac
 abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
   using SafeMath for uint256;
   using GPv2SafeERC20 for IERC20;
-  using GPv2SafeERC20 for IERC20Detailed;
+  using GPv2SafeERC20 for IERC20Metadata;
   using GPv2SafeERC20 for IERC20WithPermit;
 
   struct PermitSignature {
@@ -66,7 +67,7 @@ abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
    * @dev Get the decimals of an asset
    * @return number of decimals of the asset
    */
-  function _getDecimals(IERC20Detailed asset) internal view returns (uint8) {
+  function _getDecimals(IERC20Metadata asset) internal view returns (uint8) {
     uint8 decimals = asset.decimals();
     // Ensure 10**decimals won't overflow a uint256
     require(decimals <= 77, 'TOO_MANY_DECIMALS_ON_TOKEN');

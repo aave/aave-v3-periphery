@@ -3,12 +3,12 @@ pragma solidity ^0.8.10;
 
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
 import {FlashLoanSimpleReceiverBase} from '@aave/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol';
-import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IERC20WithPermit} from '@aave/core-v3/contracts/interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleGetter} from '@aave/core-v3/contracts/interfaces/IPriceOracleGetter.sol';
+import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
 import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/Ownable.sol';
 
@@ -19,9 +19,9 @@ import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contrac
  */
 abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
   using SafeMath for uint256;
-  using GPv2SafeERC20 for IERC20;
-  using GPv2SafeERC20 for IERC20Detailed;
-  using GPv2SafeERC20 for IERC20WithPermit;
+  using SafeERC20 for IERC20;
+  using SafeERC20 for IERC20Detailed;
+  using SafeERC20 for IERC20WithPermit;
 
   struct PermitSignature {
     uint256 amount;

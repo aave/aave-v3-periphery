@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/aave/aave-v3-periphery/compare/v2.4.0...v2.4.1) (2023-07-06)
+
+
+### Bug Fixes
+
+* use SafeERC20 safeApprove to work well with non standard ERC20 tokens ([#176](https://github.com/aave/aave-v3-periphery/issues/176)) ([f5d0af9](https://github.com/aave/aave-v3-periphery/commit/f5d0af92d5aadba7ec370d44d3c5312484d5b7a5))
+
 ## [2.4.0](https://github.com/aave/aave-v3-periphery/compare/v2.3.0...v2.4.0) (2023-05-26)
 
 

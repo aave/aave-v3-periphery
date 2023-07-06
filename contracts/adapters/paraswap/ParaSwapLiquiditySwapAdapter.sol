@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IERC20WithPermit} from '@aave/core-v3/contracts/interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
 import {BaseParaSwapSellAdapter} from './BaseParaSwapSellAdapter.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
@@ -17,6 +18,7 @@ import {ReentrancyGuard} from '../../dependencies/openzeppelin/ReentrancyGuard.s
  */
 contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard {
   using SafeMath for uint256;
+  using SafeERC20 for IERC20Detailed;
 
   constructor(
     IPoolAddressesProvider addressesProvider,
@@ -135,8 +137,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       minAmountToReceive
     );
 
-    assetToSwapTo.approve(address(POOL), 0);
-    assetToSwapTo.approve(address(POOL), amountReceived);
+    assetToSwapTo.safeApprove(address(POOL), 0);
+    assetToSwapTo.safeApprove(address(POOL), amountReceived);
     POOL.deposit(address(assetToSwapTo), amountReceived, msg.sender, 0);
   }
 
@@ -189,8 +191,8 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
       minAmountToReceive
     );
 
-    assetToSwapTo.approve(address(POOL), 0);
-    assetToSwapTo.approve(address(POOL), amountReceived);
+    assetToSwapTo.safeApprove(address(POOL), 0);
+    assetToSwapTo.safeApprove(address(POOL), amountReceived);
     POOL.deposit(address(assetToSwapTo), amountReceived, initiator, 0);
 
     _pullATokenAndWithdraw(
@@ -202,7 +204,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     );
 
     // Repay flash loan
-    assetToSwapFrom.approve(address(POOL), 0);
-    assetToSwapFrom.approve(address(POOL), flashLoanAmount.add(premium));
+    assetToSwapFrom.safeApprove(address(POOL), 0);
+    assetToSwapFrom.safeApprove(address(POOL), flashLoanAmount.add(premium));
   }
 }

@@ -2,38 +2,33 @@
 
 ## [2.4.1](https://github.com/aave/aave-v3-periphery/compare/v2.4.0...v2.4.1) (2023-07-06)
 
-
 ### Bug Fixes
 
-* use SafeERC20 safeApprove to work well with non standard ERC20 tokens ([#176](https://github.com/aave/aave-v3-periphery/issues/176)) ([f5d0af9](https://github.com/aave/aave-v3-periphery/commit/f5d0af92d5aadba7ec370d44d3c5312484d5b7a5))
+- use SafeERC20 safeApprove to work well with non standard ERC20 tokens ([#176](https://github.com/aave/aave-v3-periphery/issues/176)) ([f5d0af9](https://github.com/aave/aave-v3-periphery/commit/f5d0af92d5aadba7ec370d44d3c5312484d5b7a5))
 
 ## [2.4.0](https://github.com/aave/aave-v3-periphery/compare/v2.3.0...v2.4.0) (2023-05-26)
 
-
 ### Features
 
-* Add control to block mints in Faucet ([#172](https://github.com/aave/aave-v3-periphery/issues/172)) ([19ce4be](https://github.com/aave/aave-v3-periphery/commit/19ce4be7fc2d4364147be907a171afa0c75826e1))
+- Add control to block mints in Faucet ([#172](https://github.com/aave/aave-v3-periphery/issues/172)) ([19ce4be](https://github.com/aave/aave-v3-periphery/commit/19ce4be7fc2d4364147be907a171afa0c75826e1))
 
 ## [2.3.0](https://github.com/aave/aave-v3-periphery/compare/v2.2.0...v2.3.0) (2023-04-20)
 
-
 ### Features
 
-* deploy ([#169](https://github.com/aave/aave-v3-periphery/issues/169)) ([896e082](https://github.com/aave/aave-v3-periphery/commit/896e08237d64e8aceb68a3772ae531fbb7b96867))
+- deploy ([#169](https://github.com/aave/aave-v3-periphery/issues/169)) ([896e082](https://github.com/aave/aave-v3-periphery/commit/896e08237d64e8aceb68a3772ae531fbb7b96867))
 
 ## [2.2.0](https://github.com/aave/aave-v3-periphery/compare/v2.1.0...v2.2.0) (2023-04-20)
 
-
 ### Features
 
-* remove doc link ([#167](https://github.com/aave/aave-v3-periphery/issues/167)) ([c9dc231](https://github.com/aave/aave-v3-periphery/commit/c9dc2314c5aa5a5b5754a5675378a8844b62be05))
+- remove doc link ([#167](https://github.com/aave/aave-v3-periphery/issues/167)) ([c9dc231](https://github.com/aave/aave-v3-periphery/commit/c9dc2314c5aa5a5b5754a5675378a8844b62be05))
 
 ## [2.1.0](https://github.com/aave/aave-v3-periphery/compare/v2.0.1...v2.1.0) (2023-04-19)
 
-
 ### Features
 
-* Add a mint amount limit and ownership transfer function to Faucet  ([#162](https://github.com/aave/aave-v3-periphery/issues/162)) ([b52f6c4](https://github.com/aave/aave-v3-periphery/commit/b52f6c483373f1c9a1478af9e076a08fda6bf67c))
+- Add a mint amount limit and ownership transfer function to Faucet ([#162](https://github.com/aave/aave-v3-periphery/issues/162)) ([b52f6c4](https://github.com/aave/aave-v3-periphery/commit/b52f6c483373f1c9a1478af9e076a08fda6bf67c))
 
 ## [2.0.1](https://github.com/aave/aave-v3-periphery/compare/v2.0.0...v2.0.1) (2023-03-15)
 

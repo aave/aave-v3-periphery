@@ -183,7 +183,9 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
       const assetDataBefore = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
+          (
+            await getRewardsData(rewardsController, [assets[index]], [reward])
+          )[0]
       );
 
       const action = await rewardsController.claimAllRewards(assets, destinationAddress);
@@ -201,7 +203,9 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
       const assetDataAfter = await Bluebird.map(
         rewards,
         async (reward, index) =>
-          (await getRewardsData(rewardsController, [assets[index]], [reward]))[0]
+          (
+            await getRewardsData(rewardsController, [assets[index]], [reward])
+          )[0]
       );
 
       const unclaimedRewardsStorageAfter = await Bluebird.map(rewards, (reward) =>
@@ -252,7 +256,8 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
               assetDataAfter[i].index,
               assetDataAfter[i].index,
               expectedAccruedRewards[i]
-            );        }
+            );
+        }
 
         let expectedClaimedAmount: BigNumber = unclaimedRewardsStorageBefore[i].add(
           expectedAccruedRewards[i]
@@ -266,7 +271,7 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
           expectedClaimedAmount.toString(),
           'claimed amount are wrong'
         );
-       
+
         if (expectedClaimedAmount.gt(0)) {
           await expect(action)
             .to.emit(rewardsController, 'RewardsClaimed')

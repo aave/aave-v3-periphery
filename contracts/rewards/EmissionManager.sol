@@ -44,20 +44,18 @@ contract EmissionManager is Ownable, IEmissionManager {
   }
 
   /// @inheritdoc IEmissionManager
-  function setTransferStrategy(address reward, ITransferStrategyBase transferStrategy)
-    external
-    override
-    onlyEmissionAdmin(reward)
-  {
+  function setTransferStrategy(
+    address reward,
+    ITransferStrategyBase transferStrategy
+  ) external override onlyEmissionAdmin(reward) {
     _rewardsController.setTransferStrategy(reward, transferStrategy);
   }
 
   /// @inheritdoc IEmissionManager
-  function setRewardOracle(address reward, IEACAggregatorProxy rewardOracle)
-    external
-    override
-    onlyEmissionAdmin(reward)
-  {
+  function setRewardOracle(
+    address reward,
+    IEACAggregatorProxy rewardOracle
+  ) external override onlyEmissionAdmin(reward) {
     _rewardsController.setRewardOracle(reward, rewardOracle);
   }
 

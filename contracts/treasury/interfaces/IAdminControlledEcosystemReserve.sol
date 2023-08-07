@@ -26,11 +26,7 @@ interface IAdminControlledEcosystemReserve {
    * @param recipient Allowance's recipient
    * @param amount Allowance to approve
    **/
-  function approve(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function approve(IERC20 token, address recipient, uint256 amount) external;
 
   /**
    * @notice Function for the funds admin to transfer ERC20 tokens to other parties
@@ -38,9 +34,5 @@ interface IAdminControlledEcosystemReserve {
    * @param recipient Transfer's recipient
    * @param amount Amount to transfer
    **/
-  function transfer(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function transfer(IERC20 token, address recipient, uint256 amount) external;
 }

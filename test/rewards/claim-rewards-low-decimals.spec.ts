@@ -220,9 +220,16 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
       if (!assetDataAfter.index.eq(assetDataBefore.index)) {
         await expect(action)
           .to.emit(rewardsController, 'Accrued')
-          .withArgs(assetDataAfter.underlyingAsset, reward, userAddress, assetDataAfter.index, assetDataAfter.index, expectedAccruedRewards);
+          .withArgs(
+            assetDataAfter.underlyingAsset,
+            reward,
+            userAddress,
+            assetDataAfter.index,
+            assetDataAfter.index,
+            expectedAccruedRewards
+          );
       }
-       
+
       // ------- Distribution Manager tests END -----
 
       let unclaimedRewardsCalc = unclaimedRewardsStorageBefore.add(expectedAccruedRewards);

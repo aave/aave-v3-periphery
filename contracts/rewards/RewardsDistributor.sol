@@ -42,17 +42,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getRewardsData(address asset, address reward)
-    public
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    )
-  {
+  function getRewardsData(
+    address asset,
+    address reward
+  ) public view override returns (uint256, uint256, uint256, uint256) {
     return (
       _assets[asset].rewards[reward].index,
       _assets[asset].rewards[reward].emissionPerSecond,
@@ -62,28 +55,24 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getAssetIndex(address asset, address reward)
-    external
-    view
-    override
-    returns (uint256, uint256)
-  {
+  function getAssetIndex(
+    address asset,
+    address reward
+  ) external view override returns (uint256, uint256) {
     RewardsDataTypes.RewardData storage rewardData = _assets[asset].rewards[reward];
     return
       _getAssetIndex(
         rewardData,
         IScaledBalanceToken(asset).scaledTotalSupply(),
-        10**_assets[asset].decimals
+        10 ** _assets[asset].decimals
       );
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getDistributionEnd(address asset, address reward)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function getDistributionEnd(
+    address asset,
+    address reward
+  ) external view override returns (uint256) {
     return _assets[asset].rewards[reward].distributionEnd;
   }
 
@@ -113,12 +102,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getUserAccruedRewards(address user, address reward)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function getUserAccruedRewards(
+    address user,
+    address reward
+  ) external view override returns (uint256) {
     uint256 totalAccrued;
     for (uint256 i = 0; i < _assetsList.length; i++) {
       totalAccrued += _assets[_assetsList[i]].rewards[reward].usersData[user].accrued;
@@ -137,7 +124,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   }
 
   /// @inheritdoc IRewardsDistributor
-  function getAllUserRewards(address[] calldata assets, address user)
+  function getAllUserRewards(
+    address[] calldata assets,
+    address user
+  )
     external
     view
     override
@@ -207,7 +197,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
         IScaledBalanceToken(asset).scaledTotalSupply(),
-        10**decimals
+        10 ** decimals
       );
 
       uint256 oldEmissionPerSecond = rewardConfig.emissionPerSecond;
@@ -262,7 +252,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
       (uint256 newIndex, ) = _updateRewardData(
         rewardConfig,
         rewardsInput[i].totalSupply,
-        10**decimals
+        10 ** decimals
       );
 
       // Configure emission and distribution end of the reward per asset
@@ -359,7 +349,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     uint256 assetUnit;
     uint256 numAvailableRewards = _assets[asset].availableRewardsCount;
     unchecked {
-      assetUnit = 10**_assets[asset].decimals;
+      assetUnit = 10 ** _assets[asset].decimals;
     }
 
     if (numAvailableRewards == 0) {
@@ -454,7 +444,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     RewardsDataTypes.RewardData storage rewardData = _assets[userAssetBalance.asset].rewards[
       reward
     ];
-    uint256 assetUnit = 10**_assets[userAssetBalance.asset].decimals;
+    uint256 assetUnit = 10 ** _assets[userAssetBalance.asset].decimals;
     (, uint256 nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalSupply, assetUnit);
 
     return
@@ -530,11 +520,10 @@ abstract contract RewardsDistributor is IRewardsDistributor {
    * @param user Address of the user
    * @return userAssetBalances contains a list of structs with user balance and total supply of the given assets
    */
-  function _getUserAssetBalances(address[] calldata assets, address user)
-    internal
-    view
-    virtual
-    returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances);
+  function _getUserAssetBalances(
+    address[] calldata assets,
+    address user
+  ) internal view virtual returns (RewardsDataTypes.UserAssetBalance[] memory userAssetBalances);
 
   /// @inheritdoc IRewardsDistributor
   function getAssetDecimals(address asset) external view returns (uint8) {

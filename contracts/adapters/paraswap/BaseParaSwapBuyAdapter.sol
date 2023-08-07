@@ -21,9 +21,10 @@ abstract contract BaseParaSwapBuyAdapter is BaseParaSwapAdapter {
 
   IParaSwapAugustusRegistry public immutable AUGUSTUS_REGISTRY;
 
-  constructor(IPoolAddressesProvider addressesProvider, IParaSwapAugustusRegistry augustusRegistry)
-    BaseParaSwapAdapter(addressesProvider)
-  {
+  constructor(
+    IPoolAddressesProvider addressesProvider,
+    IParaSwapAugustusRegistry augustusRegistry
+  ) BaseParaSwapAdapter(addressesProvider) {
     // Do something on Augustus registry to check the right contract was passed
     require(!augustusRegistry.isValidAugustus(address(0)), 'Not a valid Augustus address');
     AUGUSTUS_REGISTRY = augustusRegistry;
@@ -62,8 +63,8 @@ abstract contract BaseParaSwapBuyAdapter is BaseParaSwapAdapter {
       uint256 toAssetPrice = _getPrice(address(assetToSwapTo));
 
       uint256 expectedMaxAmountToSwap = amountToReceive
-        .mul(toAssetPrice.mul(10**fromAssetDecimals))
-        .div(fromAssetPrice.mul(10**toAssetDecimals))
+        .mul(toAssetPrice.mul(10 ** fromAssetDecimals))
+        .div(fromAssetPrice.mul(10 ** toAssetDecimals))
         .percentMul(PercentageMath.PERCENTAGE_FACTOR.add(MAX_SLIPPAGE_PERCENT));
 
       require(maxAmountToSwap <= expectedMaxAmountToSwap, 'maxAmountToSwap exceed max slippage');

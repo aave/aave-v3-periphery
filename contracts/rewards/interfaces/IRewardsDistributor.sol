@@ -51,11 +51,7 @@ interface IRewardsDistributor {
    * @param reward The reward token that incentives the asset
    * @param newDistributionEnd The end date of the incentivization, in unix time format
    **/
-  function setDistributionEnd(
-    address asset,
-    address reward,
-    uint32 newDistributionEnd
-  ) external;
+  function setDistributionEnd(address asset, address reward, uint32 newDistributionEnd) external;
 
   /**
    * @dev Sets the emission per second of a set of reward distributions
@@ -99,15 +95,10 @@ interface IRewardsDistributor {
    * @return The timestamp of the last update of the index
    * @return The timestamp of the distribution end
    **/
-  function getRewardsData(address asset, address reward)
-    external
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    );
+  function getRewardsData(
+    address asset,
+    address reward
+  ) external view returns (uint256, uint256, uint256, uint256);
 
   /**
    * @dev Calculates the next value of an specific distribution index, with validations.
@@ -159,10 +150,10 @@ interface IRewardsDistributor {
    * @return The list of reward addresses
    * @return The list of unclaimed amount of rewards
    **/
-  function getAllUserRewards(address[] calldata assets, address user)
-    external
-    view
-    returns (address[] memory, uint256[] memory);
+  function getAllUserRewards(
+    address[] calldata assets,
+    address user
+  ) external view returns (address[] memory, uint256[] memory);
 
   /**
    * @dev Returns the decimals of an asset to calculate the distribution delta

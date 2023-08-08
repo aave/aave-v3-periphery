@@ -49,7 +49,9 @@ abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
     uint256 receivedAmount
   );
 
-  constructor(IPoolAddressesProvider addressesProvider) FlashLoanSimpleReceiverBase(addressesProvider) {
+  constructor(
+    IPoolAddressesProvider addressesProvider
+  ) FlashLoanSimpleReceiverBase(addressesProvider) {
     ORACLE = IPriceOracleGetter(addressesProvider.getPriceOracle());
   }
 

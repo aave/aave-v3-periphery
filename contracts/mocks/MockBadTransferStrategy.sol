@@ -17,9 +17,10 @@ contract MockBadTransferStrategy is TransferStrategyBase {
   // Added storage variable to prevent warnings at compilation for performTransfer
   uint256 ignoreWarning;
 
-  constructor(address incentivesController, address rewardsAdmin)
-    TransferStrategyBase(incentivesController, rewardsAdmin)
-  {}
+  constructor(
+    address incentivesController,
+    address rewardsAdmin
+  ) TransferStrategyBase(incentivesController, rewardsAdmin) {}
 
   /// @inheritdoc TransferStrategyBase
   function performTransfer(

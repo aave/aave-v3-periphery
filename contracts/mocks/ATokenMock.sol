@@ -31,11 +31,7 @@ contract ATokenMock {
     _decimals = decimals;
   }
 
-  function handleActionOnAic(
-    address user,
-    uint256 totalSupply,
-    uint256 userBalance
-  ) external {
+  function handleActionOnAic(address user, uint256 totalSupply, uint256 userBalance) external {
     _aic.handleAction(user, totalSupply, userBalance);
   }
 

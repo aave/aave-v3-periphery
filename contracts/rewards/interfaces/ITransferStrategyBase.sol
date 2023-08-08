@@ -16,11 +16,7 @@ interface ITransferStrategyBase {
    * @param amount Amount to transfer to the "to" address parameter
    * @return Returns true bool if transfer logic succeeds
    */
-  function performTransfer(
-    address to,
-    address reward,
-    uint256 amount
-  ) external returns (bool);
+  function performTransfer(address to, address reward, uint256 amount) external returns (bool);
 
   /**
    * @return Returns the address of the Incentives Controller
@@ -38,9 +34,5 @@ interface ITransferStrategyBase {
    * @param to Address of the recipient of the withdrawal
    * @param amount Amount of the withdrawal
    */
-  function emergencyWithdrawal(
-    address token,
-    address to,
-    uint256 amount
-  ) external;
+  function emergencyWithdrawal(address token, address to, uint256 amount) external;
 }

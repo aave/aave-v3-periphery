@@ -36,22 +36,16 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     marketReferenceCurrencyPriceInUsdProxyAggregator = _marketReferenceCurrencyPriceInUsdProxyAggregator;
   }
 
-  function getReservesList(IPoolAddressesProvider provider)
-    public
-    view
-    override
-    returns (address[] memory)
-  {
+  function getReservesList(
+    IPoolAddressesProvider provider
+  ) public view override returns (address[] memory) {
     IPool pool = IPool(provider.getPool());
     return pool.getReservesList();
   }
 
-  function getReservesData(IPoolAddressesProvider provider)
-    public
-    view
-    override
-    returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory)
-  {
+  function getReservesData(
+    IPoolAddressesProvider provider
+  ) public view override returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory) {
     IAaveOracle oracle = IAaveOracle(provider.getPriceOracle());
     IPool pool = IPool(provider.getPool());
     AaveProtocolDataProvider poolDataProvider = AaveProtocolDataProvider(
@@ -216,9 +210,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     try oracle.BASE_CURRENCY_UNIT() returns (uint256 baseCurrencyUnit) {
       baseCurrencyInfo.marketReferenceCurrencyUnit = baseCurrencyUnit;
       baseCurrencyInfo.marketReferenceCurrencyPriceInUsd = int256(baseCurrencyUnit);
-    } catch (
-      bytes memory /*lowLevelData*/
-    ) {
+    } catch (bytes memory /*lowLevelData*/) {
       baseCurrencyInfo.marketReferenceCurrencyUnit = ETH_CURRENCY_UNIT;
       baseCurrencyInfo
         .marketReferenceCurrencyPriceInUsd = marketReferenceCurrencyPriceInUsdProxyAggregator
@@ -228,12 +220,10 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
     return (reservesData, baseCurrencyInfo);
   }
 
-  function getUserReservesData(IPoolAddressesProvider provider, address user)
-    external
-    view
-    override
-    returns (UserReserveData[] memory, uint8)
-  {
+  function getUserReservesData(
+    IPoolAddressesProvider provider,
+    address user
+  ) external view override returns (UserReserveData[] memory, uint8) {
     IPool pool = IPool(provider.getPool());
     address[] memory reserves = pool.getReservesList();
     DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);

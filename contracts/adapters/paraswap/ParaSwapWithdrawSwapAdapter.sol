@@ -34,7 +34,7 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
   }
 
   /**
-   * @dev Swaps an amount of an asset to another and deposits the new asset amount on behalf of the user without using a flash loan.
+   * @dev Swaps an amount of an asset to another and transfers the new asset to the user.
    * This method can be used when the temporary transfer of the collateral asset to this contract does not affect the user position.
    * The user should give this contract allowance to pull the ATokens in order to withdraw the underlying asset and perform the swap.
    * @param assetToSwapFrom Address of the underlying asset to be swapped from
@@ -46,7 +46,7 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
    * @param augustus Address of ParaSwap's AugustusSwapper contract
    * @param permitParams Struct containing the permit signatures, set to all zeroes if not used
    */
-  function swapAndDeposit(
+  function withdrawAndSwap(
     IERC20Detailed assetToSwapFrom,
     IERC20Detailed assetToSwapTo,
     uint256 amountToSwap,

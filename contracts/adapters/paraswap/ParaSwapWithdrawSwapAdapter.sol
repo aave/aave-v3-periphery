@@ -84,6 +84,6 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
       minAmountToReceive
     );
 
-    assetToSwapTo.safeTransferFrom(address(this), msg.sender, amountReceived);
+    assetToSwapTo.safeTransfer(msg.sender, amountReceived);
   }
 }

@@ -34,8 +34,7 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
   }
 
   /**
-   * @dev Swaps an amount of an asset to another and transfers the new asset to the user.
-   * This method can be used when the temporary transfer of the collateral asset to this contract does not affect the user position.
+   * @dev Swaps an amount of an asset to another after a withdraw and transfers the new asset to the user.
    * The user should give this contract allowance to pull the ATokens in order to withdraw the underlying asset and perform the swap.
    * @param assetToSwapFrom Address of the underlying asset to be swapped from
    * @param assetToSwapTo Address of the underlying asset to be swapped to

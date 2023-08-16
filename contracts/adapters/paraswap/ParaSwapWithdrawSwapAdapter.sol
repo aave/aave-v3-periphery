@@ -7,12 +7,10 @@ import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAd
 import {BaseParaSwapSellAdapter} from './BaseParaSwapSellAdapter.sol';
 import {IParaSwapAugustusRegistry} from './interfaces/IParaSwapAugustusRegistry.sol';
 import {SafeERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {SafeMath} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IParaSwapAugustus} from './interfaces/IParaSwapAugustus.sol';
 import {ReentrancyGuard} from '../../dependencies/openzeppelin/ReentrancyGuard.sol';
 
 contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard {
-  using SafeMath for uint256;
   using SafeERC20 for IERC20Detailed;
 
   constructor(
@@ -24,11 +22,11 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
   }
 
   function executeOperation(
-    address asset,
-    uint256 amount,
-    uint256 premium,
-    address initiator,
-    bytes calldata params
+    address,
+    uint256,
+    uint256,
+    address,
+    bytes calldata
   ) external override nonReentrant returns (bool) {
     revert('NOT_SUPPORTED');
   }

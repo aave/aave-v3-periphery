@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/aave/aave-v3-periphery/compare/v2.4.1...v2.5.0) (2023-08-22)
+
+
+### Features
+
+* Add withdraw and swap paraswap adapter ([#180](https://github.com/aave/aave-v3-periphery/issues/180)) ([b7ead26](https://github.com/aave/aave-v3-periphery/commit/b7ead26505ad699a5da31aa1abd20b47b5f27d6a))
+
 ## [2.4.1](https://github.com/aave/aave-v3-periphery/compare/v2.4.0...v2.4.1) (2023-07-06)
 
 

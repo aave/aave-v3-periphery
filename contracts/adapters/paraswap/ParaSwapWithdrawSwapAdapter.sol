@@ -21,16 +21,6 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
     transferOwnership(owner);
   }
 
-  function executeOperation(
-    address,
-    uint256,
-    uint256,
-    address,
-    bytes calldata
-  ) external nonReentrant returns (bool) {
-    revert('NOT_SUPPORTED');
-  }
-
   /**
    * @dev Swaps an amount of an asset to another after a withdraw and transfers the new asset to the user.
    * The user should give this contract allowance to pull the ATokens in order to withdraw the underlying asset and perform the swap.

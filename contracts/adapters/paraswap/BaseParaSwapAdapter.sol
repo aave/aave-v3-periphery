@@ -2,7 +2,8 @@
 pragma solidity ^0.8.10;
 
 import {DataTypes} from '@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol';
-import {FlashLoanSimpleReceiverBase} from '@aave/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol';
+import {IFlashLoanSimpleReceiver} from '@aave/core-v3/contracts/flashloan/interfaces/IFlashLoanSimpleReceiver.sol';
+import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {GPv2SafeERC20} from '@aave/core-v3/contracts/dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20Detailed.sol';
@@ -17,7 +18,7 @@ import {Ownable} from '@aave/core-v3/contracts/dependencies/openzeppelin/contrac
  * @notice Utility functions for adapters using ParaSwap
  * @author Jason Raymond Bell
  */
-abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
+abstract contract BaseParaSwapAdapter is IFlashLoanSimpleReceiver, Ownable {
   using SafeMath for uint256;
   using GPv2SafeERC20 for IERC20;
   using GPv2SafeERC20 for IERC20Detailed;
@@ -35,6 +36,8 @@ abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
   uint256 public constant MAX_SLIPPAGE_PERCENT = 3000; // 30%
 
   IPriceOracleGetter public immutable ORACLE;
+  IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
+  IPool public immutable override POOL;
 
   event Swapped(
     address indexed fromAsset,
@@ -49,10 +52,10 @@ abstract contract BaseParaSwapAdapter is FlashLoanSimpleReceiverBase, Ownable {
     uint256 receivedAmount
   );
 
-  constructor(
-    IPoolAddressesProvider addressesProvider
-  ) FlashLoanSimpleReceiverBase(addressesProvider) {
+  constructor(IPoolAddressesProvider addressesProvider) {
     ORACLE = IPriceOracleGetter(addressesProvider.getPriceOracle());
+    ADDRESSES_PROVIDER = addressesProvider;
+    POOL = IPool(addressesProvider.getPool());
   }
 
   /**

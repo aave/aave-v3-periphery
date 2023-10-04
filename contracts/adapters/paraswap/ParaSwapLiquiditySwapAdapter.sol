@@ -51,7 +51,7 @@ contract ParaSwapLiquiditySwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuar
     uint256 premium,
     address initiator,
     bytes calldata params
-  ) external override nonReentrant returns (bool) {
+  ) external nonReentrant returns (bool) {
     require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
     uint256 flashLoanAmount = amount;

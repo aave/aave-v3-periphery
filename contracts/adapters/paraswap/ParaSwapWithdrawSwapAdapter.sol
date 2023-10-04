@@ -27,7 +27,7 @@ contract ParaSwapWithdrawSwapAdapter is BaseParaSwapSellAdapter, ReentrancyGuard
     uint256,
     address,
     bytes calldata
-  ) external override nonReentrant returns (bool) {
+  ) external nonReentrant returns (bool) {
     revert('NOT_SUPPORTED');
   }
 

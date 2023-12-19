@@ -1,6 +1,6 @@
 {
   "name": "@aave/periphery-v3",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
@@ -65,8 +65,8 @@
     "hardhat-gas-reporter": "^1.0.4",
     "husky": "^6.0.0",
     "lowdb": "1.0.0",
-    "prettier": "2.7.1",
-    "prettier-plugin-solidity": "1.0.0-dev.23",
+    "prettier": "2.8.4",
+    "prettier-plugin-solidity": "1.1.3",
     "pretty-quick": "^3.1.0",
     "solidity-coverage": "^0.7.17",
     "tmp-promise": "^3.0.2",

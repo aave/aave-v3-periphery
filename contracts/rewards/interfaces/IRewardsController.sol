@@ -116,11 +116,7 @@ interface IRewardsController is IRewardsDistributor {
    * @param totalSupply The total supply of the asset prior to user balance change
    * @param userBalance The previous user balance prior to balance change
    **/
-  function handleAction(
-    address user,
-    uint256 totalSupply,
-    uint256 userBalance
-  ) external;
+  function handleAction(address user, uint256 totalSupply, uint256 userBalance) external;
 
   /**
    * @dev Claims reward for a user to the desired address, on all the assets of the pool, accumulating the pending rewards
@@ -175,9 +171,10 @@ interface IRewardsController is IRewardsDistributor {
    * @return rewardsList List of addresses of the reward tokens
    * @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardList"
    **/
-  function claimAllRewards(address[] calldata assets, address to)
-    external
-    returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
+  function claimAllRewards(
+    address[] calldata assets,
+    address to
+  ) external returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
 
   /**
    * @dev Claims all rewards for a user on behalf, on all the assets of the pool, accumulating the pending rewards. The caller must
@@ -200,7 +197,7 @@ interface IRewardsController is IRewardsDistributor {
    * @return rewardsList List of addresses of the reward tokens
    * @return claimedAmounts List that contains the claimed amount per reward, following same order as "rewardsList"
    **/
-  function claimAllRewardsToSelf(address[] calldata assets)
-    external
-    returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
+  function claimAllRewardsToSelf(
+    address[] calldata assets
+  ) external returns (address[] memory rewardsList, uint256[] memory claimedAmounts);
 }

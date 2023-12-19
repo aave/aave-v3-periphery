@@ -11,12 +11,7 @@ interface IAaveEcosystemReserveController {
    * @param recipient Allowance's recipient
    * @param amount Allowance to approve
    **/
-  function approve(
-    address collector,
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function approve(address collector, IERC20 token, address recipient, uint256 amount) external;
 
   /**
    * @notice Proxy function for ERC20's transfer(), pointing to a specific collector contract
@@ -25,12 +20,7 @@ interface IAaveEcosystemReserveController {
    * @param recipient Transfer's recipient
    * @param amount Amount to transfer
    **/
-  function transfer(
-    address collector,
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function transfer(address collector, IERC20 token, address recipient, uint256 amount) external;
 
   /**
    * @notice Proxy function to create a stream of token on a specific collector contract

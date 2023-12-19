@@ -14,7 +14,10 @@ import {IUiIncentiveDataProviderV3} from './interfaces/IUiIncentiveDataProviderV
 contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  function getFullReservesIncentiveData(IPoolAddressesProvider provider, address user)
+  function getFullReservesIncentiveData(
+    IPoolAddressesProvider provider,
+    address user
+  )
     external
     view
     override
@@ -23,20 +26,15 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
     return (_getReservesIncentivesData(provider), _getUserReservesIncentivesData(provider, user));
   }
 
-  function getReservesIncentivesData(IPoolAddressesProvider provider)
-    external
-    view
-    override
-    returns (AggregatedReserveIncentiveData[] memory)
-  {
+  function getReservesIncentivesData(
+    IPoolAddressesProvider provider
+  ) external view override returns (AggregatedReserveIncentiveData[] memory) {
     return _getReservesIncentivesData(provider);
   }
 
-  function _getReservesIncentivesData(IPoolAddressesProvider provider)
-    private
-    view
-    returns (AggregatedReserveIncentiveData[] memory)
-  {
+  function _getReservesIncentivesData(
+    IPoolAddressesProvider provider
+  ) private view returns (AggregatedReserveIncentiveData[] memory) {
     IPool pool = IPool(provider.getPool());
     address[] memory reserves = pool.getReservesList();
     AggregatedReserveIncentiveData[]
@@ -216,20 +214,17 @@ contract UiIncentiveDataProviderV3 is IUiIncentiveDataProviderV3 {
     return (reservesIncentiveData);
   }
 
-  function getUserReservesIncentivesData(IPoolAddressesProvider provider, address user)
-    external
-    view
-    override
-    returns (UserReserveIncentiveData[] memory)
-  {
+  function getUserReservesIncentivesData(
+    IPoolAddressesProvider provider,
+    address user
+  ) external view override returns (UserReserveIncentiveData[] memory) {
     return _getUserReservesIncentivesData(provider, user);
   }
 
-  function _getUserReservesIncentivesData(IPoolAddressesProvider provider, address user)
-    private
-    view
-    returns (UserReserveIncentiveData[] memory)
-  {
+  function _getUserReservesIncentivesData(
+    IPoolAddressesProvider provider,
+    address user
+  ) private view returns (UserReserveIncentiveData[] memory) {
     IPool pool = IPool(provider.getPool());
     address[] memory reserves = pool.getReservesList();
 

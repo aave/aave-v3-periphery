@@ -93,18 +93,16 @@ interface IUiPoolDataProviderV3 {
     uint8 networkBaseTokenPriceDecimals;
   }
 
-  function getReservesList(IPoolAddressesProvider provider)
-    external
-    view
-    returns (address[] memory);
+  function getReservesList(
+    IPoolAddressesProvider provider
+  ) external view returns (address[] memory);
 
-  function getReservesData(IPoolAddressesProvider provider)
-    external
-    view
-    returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory);
+  function getReservesData(
+    IPoolAddressesProvider provider
+  ) external view returns (AggregatedReserveData[] memory, BaseCurrencyInfo memory);
 
-  function getUserReservesData(IPoolAddressesProvider provider, address user)
-    external
-    view
-    returns (UserReserveData[] memory, uint8);
+  function getUserReservesData(
+    IPoolAddressesProvider provider,
+    address user
+  ) external view returns (UserReserveData[] memory, uint8);
 }

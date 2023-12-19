@@ -55,18 +55,20 @@ interface IUiIncentiveDataProviderV3 {
     uint8 rewardTokenDecimals;
   }
 
-  function getReservesIncentivesData(IPoolAddressesProvider provider)
-    external
-    view
-    returns (AggregatedReserveIncentiveData[] memory);
+  function getReservesIncentivesData(
+    IPoolAddressesProvider provider
+  ) external view returns (AggregatedReserveIncentiveData[] memory);
 
-  function getUserReservesIncentivesData(IPoolAddressesProvider provider, address user)
-    external
-    view
-    returns (UserReserveIncentiveData[] memory);
+  function getUserReservesIncentivesData(
+    IPoolAddressesProvider provider,
+    address user
+  ) external view returns (UserReserveIncentiveData[] memory);
 
   // generic method with full data
-  function getFullReservesIncentiveData(IPoolAddressesProvider provider, address user)
+  function getFullReservesIncentiveData(
+    IPoolAddressesProvider provider,
+    address user
+  )
     external
     view
     returns (AggregatedReserveIncentiveData[] memory, UserReserveIncentiveData[] memory);

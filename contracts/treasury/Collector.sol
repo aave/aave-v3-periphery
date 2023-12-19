@@ -46,20 +46,12 @@ contract Collector is VersionedInitializable, ICollector {
   }
 
   /// @inheritdoc ICollector
-  function approve(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external onlyFundsAdmin {
+  function approve(IERC20 token, address recipient, uint256 amount) external onlyFundsAdmin {
     token.approve(recipient, amount);
   }
 
   /// @inheritdoc ICollector
-  function transfer(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external onlyFundsAdmin {
+  function transfer(IERC20 token, address recipient, uint256 amount) external onlyFundsAdmin {
     token.transfer(recipient, amount);
   }
 

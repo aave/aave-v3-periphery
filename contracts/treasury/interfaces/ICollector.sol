@@ -33,11 +33,7 @@ interface ICollector {
    * @param recipient The address of the entity allowed to pull tokens
    * @param amount The amount allowed to be pulled. If zero it will revoke the approval.
    */
-  function approve(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function approve(IERC20 token, address recipient, uint256 amount) external;
 
   /**
    * @dev Transfer an amount of tokens to the recipient.
@@ -45,11 +41,7 @@ interface ICollector {
    * @param recipient The address of the entity to transfer the tokens.
    * @param amount The amount to be transferred.
    */
-  function transfer(
-    IERC20 token,
-    address recipient,
-    uint256 amount
-  ) external;
+  function transfer(IERC20 token, address recipient, uint256 amount) external;
 
   /**
    * @dev Transfer the ownership of the funds administrator role.

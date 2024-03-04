@@ -6,7 +6,7 @@ interface IFaucet {
    * @notice Returns the maximum amount of tokens per mint allowed
    * @return The maximum amount of tokens per mint allowed
    */
-  function MAX_MINT_AMOUNT() external pure returns (uint256);
+  function MAX_MINT_AMOUNT() external view returns (uint256);
 
   /**
    * @notice Function to mint Testnet tokens to the destination address

@@ -18,7 +18,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     const { deployer } = await hre.getNamedAccounts();
     const factory = await hre.ethers.getContractFactory('Faucet');
 
-    faucetOwnable = await factory.deploy(deployer, false);
+    faucetOwnable = await factory.deploy(deployer, false, 10000); // 10k whole tokens
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });

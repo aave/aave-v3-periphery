@@ -11,7 +11,7 @@ import {IFaucet} from './IFaucet.sol';
  */
 contract Faucet is IFaucet, Ownable {
   /// @inheritdoc IFaucet
-  uint256 public constant MAX_MINT_AMOUNT = 10000;
+  uint256 public immutable MAX_MINT_AMOUNT;
 
   // Mapping to control mint of assets (allowed by default)
   mapping(address => bool) internal _nonMintable;
@@ -20,10 +20,11 @@ contract Faucet is IFaucet, Ownable {
   // If disabled, anyone can call mint at the faucet, for PoC environments
   bool internal _permissioned;
 
-  constructor(address owner, bool permissioned) {
+  constructor(address owner, bool permissioned, uint256 maxMinAmount) {
     require(owner != address(0));
     transferOwnership(owner);
     _permissioned = permissioned;
+    MAX_MINT_AMOUNT = maxMinAmount;
   }
 
   /**

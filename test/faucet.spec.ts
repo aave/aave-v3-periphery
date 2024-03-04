@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
-import { ONE_ADDRESS, evmRevert, evmSnapshot, waitForTx } from '@aave/deploy-v3';
+import { ONE_ADDRESS, waitForTx } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { TestnetERC20__factory } from '../types';
 
@@ -53,7 +53,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
         deployer,
       } = testEnv;
 
-      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const threshold = await faucetOwnable.connect(deployer.signer).getMaximumMintAmount();
       const thresholdValue = threshold.toNumber();
       const withinLimitThreshold = parseEther(thresholdValue.toString());
 
@@ -70,13 +70,33 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
         deployer,
       } = testEnv;
 
-      const threshold = await faucetOwnable.connect(deployer.signer).MAX_MINT_AMOUNT();
+      const threshold = await faucetOwnable.connect(deployer.signer).getMaximumMintAmount();
       const thresholdValue = threshold.toNumber();
       const maxLimitThreshold = parseEther((thresholdValue + 1).toString());
 
       await expect(
         faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, maxLimitThreshold)
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
+    });
+
+    it('setMaximumMintAmount updates maximum mint amount', async () => {
+      const {
+        deployer,
+        dai,
+        users: [, , user],
+      } = testEnv;
+
+      const oldLimit = await faucetOwnable.getMaximumMintAmount();
+
+      const newLimit = 100;
+      await expect(await faucetOwnable.connect(user.signer).setMaximumMintAmount(newLimit));
+      await expect(await faucetOwnable.getMaximumMintAmount()).eq(newLimit);
+      await expect(
+        faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, newLimit + 1)
+      ).to.be.revertedWith('Error: Mint limit transaction exceeded');
+
+      await expect(await faucetOwnable.connect(user.signer).setMaximumMintAmount(oldLimit));
+      await expect(await faucetOwnable.getMaximumMintAmount()).eq(oldLimit);
     });
 
     it('Non-owner tries to deactivate minting (revert expected)', async () => {
@@ -155,6 +175,16 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Getter isPermissioned should return true', async () => {
       await expect(await faucetOwnable.isPermissioned()).is.equal(true);
     });
+  });
+
+  it('Function setMaximumMintAmount should revert if caller not owner', async () => {
+    const {
+      users: [, , user],
+    } = testEnv;
+
+    await expect(faucetOwnable.connect(user.signer).setMaximumMintAmount(123)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
   });
 
   it('Function setPermissioned should revert if caller not owner', async () => {

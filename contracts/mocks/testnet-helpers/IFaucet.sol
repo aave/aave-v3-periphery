@@ -3,12 +3,6 @@ pragma solidity ^0.8.0;
 
 interface IFaucet {
   /**
-   * @notice Returns the maximum amount of tokens per mint allowed
-   * @return The maximum amount of tokens per mint allowed
-   */
-  function MAX_MINT_AMOUNT() external view returns (uint256);
-
-  /**
    * @notice Function to mint Testnet tokens to the destination address
    * @param token The address of the token to perform the mint
    * @param to The address to send the minted tokens
@@ -49,4 +43,16 @@ interface IFaucet {
    * @param newOwner The address of the new owner
    */
   function transferOwnershipOfChild(address[] calldata childContracts, address newOwner) external;
+
+  /**
+   * @notice Updates the maximum amount of tokens per mint allowed
+   * @param newMaxMintAmount The new value of maximum amount of tokens per mint (whole tokens)
+   */
+  function setMaximumMintAmount(uint256 newMaxMintAmount) external;
+
+  /**
+   * @notice Returns the maximum amount of tokens per mint allowed
+   * @return The maximum amount of tokens per mint allowed (whole tokens)
+   */
+  function getMaximumMintAmount() external view returns (uint256);
 }

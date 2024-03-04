@@ -81,21 +81,20 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
     it('setMaximumMintAmount updates maximum mint amount', async () => {
       const {
-        deployer,
         dai,
         users: [, , user],
       } = testEnv;
 
       const oldLimit = await faucetOwnable.getMaximumMintAmount();
 
-      const newLimit = 100;
-      await expect(await faucetOwnable.connect(user.signer).setMaximumMintAmount(newLimit));
+      const newLimit: number = 100;
+      await expect(await faucetOwnable.setMaximumMintAmount(newLimit));
       await expect(await faucetOwnable.getMaximumMintAmount()).eq(newLimit);
       await expect(
-        faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, newLimit + 1)
+        faucetOwnable.mint(dai.address, user.address, parseEther((newLimit + 1).toString()))
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
 
-      await expect(await faucetOwnable.connect(user.signer).setMaximumMintAmount(oldLimit));
+      await expect(await faucetOwnable.setMaximumMintAmount(oldLimit));
       await expect(await faucetOwnable.getMaximumMintAmount()).eq(oldLimit);
     });
 

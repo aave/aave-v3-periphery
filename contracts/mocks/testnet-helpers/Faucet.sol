@@ -10,8 +10,7 @@ import {IFaucet} from './IFaucet.sol';
  * @dev Ownable Faucet Contract
  */
 contract Faucet is IFaucet, Ownable {
-  /// @inheritdoc IFaucet
-  uint256 public constant MAX_MINT_AMOUNT = 10000;
+  uint256 internal maximumMintAmount;
 
   // Mapping to control mint of assets (allowed by default)
   mapping(address => bool) internal _nonMintable;
@@ -20,10 +19,11 @@ contract Faucet is IFaucet, Ownable {
   // If disabled, anyone can call mint at the faucet, for PoC environments
   bool internal _permissioned;
 
-  constructor(address owner, bool permissioned) {
+  constructor(address owner, bool permissioned, uint256 maxMinAmount) {
     require(owner != address(0));
     transferOwnership(owner);
     _permissioned = permissioned;
+    maximumMintAmount = maxMinAmount;
   }
 
   /**
@@ -44,7 +44,7 @@ contract Faucet is IFaucet, Ownable {
   ) external override onlyOwnerIfPermissioned returns (uint256) {
     require(!_nonMintable[token], 'Error: not mintable');
     require(
-      amount <= MAX_MINT_AMOUNT * (10 ** TestnetERC20(token).decimals()),
+      amount <= maximumMintAmount * (10 ** TestnetERC20(token).decimals()),
       'Error: Mint limit transaction exceeded'
     );
 
@@ -80,5 +80,15 @@ contract Faucet is IFaucet, Ownable {
     for (uint256 i = 0; i < childContracts.length; i++) {
       Ownable(childContracts[i]).transferOwnership(newOwner);
     }
+  }
+
+  /// @inheritdoc IFaucet
+  function setMaximumMintAmount(uint256 newMaxMintAmount) external override onlyOwner {
+    maximumMintAmount = newMaxMintAmount;
+  }
+
+  /// @inheritdoc IFaucet
+  function getMaximumMintAmount() external view override returns (uint256) {
+    return maximumMintAmount;
   }
 }

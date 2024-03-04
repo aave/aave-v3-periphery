@@ -3,7 +3,7 @@ import { PullRewardsTransferStrategy } from './../../types/PullRewardsTransferSt
 import { ATokenMock } from './../../types/ATokenMock.d';
 import { RewardsController } from './../../types/RewardsController';
 import hre from 'hardhat';
-import { Signer } from 'ethers';
+import { BigNumber, Signer } from 'ethers';
 import bluebird from 'bluebird';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
@@ -45,16 +45,16 @@ import {
   getStakedRewardsStrategy,
   getStakeAave,
   waitForTx,
-  MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
-  deployMintableERC20,
   StakedTokenV2Rev3,
   impersonateAddress,
   getEmissionManager,
+  getFaucet,
+  MAX_UINT_AMOUNT,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
-import { EmissionManager, EmissionManager__factory } from '../../types';
+import { EmissionManager, Faucet } from '../../types';
 
 chai.use(bignumberChai());
 
@@ -76,6 +76,7 @@ export interface TestEnv {
   weth: WETH9Mocked;
   aWETH: AToken;
   dai: MintableERC20;
+  faucetMintable: Faucet;
   aDai: AToken;
   variableDebtDai: VariableDebtToken;
   stableDebtDai: StableDebtToken;
@@ -126,6 +127,7 @@ const testEnv: TestEnv = {
   variableDebtDai: {} as VariableDebtToken,
   stableDebtDai: {} as StableDebtToken,
   aUsdc: {} as AToken,
+  faucetMintable: {} as Faucet,
   usdc: {} as MintableERC20,
   aave: {} as MintableERC20,
   addressesProvider: {} as PoolAddressesProvider,
@@ -211,6 +213,7 @@ export async function initializeMakeSuite() {
     process.exit(1);
   }
 
+  testEnv.faucetMintable = await getFaucet();
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.variableDebtDai = await getVariableDebtToken(variableDebtDaiAddress);
   testEnv.stableDebtDai = await getStableDebtToken(stableDebtDaiAddress);
@@ -278,21 +281,23 @@ export async function initializeMakeSuite() {
         await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)
       ).address
   );
-  await waitForTx(
-    await testEnv.aaveToken
-      .connect(rewardsVault.signer)
-      ['mint(address,uint256)'](rewardsVault.address, parseEther('60000000000'))
-  );
-  await waitForTx(
-    await testEnv.rewardToken
-      .connect(rewardsVault.signer)
-      ['mint(address,uint256)'](rewardsVault.address, parseEther('200000000'))
-  );
 
-  await waitForTx(
-    await testEnv.aaveToken
-      .connect(rewardsVault.signer)
-      .transfer(testEnv.stakedTokenStrategy.address, parseEther('30000000000'))
+  // Increase maximum amount for mints on Faucet for tests
+  await testEnv.faucetMintable.setMaximumMintAmount(BigNumber.from(10).pow(40)); // 1e40
+  await testEnv.faucetMintable.mint(
+    testEnv.aave.address,
+    rewardsVault.address,
+    parseEther('60000000000')
+  );
+  await testEnv.faucetMintable.mint(
+    testEnv.rewardToken.address,
+    rewardsVault.address,
+    parseEther('200000000')
+  );
+  await testEnv.faucetMintable.mint(
+    testEnv.aave.address,
+    testEnv.stakedTokenStrategy.address,
+    parseEther('30000000000')
   );
 }
 

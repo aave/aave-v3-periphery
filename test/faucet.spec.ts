@@ -11,6 +11,7 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
   const mintAmount = parseEther('100');
 
   let faucetOwnable;
+  let tokenMintable;
 
   before(async () => {
     // Enforce permissioned mode as disabled for deterministic test suite
@@ -19,6 +20,9 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     const factory = await hre.ethers.getContractFactory('Faucet');
 
     faucetOwnable = await factory.deploy(deployer, false, 10000); // 10k whole tokens
+
+    const mintableFactory = await hre.ethers.getContractFactory('TestnetERC20');
+    tokenMintable = await mintableFactory.deploy('MintableToken', 'TOK', 18, faucetOwnable.address);
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
@@ -32,14 +36,15 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Mint can be called by anyone', async () => {
       const {
         users: [user],
-        dai,
       } = testEnv;
 
       await waitForTx(
-        await faucetOwnable.connect(user.signer).mint(dai.address, user.address, mintAmount)
+        await faucetOwnable
+          .connect(user.signer)
+          .mint(tokenMintable.address, user.address, mintAmount)
       );
 
-      await expect(await dai.balanceOf(user.address)).eq(mintAmount);
+      await expect(await tokenMintable.balanceOf(user.address)).eq(mintAmount);
     });
 
     it('Getter isPermissioned should return false', async () => {
@@ -49,7 +54,6 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Mint function should mint tokens within limit', async () => {
       const {
         users: [, , , user],
-        dai,
         deployer,
       } = testEnv;
 
@@ -59,14 +63,13 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
 
       await faucetOwnable
         .connect(deployer.signer)
-        .mint(dai.address, user.address, withinLimitThreshold);
-      await expect(await dai.balanceOf(user.address)).eq(withinLimitThreshold);
+        .mint(tokenMintable.address, user.address, withinLimitThreshold);
+      await expect(await tokenMintable.balanceOf(user.address)).eq(withinLimitThreshold);
     });
 
     it('Mint function should revert with values over the limit', async () => {
       const {
         users: [, , , user],
-        dai,
         deployer,
       } = testEnv;
 
@@ -75,13 +78,14 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       const maxLimitThreshold = parseEther((thresholdValue + 1).toString());
 
       await expect(
-        faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, maxLimitThreshold)
+        faucetOwnable
+          .connect(deployer.signer)
+          .mint(tokenMintable.address, user.address, maxLimitThreshold)
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
     });
 
     it('setMaximumMintAmount updates maximum mint amount', async () => {
       const {
-        dai,
         users: [, , user],
       } = testEnv;
 
@@ -91,7 +95,11 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       await expect(await faucetOwnable.setMaximumMintAmount(newLimit));
       await expect(await faucetOwnable.getMaximumMintAmount()).eq(newLimit);
       await expect(
-        faucetOwnable.mint(dai.address, user.address, parseEther((newLimit + 1).toString()))
+        faucetOwnable.mint(
+          tokenMintable.address,
+          user.address,
+          parseEther((newLimit + 1).toString())
+        )
       ).to.be.revertedWith('Error: Mint limit transaction exceeded');
 
       await expect(await faucetOwnable.setMaximumMintAmount(oldLimit));
@@ -101,11 +109,10 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Non-owner tries to deactivate minting (revert expected)', async () => {
       const {
         users: [, , user],
-        dai,
       } = testEnv;
 
       await expect(
-        faucetOwnable.connect(user.signer).setMintable(dai.address, false)
+        faucetOwnable.connect(user.signer).setMintable(tokenMintable.address, false)
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
@@ -113,24 +120,27 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       const {
         deployer,
         users: [user],
-        dai,
       } = testEnv;
 
-      expect(await faucetOwnable.isMintable(dai.address)).to.be.true;
-      await waitForTx(await faucetOwnable.connect(deployer.signer).setMintable(dai.address, false));
-      expect(await faucetOwnable.isMintable(dai.address)).to.be.false;
+      expect(await faucetOwnable.isMintable(tokenMintable.address)).to.be.true;
+      await waitForTx(
+        await faucetOwnable.connect(deployer.signer).setMintable(tokenMintable.address, false)
+      );
+      expect(await faucetOwnable.isMintable(tokenMintable.address)).to.be.false;
 
       await expect(
-        faucetOwnable.connect(user.signer).mint(dai.address, user.address, 1)
+        faucetOwnable.connect(user.signer).mint(tokenMintable.address, user.address, 1)
       ).to.be.revertedWith('Error: not mintable');
 
-      expect(await faucetOwnable.isMintable(dai.address)).to.be.false;
-      await waitForTx(await faucetOwnable.connect(deployer.signer).setMintable(dai.address, true));
-      expect(await faucetOwnable.isMintable(dai.address)).to.be.true;
+      expect(await faucetOwnable.isMintable(tokenMintable.address)).to.be.false;
+      await waitForTx(
+        await faucetOwnable.connect(deployer.signer).setMintable(tokenMintable.address, true)
+      );
+      expect(await faucetOwnable.isMintable(tokenMintable.address)).to.be.true;
 
-      const balanceBefore = await dai.balanceOf(user.address);
-      expect(await faucetOwnable.connect(user.signer).mint(dai.address, user.address, 1));
-      expect(await dai.balanceOf(user.address)).eq(balanceBefore.add(1));
+      const balanceBefore = await tokenMintable.balanceOf(user.address);
+      expect(await faucetOwnable.connect(user.signer).mint(tokenMintable.address, user.address, 1));
+      expect(await tokenMintable.balanceOf(user.address)).eq(balanceBefore.add(1));
     });
 
     it('Getter isPermissioned should return false', async () => {
@@ -146,11 +156,10 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     it('Mint function should revert if caller not owner', async () => {
       const {
         users: [, , user],
-        dai,
       } = testEnv;
 
       await expect(
-        faucetOwnable.connect(user.signer).mint(dai.address, user.address, mintAmount)
+        faucetOwnable.connect(user.signer).mint(tokenMintable.address, user.address, mintAmount)
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
@@ -158,17 +167,18 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       const mintAmount = parseEther('100');
       const {
         users: [, , , user],
-        dai,
         deployer,
       } = testEnv;
 
-      const initialBalance = await dai.balanceOf(user.address);
+      const initialBalance = await tokenMintable.balanceOf(user.address);
 
       await waitForTx(
-        await faucetOwnable.connect(deployer.signer).mint(dai.address, user.address, mintAmount)
+        await faucetOwnable
+          .connect(deployer.signer)
+          .mint(tokenMintable.address, user.address, mintAmount)
       );
 
-      await expect(await dai.balanceOf(user.address)).eq(initialBalance.add(mintAmount));
+      await expect(await tokenMintable.balanceOf(user.address)).eq(initialBalance.add(mintAmount));
     });
 
     it('Getter isPermissioned should return true', async () => {

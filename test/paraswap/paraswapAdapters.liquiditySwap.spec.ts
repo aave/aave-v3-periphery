@@ -36,9 +36,11 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
   let evmSnapshotId: string;
 
   before(async () => {
-    const { addressesProvider, deployer } = testEnv;
+    const { addressesProvider, deployer, faucetMintable } = testEnv;
 
-    mockAugustus = await new MockParaSwapAugustus__factory(await getFirstSigner()).deploy();
+    mockAugustus = await new MockParaSwapAugustus__factory(await getFirstSigner()).deploy(
+      faucetMintable.address
+    );
     mockAugustusRegistry = await new MockParaSwapAugustusRegistry__factory(
       await getFirstSigner()
     ).deploy(mockAugustus.address);
@@ -93,20 +95,20 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
     describe('executeOperation', () => {
       beforeEach(async () => {
-        const { users, weth, dai, pool, deployer } = testEnv;
+        const { users, weth, dai, pool, deployer, faucetMintable } = testEnv;
         const userAddress = users[0].address;
 
         // Provide liquidity
-        await dai['mint(uint256)'](parseEther('20000'));
+        await faucetMintable.mint(dai.address, deployer.address, parseEther('20000'));
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
       });
@@ -337,7 +339,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should work correctly with tokens of different decimals', async () => {
-        const { users, usdc, oracle, dai, aDai, pool, deployer } = testEnv;
+        const { users, usdc, oracle, dai, aDai, pool, deployer, faucetMintable } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
@@ -348,12 +350,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         const flashloanTotal = amountUSDCtoSwap.add(flashloanPremium);
 
         // Provider liquidity
-        await usdc['mint(uint256)'](liquidity);
+        await faucetMintable.mint(usdc.address, deployer.address, liquidity);
         await usdc.approve(pool.address, liquidity);
         await pool.deposit(usdc.address, liquidity, deployer.address, 0);
 
         // Make a deposit for user
-        await usdc.connect(user)['mint(uint256)'](flashloanTotal);
+        await faucetMintable.mint(usdc.address, userAddress, flashloanTotal);
         await usdc.connect(user).approve(pool.address, flashloanTotal);
         await pool.connect(user).deposit(usdc.address, flashloanTotal, userAddress, 0);
 
@@ -507,7 +509,7 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should revert when min amount to receive exceeds the max slippage amount (with tokens of different decimals)', async () => {
-        const { users, usdc, oracle, dai, pool, deployer } = testEnv;
+        const { users, usdc, oracle, dai, pool, deployer, faucetMintable } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
@@ -518,12 +520,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         const flashloanTotal = amountUSDCtoSwap.add(flashloanPremium);
 
         // Provider liquidity
-        await usdc['mint(uint256)'](liquidity);
+        await faucetMintable.mint(usdc.address, deployer.address, liquidity);
         await usdc.approve(pool.address, liquidity);
         await pool.deposit(usdc.address, liquidity, deployer.address, 0);
 
         // Make a deposit for user
-        await usdc.connect(user)['mint(uint256)'](flashloanTotal);
+        await faucetMintable.mint(usdc.address, userAddress, flashloanTotal);
         await usdc.connect(user).approve(pool.address, flashloanTotal);
         await pool.connect(user).deposit(usdc.address, flashloanTotal, userAddress, 0);
 
@@ -913,16 +915,16 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should not touch any token balance already in the adapter', async () => {
-        const { users, weth, oracle, dai, aDai, aWETH, pool } = testEnv;
+        const { users, weth, oracle, dai, aDai, aWETH, pool, faucetMintable, deployer } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
         // Put token balances in the adapter
         const adapterWethBalanceBefore = parseEther('123');
-        await weth['mint(uint256)'](adapterWethBalanceBefore);
+        await faucetMintable.mint(weth.address, deployer.address, adapterWethBalanceBefore);
         await weth.transfer(paraswapLiquiditySwapAdapter.address, adapterWethBalanceBefore);
         const adapterDaiBalanceBefore = parseEther('234');
-        await dai['mint(uint256)'](adapterDaiBalanceBefore);
+        await faucetMintable.mint(dai.address, deployer.address, adapterDaiBalanceBefore);
         await dai.transfer(paraswapLiquiditySwapAdapter.address, adapterDaiBalanceBefore);
 
         const amountWETHtoSwap = await parseUnitsFromToken(weth.address, '10');
@@ -998,28 +1000,28 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
     describe('executeOperation with borrowing', () => {
       beforeEach(async () => {
-        const { users, weth, dai, pool, deployer } = testEnv;
+        const { users, weth, dai, pool, deployer, faucetMintable } = testEnv;
         const userAddress = users[0].address;
         const borrower = users[1].signer;
         const borrowerAddress = users[1].address;
 
         // Provide liquidity
-        await dai['mint(uint256)'](parseEther('20000'));
+        await faucetMintable.mint(dai.address, deployer.address, parseEther('20000'));
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
 
         // Add borrowing
         const collateralAmount = parseEther('30000000');
-        await dai['mint(uint256)'](collateralAmount);
+        await faucetMintable.mint(dai.address, deployer.address, collateralAmount);
         await dai.approve(pool.address, collateralAmount);
         await pool.deposit(dai.address, collateralAmount, borrowerAddress, 0);
         await pool
@@ -1380,20 +1382,20 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
     describe('swapAndDeposit', () => {
       beforeEach(async () => {
-        const { users, weth, dai, pool, deployer } = testEnv;
+        const { users, weth, dai, pool, deployer, faucetMintable } = testEnv;
         const userAddress = users[0].address;
 
         // Provide liquidity
-        await dai['mint(uint256)'](parseEther('20000'));
+        await faucetMintable.mint(dai.address, deployer.address, parseEther('20000'));
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
       });
@@ -2200,16 +2202,16 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should not touch any token balance already in the adapter', async () => {
-        const { users, weth, oracle, dai, aDai, aWETH } = testEnv;
+        const { users, weth, oracle, dai, aDai, aWETH, deployer, faucetMintable } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
         // Put token balances in the adapter
         const adapterWethBalanceBefore = parseEther('123');
-        await weth['mint(uint256)'](adapterWethBalanceBefore);
+        await faucetMintable.mint(weth.address, deployer.address, adapterWethBalanceBefore);
         await weth.transfer(paraswapLiquiditySwapAdapter.address, adapterWethBalanceBefore);
         const adapterDaiBalanceBefore = parseEther('234');
-        await dai['mint(uint256)'](adapterDaiBalanceBefore);
+        await faucetMintable.mint(dai.address, deployer.address, adapterDaiBalanceBefore);
         await dai.transfer(paraswapLiquiditySwapAdapter.address, adapterDaiBalanceBefore);
 
         const amountWETHtoSwap = await parseUnitsFromToken(weth.address, '10');
@@ -2280,28 +2282,28 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
     describe('swapAndDeposit with borrowing', () => {
       beforeEach(async () => {
-        const { users, weth, dai, pool, deployer } = testEnv;
+        const { users, weth, dai, pool, deployer, faucetMintable } = testEnv;
         const userAddress = users[0].address;
         const borrower = users[1].signer;
         const borrowerAddress = users[1].address;
 
         // Provide liquidity
-        await dai['mint(uint256)'](parseEther('20000'));
+        await faucetMintable.mint(dai.address, deployer.address, parseEther('20000'));
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
 
         // Add borrowing
         const collateralAmount = parseEther('30000000');
-        await dai['mint(uint256)'](collateralAmount);
+        await faucetMintable.mint(dai.address, deployer.address, collateralAmount);
         await dai.approve(pool.address, collateralAmount);
         await pool.deposit(dai.address, collateralAmount, borrowerAddress, 0);
         await pool

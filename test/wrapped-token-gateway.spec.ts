@@ -120,7 +120,8 @@ makeSuite('Use native ETH at Pool via WrappedTokenGatewayV3', (testEnv: TestEnv)
   });
 
   it('Borrow stable WETH and Full Repay with ETH', async () => {
-    const { users, WrappedTokenGatewayV3, aDai, weth, dai, pool, helpersContract } = testEnv;
+    const { users, WrappedTokenGatewayV3, aDai, weth, dai, pool, helpersContract, faucetMintable } =
+      testEnv;
     const borrowSize = utils.parseEther('1');
     const repaySize = borrowSize.add(borrowSize.mul(5).div(100));
     const user = users[1];
@@ -141,7 +142,7 @@ makeSuite('Use native ETH at Pool via WrappedTokenGatewayV3', (testEnv: TestEnv)
     const stableDebtToken = await getStableDebtToken(stableDebtTokenAddress);
 
     // Deposit 10000 DAI
-    await dai.connect(user.signer)['mint(uint256)'](daiSize);
+    await faucetMintable.mint(dai.address, user.address, daiSize);
     await dai.connect(user.signer).approve(pool.address, daiSize);
     await pool.connect(user.signer).deposit(dai.address, daiSize, user.address, '0');
 
@@ -343,11 +344,11 @@ makeSuite('Use native ETH at Pool via WrappedTokenGatewayV3', (testEnv: TestEnv)
   });
 
   it('Owner can do emergency token recovery', async () => {
-    const { users, dai, WrappedTokenGatewayV3, deployer } = testEnv;
+    const { users, dai, WrappedTokenGatewayV3, deployer, faucetMintable } = testEnv;
     const user = users[0];
     const amount = utils.parseEther('1');
 
-    await dai.connect(user.signer)['mint(uint256)'](amount);
+    await faucetMintable.mint(dai.address, user.address, amount);
     const daiBalanceAfterMint = await dai.balanceOf(user.address);
 
     await dai.connect(user.signer).transfer(WrappedTokenGatewayV3.address, amount);

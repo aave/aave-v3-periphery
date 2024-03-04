@@ -30,9 +30,11 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
   let evmSnapshotId: string;
 
   before(async () => {
-    const { addressesProvider, deployer } = testEnv;
+    const { addressesProvider, deployer, faucetMintable } = testEnv;
 
-    mockAugustus = await new MockParaSwapAugustus__factory(await getFirstSigner()).deploy();
+    mockAugustus = await new MockParaSwapAugustus__factory(await getFirstSigner()).deploy(
+      faucetMintable.address
+    );
     mockAugustusRegistry = await new MockParaSwapAugustusRegistry__factory(
       await getFirstSigner()
     ).deploy(mockAugustus.address);
@@ -87,20 +89,20 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
 
     describe('withdrawAndSwap', () => {
       beforeEach(async () => {
-        const { users, weth, dai, pool, deployer } = testEnv;
+        const { users, weth, dai, pool, deployer, faucetMintable } = testEnv;
         const userAddress = users[0].address;
 
         // Provide liquidity
-        await dai['mint(uint256)'](parseEther('20000'));
+        await faucetMintable.mint(dai.address, deployer.address, parseEther('20000'));
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await faucetMintable.mint(weth.address, deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
       });
@@ -890,16 +892,16 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should not touch any token balance already in the adapter', async () => {
-        const { users, weth, oracle, dai, aWETH } = testEnv;
+        const { deployer, users, weth, oracle, dai, aWETH, faucetMintable } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
         // Put token balances in the adapter
         const adapterWethBalanceBefore = parseEther('123');
-        await weth['mint(uint256)'](adapterWethBalanceBefore);
+        await faucetMintable.mint(weth.address, deployer.address, adapterWethBalanceBefore);
         await weth.transfer(paraswapWithdrawSwapAdapter.address, adapterWethBalanceBefore);
         const adapterDaiBalanceBefore = parseEther('234');
-        await dai['mint(uint256)'](adapterDaiBalanceBefore);
+        await faucetMintable.mint(dai.address, deployer.address, adapterDaiBalanceBefore);
         await dai.transfer(paraswapWithdrawSwapAdapter.address, adapterDaiBalanceBefore);
 
         const amountWETHtoSwap = await parseUnitsFromToken(weth.address, '10');

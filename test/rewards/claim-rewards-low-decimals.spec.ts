@@ -75,11 +75,13 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
   } of getRewardsBalanceScenarios) {
     let amountToClaim = _amountToClaim;
     it(caseName, async () => {
+      const { rewardsController, aave, rewardToken, stakedAave, aEursMockV2, stakedTokenStrategy } =
+        testEnv;
+
       const { timestamp } = await hre.ethers.provider.getBlock('latest');
       const timePerTest = 31536000;
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
       await advanceTimeAndBlock(timePerTest);
-      const { rewardsController, stakedAave, aEursMockV2, stakedTokenStrategy } = testEnv;
 
       const userAddress = await rewardsController.signer.getAddress();
 

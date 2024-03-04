@@ -108,6 +108,7 @@ makeSuite('Pull Rewards Transfer Strategy', (testEnv: TestEnv) => {
       users: [user1],
       rewardsVault,
       rewardToken,
+      faucetMintable,
     } = testEnv;
 
     const artifact = await hre.deployments.deploy('transfer-strategy-3', {
@@ -122,9 +123,7 @@ makeSuite('Pull Rewards Transfer Strategy', (testEnv: TestEnv) => {
     );
 
     await waitForTx(
-      await rewardToken
-        .connect(rewardsVault.signer)
-        ['mint(address,uint256)'](rewardsVault.address, parseEther('2000000'))
+      await faucetMintable.mint(rewardToken.address, rewardsVault.address, parseEther('2000000'))
     );
     await waitForTx(
       await rewardToken.connect(rewardsVault.signer).approve(instance.address, MAX_UINT_AMOUNT)
@@ -149,6 +148,7 @@ makeSuite('Pull Rewards Transfer Strategy', (testEnv: TestEnv) => {
       users: [user1],
       rewardsVault,
       rewardToken,
+      faucetMintable,
     } = testEnv;
 
     const artifact = await hre.deployments.deploy('transfer-strategy-4', {
@@ -163,9 +163,7 @@ makeSuite('Pull Rewards Transfer Strategy', (testEnv: TestEnv) => {
     );
 
     await waitForTx(
-      await rewardToken
-        .connect(rewardsVault.signer)
-        ['mint(address,uint256)'](rewardsVault.address, parseEther('2000000'))
+      await faucetMintable.mint(rewardToken.address, rewardsVault.address, parseEther('2000000'))
     );
     await waitForTx(
       await rewardToken.connect(rewardsVault.signer).approve(instance.address, MAX_UINT_AMOUNT)

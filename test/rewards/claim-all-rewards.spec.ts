@@ -82,11 +82,11 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
 
 makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
   before(async () => {
-    const { rewardTokens, rewardsVault, pullRewardsStrategy } = testEnv;
+    const { rewardTokens, rewardsVault, pullRewardsStrategy, faucetMintable } = testEnv;
     const rewards = rewardTokens.slice(0, 4);
 
     await Bluebird.each(rewards, async (reward, index) => {
-      await reward.connect(rewardsVault.signer)['mint(uint256)'](parseEther('1000000000'));
+      await faucetMintable.mint(reward.address, rewardsVault.address, parseEther('1000000000'));
       await reward
         .connect(rewardsVault.signer)
         .approve(pullRewardsStrategy.address, MAX_UINT_AMOUNT);

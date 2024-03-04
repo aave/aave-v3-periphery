@@ -2,12 +2,13 @@
 pragma solidity ^0.8.10;
 
 import {IParaSwapAugustus} from '../../adapters/paraswap/interfaces/IParaSwapAugustus.sol';
+import {IFaucet} from '../testnet-helpers/IFaucet.sol';
 import {MockParaSwapTokenTransferProxy} from './MockParaSwapTokenTransferProxy.sol';
 import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
-import {MintableERC20} from '@aave/core-v3/contracts/mocks/tokens/MintableERC20.sol';
 
 contract MockParaSwapAugustus is IParaSwapAugustus {
   MockParaSwapTokenTransferProxy immutable TOKEN_TRANSFER_PROXY;
+  IFaucet immutable FAUCET;
   bool _expectingSwap;
   address _expectedFromToken;
   address _expectedToToken;
@@ -20,8 +21,9 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
   uint256 _expectedToAmountMax;
   uint256 _expectedToAmountMin;
 
-  constructor() {
+  constructor(address faucetMintable) {
     TOKEN_TRANSFER_PROXY = new MockParaSwapTokenTransferProxy();
+    FAUCET = IFaucet(faucetMintable);
   }
 
   function getTokenTransferProxy() external view override returns (address) {
@@ -73,7 +75,7 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
     );
     require(_receivedAmount >= toAmount, 'Received amount of tokens are less than expected');
     TOKEN_TRANSFER_PROXY.transferFrom(fromToken, msg.sender, address(this), fromAmount);
-    MintableERC20(toToken).mint(_receivedAmount);
+    FAUCET.mint(toToken, address(this), _receivedAmount);
     IERC20(toToken).transfer(msg.sender, _receivedAmount);
     _expectingSwap = false;
     return _receivedAmount;
@@ -94,7 +96,7 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
     );
     require(_fromAmount <= fromAmount, 'From amount of tokens are higher than expected');
     TOKEN_TRANSFER_PROXY.transferFrom(fromToken, msg.sender, address(this), _fromAmount);
-    MintableERC20(toToken).mint(toAmount);
+    FAUCET.mint(toToken, address(this), toAmount);
     IERC20(toToken).transfer(msg.sender, toAmount);
     _expectingSwap = false;
     return fromAmount;

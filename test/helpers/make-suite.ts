@@ -225,6 +225,8 @@ export async function initializeMakeSuite() {
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.WrappedTokenGatewayV3 = await getWrappedTokenGateway();
 
+  const testnetTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
+
   // Added extra reward token
   await hre.deployments.deploy(`EXTRA${TESTNET_REWARD_TOKEN_PREFIX}`, {
     from: await _deployer.getAddress(),
@@ -282,6 +284,8 @@ export async function initializeMakeSuite() {
   );
 
   // Support direct minting
+  const testnetTokensAddresses = testnetTokens.map(({ artifact }) => artifact.address);
+  await waitForTx(await testEnv.faucetMintable.setProtectedOfChild(testnetTokensAddresses, false));
   await waitForTx(
     await testEnv.faucetMintable.setProtectedOfChild(
       [
@@ -289,6 +293,7 @@ export async function initializeMakeSuite() {
         testEnv.dai.address,
         testEnv.usdc.address,
         testEnv.rewardToken.address,
+        testEnv.weth.address,
       ],
       false
     )

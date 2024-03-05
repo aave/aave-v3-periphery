@@ -85,10 +85,10 @@ contract Faucet is IFaucet, Ownable {
   /// @inheritdoc IFaucet
   function setProtectedOfChild(
     address[] calldata childContracts,
-    bool protected
+    bool state
   ) external override onlyOwner {
     for (uint256 i = 0; i < childContracts.length; i++) {
-      TestnetERC20(childContracts[i]).setProtected(protected);
+      TestnetERC20(childContracts[i]).setProtected(state);
     }
   }
 

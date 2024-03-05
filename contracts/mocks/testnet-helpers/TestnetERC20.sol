@@ -107,8 +107,8 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
     return _nonces[owner];
   }
 
-  function setProtected(bool protected) public onlyOwner {
-    _protected = protected;
+  function setProtected(bool state) public onlyOwner {
+    _protected = state;
   }
 
   function isProtected() public view returns (bool) {

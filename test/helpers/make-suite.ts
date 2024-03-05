@@ -50,7 +50,6 @@ import {
   impersonateAddress,
   getEmissionManager,
   getFaucet,
-  MAX_UINT_AMOUNT,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
@@ -282,22 +281,34 @@ export async function initializeMakeSuite() {
       ).address
   );
 
-  // Increase maximum amount for mints on Faucet for tests
-  await testEnv.faucetMintable.setMaximumMintAmount(BigNumber.from(10).pow(40)); // 1e40
-  await testEnv.faucetMintable.mint(
-    testEnv.aave.address,
-    rewardsVault.address,
-    parseEther('60000000000')
+  // Support direct minting
+  await waitForTx(
+    await testEnv.faucetMintable.setProtectedOfChild(
+      [
+        testEnv.aave.address,
+        testEnv.dai.address,
+        testEnv.usdc.address,
+        testEnv.rewardToken.address,
+      ],
+      false
+    )
   );
-  await testEnv.faucetMintable.mint(
-    testEnv.rewardToken.address,
-    rewardsVault.address,
-    parseEther('200000000')
+
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('60000000000'))
   );
-  await testEnv.faucetMintable.mint(
-    testEnv.aave.address,
-    testEnv.stakedTokenStrategy.address,
-    parseEther('30000000000')
+  await waitForTx(
+    await testEnv.rewardToken
+      .connect(rewardsVault.signer)
+      ['mint(address,uint256)'](rewardsVault.address, parseEther('200000000'))
+  );
+
+  await waitForTx(
+    await testEnv.aaveToken
+      .connect(rewardsVault.signer)
+      .transfer(testEnv.stakedTokenStrategy.address, parseEther('30000000000'))
   );
 }
 

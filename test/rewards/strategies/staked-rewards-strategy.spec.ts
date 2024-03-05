@@ -70,7 +70,6 @@ makeSuite('Staked Token Transfer Strategy', (testEnv: TestEnv) => {
       deployer,
       users: [user1],
       rewardsVault,
-      faucetMintable,
       aave,
       stakedAave,
     } = testEnv;
@@ -87,7 +86,9 @@ makeSuite('Staked Token Transfer Strategy', (testEnv: TestEnv) => {
     );
 
     await waitForTx(
-      await faucetMintable.mint(aave.address, instance.address, parseEther('20000000'))
+      await aave
+        .connect(rewardsVault.signer)
+        ['mint(address,uint256)'](instance.address, parseEther('20000000'))
     );
 
     const rewardAmount = parseEther('20');

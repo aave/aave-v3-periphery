@@ -28,12 +28,10 @@ makeSuite('Base Transfer Strategy', (testEnv: TestEnv) => {
       deployer,
       users: [user1],
       dai,
-      faucetMintable,
     } = testEnv;
-
     const amountToRecover = parseEther('10');
     await waitForTx(
-      await faucetMintable.mint(dai.address, pullRewardsStrategy.address, amountToRecover)
+      await dai['mint(address,uint256)'](pullRewardsStrategy.address, amountToRecover)
     );
 
     const userBalanceBefore = await dai.balanceOf(user1.address);

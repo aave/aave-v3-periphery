@@ -83,6 +83,17 @@ contract Faucet is IFaucet, Ownable {
   }
 
   /// @inheritdoc IFaucet
+  function setProtectedOfChild(
+    address[] calldata childContracts,
+    bool protected
+  ) external override onlyOwner {
+    for (uint256 i = 0; i < childContracts.length; i++) {
+      TestnetERC20(childContracts[i]).setProtected(protected);
+    }
+  }
+
+
+  /// @inheritdoc IFaucet
   function setMaximumMintAmount(uint256 newMaxMintAmount) external override onlyOwner {
     maximumMintAmount = newMaxMintAmount;
   }

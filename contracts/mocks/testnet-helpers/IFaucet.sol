@@ -45,6 +45,13 @@ interface IFaucet {
   function transferOwnershipOfChild(address[] calldata childContracts, address newOwner) external;
 
   /**
+   * @notice Updates protection of child contracts (whether tokens are mintable)
+   * @param childContracts A list of child contract addresses
+   * @param protected True if tokens are only mintable through Faucet, false otherwise
+   */
+  function setProtectedOfChild(address[] calldata childContracts, bool protected) external;
+
+  /**
    * @notice Updates the maximum amount of tokens per mint allowed
    * @param newMaxMintAmount The new value of maximum amount of tokens per mint (whole tokens)
    */

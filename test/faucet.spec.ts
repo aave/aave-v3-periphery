@@ -3,15 +3,15 @@ import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
 import { ONE_ADDRESS, waitForTx } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { TestnetERC20__factory } from '../types';
+import { Faucet, TestnetERC20, TestnetERC20__factory } from '../types';
 
 declare let hre: HardhatRuntimeEnvironment;
 
 makeSuite('Faucet', (testEnv: TestEnv) => {
   const mintAmount = parseEther('100');
 
-  let faucetOwnable;
-  let tokenMintable;
+  let faucetOwnable: Faucet;
+  let tokenMintable: TestnetERC20;
 
   before(async () => {
     // Enforce permissioned mode as disabled for deterministic test suite
@@ -19,10 +19,15 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
     const { deployer } = await hre.getNamedAccounts();
     const factory = await hre.ethers.getContractFactory('Faucet');
 
-    faucetOwnable = await factory.deploy(deployer, false, 10000); // 10k whole tokens
+    faucetOwnable = (await factory.deploy(deployer, false, 10000)) as Faucet; // 10k whole tokens
 
     const mintableFactory = await hre.ethers.getContractFactory('TestnetERC20');
-    tokenMintable = await mintableFactory.deploy('MintableToken', 'TOK', 18, faucetOwnable.address);
+    tokenMintable = (await mintableFactory.deploy(
+      'MintableToken',
+      'TOK',
+      18,
+      faucetOwnable.address
+    )) as TestnetERC20;
 
     await waitForTx(await faucetOwnable.setPermissioned(false));
   });
@@ -61,10 +66,14 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       const thresholdValue = threshold.toNumber();
       const withinLimitThreshold = parseEther(thresholdValue.toString());
 
+      const balanceBefore = await tokenMintable.balanceOf(user.address);
+
       await faucetOwnable
         .connect(deployer.signer)
         .mint(tokenMintable.address, user.address, withinLimitThreshold);
-      await expect(await tokenMintable.balanceOf(user.address)).eq(withinLimitThreshold);
+
+      const balanceAfter = await tokenMintable.balanceOf(user.address);
+      await expect(balanceAfter.sub(balanceBefore)).eq(withinLimitThreshold);
     });
 
     it('Mint function should revert with values over the limit', async () => {
@@ -257,5 +266,33 @@ makeSuite('Faucet', (testEnv: TestEnv) => {
       .connect(deployer.signer)
       .transferOwnershipOfChild([childContract.address], ONE_ADDRESS);
     expect(await childContract.owner()).to.be.eq(ONE_ADDRESS);
+  });
+
+  it('Direct mint should revert if protected and caller not owner', async () => {
+    const {
+      users: [, , user],
+    } = testEnv;
+
+    expect(await tokenMintable.isProtected()).to.be.true;
+    await expect(
+      tokenMintable.connect(user.signer)['mint(address,uint256)'](user.address, 1)
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+
+  it('Direct mint if not protected', async () => {
+    const {
+      users: [, , user, user2],
+    } = testEnv;
+
+    expect(await tokenMintable.isProtected()).to.be.true;
+    await expect(tokenMintable.connect(user.signer).setProtected(false)).to.be.revertedWith(
+      'Ownable: caller is not the owner'
+    );
+    expect(await faucetOwnable.setProtectedOfChild([tokenMintable.address], false));
+    expect(await tokenMintable.isProtected()).to.be.false;
+
+    // mintable by anyone
+    expect(await tokenMintable.connect(user2.signer)['mint(uint256)'](1000));
+    await expect(await tokenMintable.balanceOf(user2.address)).eq(1000);
   });
 });

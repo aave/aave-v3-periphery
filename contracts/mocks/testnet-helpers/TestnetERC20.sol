@@ -21,6 +21,18 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
 
   bytes32 public DOMAIN_SEPARATOR;
 
+  bool internal _protected;
+
+  /**
+   * @dev Function modifier, if _permissioned is enabled then msg.sender is required to be the owner
+   */
+  modifier onlyOwnerIfProtected() {
+    if (_protected == true) {
+      require(owner() == _msgSender(), 'Ownable: caller is not the owner');
+    }
+    _;
+  }
+
   constructor(
     string memory name,
     string memory symbol,
@@ -41,6 +53,7 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
     _setupDecimals(decimals);
     require(owner != address(0));
     transferOwnership(owner);
+    _protected = true;
   }
 
   /// @inheritdoc IERC20WithPermit
@@ -74,7 +87,7 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
    * @param value The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(uint256 value) public virtual onlyOwner returns (bool) {
+  function mint(uint256 value) public virtual onlyOwnerIfProtected returns (bool) {
     _mint(_msgSender(), value);
     return true;
   }
@@ -85,12 +98,20 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
    * @param value The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(address account, uint256 value) public virtual onlyOwner returns (bool) {
+  function mint(address account, uint256 value) public virtual onlyOwnerIfProtected returns (bool) {
     _mint(account, value);
     return true;
   }
 
   function nonces(address owner) public view returns (uint256) {
     return _nonces[owner];
+  }
+
+  function setProtected(bool protected) public onlyOwner {
+    _protected = protected;
+  }
+
+  function isProtected() public view returns (bool) {
+    return _protected;
   }
 }

@@ -24,7 +24,7 @@ contract TestnetERC20 is IERC20WithPermit, ERC20, Ownable {
   bool internal _protected;
 
   /**
-   * @dev Function modifier, if _permissioned is enabled then msg.sender is required to be the owner
+   * @dev Function modifier, if _protected is enabled then msg.sender is required to be the owner
    */
   modifier onlyOwnerIfProtected() {
     if (_protected == true) {

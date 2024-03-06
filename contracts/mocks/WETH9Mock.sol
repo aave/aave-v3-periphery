@@ -8,7 +8,7 @@ contract WETH9Mock is WETH9, Ownable {
   bool internal _protected;
 
   /**
-   * @dev Function modifier, if _permissioned is enabled then msg.sender is required to be the owner
+   * @dev Function modifier, if _protected is enabled then msg.sender is required to be the owner
    */
   modifier onlyOwnerIfProtected() {
     if (_protected == true) {

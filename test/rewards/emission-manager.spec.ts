@@ -18,7 +18,6 @@ makeSuite('EmissionManager', (testEnv: TestEnv) => {
       deployer.signer,
       RewardsController__factory.abi
     );
-    console.log('Mock', mockRewardsController.address);
     await emissionManager.setRewardsController(mockRewardsController.address);
   });
 

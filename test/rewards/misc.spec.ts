@@ -1,10 +1,5 @@
 import { RewardsController } from './../../types/RewardsController.d';
-import {
-  waitForTx,
-  MAX_UINT_AMOUNT,
-  ZERO_ADDRESS,
-  deployReservesSetupHelper,
-} from '@aave/deploy-v3';
+import { waitForTx, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { makeSuite } from '../helpers/make-suite';
 import { RANDOM_ADDRESSES } from '../helpers/constants';

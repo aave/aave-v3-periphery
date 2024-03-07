@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { waitForTx, getBlockTimestamp, ZERO_ADDRESS, impersonateAddress } from '@aave/deploy-v3';
 import { makeSuite, TestEnv } from '../helpers/make-suite';
 
-makeSuite('AaveIncentivesController - Claim rewards on behalf', (testEnv: TestEnv) => {
+makeSuite('AaveIncentivesController - Claim all rewards on behalf', (testEnv: TestEnv) => {
   beforeEach(async () => {
     const { rewardsController, aDaiMockV2, stakedAave, stakedTokenStrategy } = testEnv;
 

@@ -73,7 +73,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
       await usdc.approve(pool.address, usdcLiquidity);
       await pool.deposit(usdc.address, usdcLiquidity, deployer.address, 0);
 
-      await weth['mint(uint256)'](parseEther('100'));
+      await weth['mint(address,uint256)'](deployer.address, parseEther('100'));
       await weth.approve(pool.address, parseEther('100'));
       await pool.deposit(weth.address, parseEther('100'), deployer.address, 0);
 
@@ -82,7 +82,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
       await pool.deposit(aave.address, parseEther('1000000'), deployer.address, 0);
 
       // Make a deposit for user
-      await weth['mint(uint256)'](parseEther('1000'));
+      await weth['mint(address,uint256)'](deployer.address, parseEther('1000'));
       await weth.approve(pool.address, parseEther('1000'));
       await pool.deposit(weth.address, parseEther('1000'), userAddress, 0);
 
@@ -410,7 +410,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
         const amountWETHtoSwap = await parseUnitsFromToken(weth.address, '10');
 
-        await weth.connect(user)['mint(uint256)'](amountWETHtoSwap);
+        await weth.connect(user)['mint(address,uint256)'](userAddress, amountWETHtoSwap);
         await weth.connect(user).transfer(paraswapRepayAdapter.address, amountWETHtoSwap);
 
         const daiPrice = await oracle.getAssetPrice(dai.address);
@@ -479,7 +479,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
 
         const amountWETHtoSwap = await parseUnitsFromToken(weth.address, '10');
 
-        await weth.connect(user)['mint(uint256)'](amountWETHtoSwap);
+        await weth.connect(user)['mint(address,uint256)'](userAddress, amountWETHtoSwap);
         await weth.connect(user).transfer(paraswapRepayAdapter.address, amountWETHtoSwap);
 
         const daiPrice = await oracle.getAssetPrice(dai.address);

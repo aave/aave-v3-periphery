@@ -101,12 +101,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
       });
@@ -913,13 +913,13 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should not touch any token balance already in the adapter', async () => {
-        const { users, weth, oracle, dai, aDai, aWETH, pool } = testEnv;
+        const { users, weth, oracle, dai, aDai, aWETH, pool, deployer } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
         // Put token balances in the adapter
         const adapterWethBalanceBefore = parseEther('123');
-        await weth['mint(uint256)'](adapterWethBalanceBefore);
+        await weth['mint(address,uint256)'](deployer.address, adapterWethBalanceBefore);
         await weth.transfer(paraswapLiquiditySwapAdapter.address, adapterWethBalanceBefore);
         const adapterDaiBalanceBefore = parseEther('234');
         await dai['mint(uint256)'](adapterDaiBalanceBefore);
@@ -1008,12 +1008,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
 
@@ -1388,12 +1388,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
       });
@@ -2200,13 +2200,13 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
       });
 
       it('should not touch any token balance already in the adapter', async () => {
-        const { users, weth, oracle, dai, aDai, aWETH } = testEnv;
+        const { users, weth, oracle, dai, aDai, aWETH, deployer } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;
 
         // Put token balances in the adapter
         const adapterWethBalanceBefore = parseEther('123');
-        await weth['mint(uint256)'](adapterWethBalanceBefore);
+        await weth['mint(address,uint256)'](deployer.address, adapterWethBalanceBefore);
         await weth.transfer(paraswapLiquiditySwapAdapter.address, adapterWethBalanceBefore);
         const adapterDaiBalanceBefore = parseEther('234');
         await dai['mint(uint256)'](adapterDaiBalanceBefore);
@@ -2290,12 +2290,12 @@ makeSuite('ParaSwap adapters', (testEnv: TestEnv) => {
         await dai.approve(pool.address, parseEther('20000'));
         await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
 
-        await weth['mint(uint256)'](parseEther('10000'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('10000'));
         await weth.approve(pool.address, parseEther('10000'));
         await pool.deposit(weth.address, parseEther('10000'), deployer.address, 0);
 
         // Make a deposit for user
-        await weth['mint(uint256)'](parseEther('100'));
+        await weth['mint(address,uint256)'](deployer.address, parseEther('100'));
         await weth.approve(pool.address, parseEther('100'));
         await pool.deposit(weth.address, parseEther('100'), userAddress, 0);
 

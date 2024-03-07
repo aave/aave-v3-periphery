@@ -3,7 +3,7 @@ import { PullRewardsTransferStrategy } from './../../types/PullRewardsTransferSt
 import { ATokenMock } from './../../types/ATokenMock.d';
 import { RewardsController } from './../../types/RewardsController';
 import hre from 'hardhat';
-import { Signer } from 'ethers';
+import { BigNumber, Signer } from 'ethers';
 import bluebird from 'bluebird';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import chai from 'chai';
@@ -45,16 +45,15 @@ import {
   getStakedRewardsStrategy,
   getStakeAave,
   waitForTx,
-  MAX_UINT_AMOUNT,
   TESTNET_PRICE_AGGR_PREFIX,
-  deployMintableERC20,
   StakedTokenV2Rev3,
   impersonateAddress,
   getEmissionManager,
+  getFaucet,
 } from '@aave/deploy-v3';
 import { deployATokenMock } from '../rewards/helpers/deploy';
 import { parseEther } from 'ethers/lib/utils';
-import { EmissionManager, EmissionManager__factory } from '../../types';
+import { EmissionManager, Faucet } from '../../types';
 
 chai.use(bignumberChai());
 
@@ -76,6 +75,7 @@ export interface TestEnv {
   weth: WETH9Mocked;
   aWETH: AToken;
   dai: MintableERC20;
+  faucetMintable: Faucet;
   aDai: AToken;
   variableDebtDai: VariableDebtToken;
   stableDebtDai: StableDebtToken;
@@ -126,6 +126,7 @@ const testEnv: TestEnv = {
   variableDebtDai: {} as VariableDebtToken,
   stableDebtDai: {} as StableDebtToken,
   aUsdc: {} as AToken,
+  faucetMintable: {} as Faucet,
   usdc: {} as MintableERC20,
   aave: {} as MintableERC20,
   addressesProvider: {} as PoolAddressesProvider,
@@ -211,6 +212,7 @@ export async function initializeMakeSuite() {
     process.exit(1);
   }
 
+  testEnv.faucetMintable = await getFaucet();
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.variableDebtDai = await getVariableDebtToken(variableDebtDaiAddress);
   testEnv.stableDebtDai = await getStableDebtToken(stableDebtDaiAddress);
@@ -222,6 +224,8 @@ export async function initializeMakeSuite() {
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.WrappedTokenGatewayV3 = await getWrappedTokenGateway();
+
+  const testnetTokens = await getSubTokensByPrefix(TESTNET_REWARD_TOKEN_PREFIX);
 
   // Added extra reward token
   await hre.deployments.deploy(`EXTRA${TESTNET_REWARD_TOKEN_PREFIX}`, {
@@ -278,6 +282,23 @@ export async function initializeMakeSuite() {
         await hre.deployments.get(`${symbol}${TESTNET_PRICE_AGGR_PREFIX}`)
       ).address
   );
+
+  // Support direct minting
+  const testnetTokensAddresses = testnetTokens.map(({ artifact }) => artifact.address);
+  await waitForTx(await testEnv.faucetMintable.setProtectedOfChild(testnetTokensAddresses, false));
+  await waitForTx(
+    await testEnv.faucetMintable.setProtectedOfChild(
+      [
+        testEnv.aave.address,
+        testEnv.dai.address,
+        testEnv.usdc.address,
+        testEnv.rewardToken.address,
+        testEnv.weth.address,
+      ],
+      false
+    )
+  );
+
   await waitForTx(
     await testEnv.aaveToken
       .connect(rewardsVault.signer)

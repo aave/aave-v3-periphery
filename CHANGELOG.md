@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.2](https://github.com/aave/aave-v3-periphery/compare/v2.5.1...v2.5.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* Bump v3 core dependency ([#188](https://github.com/aave/aave-v3-periphery/issues/188)) ([d332212](https://github.com/aave/aave-v3-periphery/commit/d332212c10bf8a65d622e9bfbbb83f760cba171c))
+
 ## [2.5.1](https://github.com/aave/aave-v3-periphery/compare/v2.5.0...v2.5.1) (2024-03-07)
 
 

@@ -4,9 +4,7 @@
   "description": "Aave Protocol V3 periphery smart contracts",
   "files": [
     "contracts",
-    "artifacts",
-    "types",
-    "dist"
+    "artifacts"
   ],
   "scripts": {
     "run-env": "npm i && tail -f /dev/null",
@@ -33,7 +31,6 @@
   },
   "license": "AGPLv3",
   "devDependencies": {
-    "@aave/core-v3": "1.19.2-beta.1",
     "@aave/deploy-v3": "1.56.1",
     "@ethereum-waffle/mock-contract": "4.0.4",
     "@ethersproject/abi": "^5.1.0",
@@ -87,5 +84,8 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/aave/aave-v3-periphery"
+  },
+  "dependencies": {
+    "@aave/core-v3": "1.19.2-beta.1"
   }
 }

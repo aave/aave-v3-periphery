@@ -55,36 +55,6 @@ makeSuite('RewardsController misc tests', (testEnv) => {
     await waitForTx(await aDaiMockV2.doubleHandleActionOnAic(users[1].address, '2000', '100'));
   });
 
-  it('Should overflow index if passed a large emission', async () => {
-    const {
-      aDaiMockV2,
-      rewardsController,
-      users,
-      distributionEnd,
-      stakedAave: { address: reward },
-      stakedTokenStrategy,
-    } = testEnv;
-    const MAX_88_UINT = '309485009821345068724781055';
-
-    await waitForTx(
-      await rewardsController.configureAssets([
-        {
-          asset: aDaiMockV2.address,
-          reward,
-          rewardOracle: testEnv.aavePriceAggregator,
-          emissionPerSecond: MAX_88_UINT,
-          distributionEnd,
-          totalSupply: '0',
-          transferStrategy: stakedTokenStrategy.address,
-        },
-      ])
-    );
-
-    await expect(
-      aDaiMockV2.doubleHandleActionOnAic(users[1].address, '2000', '100')
-    ).to.be.revertedWith('INDEX_OVERFLOW');
-  });
-
   it('Should claimRewards revert if to argument is ZERO_ADDRESS', async () => {
     const {
       aDaiMockV2,

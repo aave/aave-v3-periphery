@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 import { makeSuite } from '../helpers/make-suite';
-import { BigNumber } from 'ethers';
+import { BigNumber, constants } from 'ethers';
 import {
   waitForTx,
   getBlockTimestamp,
@@ -36,6 +36,11 @@ const getRewardsBalanceScenarios: ScenarioAction[] = [
     caseName: 'Accrued rewards are 0, claim not 0',
     emissionPerSecond: '0',
     amountToClaim: '100',
+  },
+  {
+    caseName: 'Less than 1 unit of small decimals case',
+    emissionPerSecond: '90',
+    amountToClaim: constants.MaxUint256.toString(),
   },
   {
     caseName: 'Accrued rewards are not 0',
@@ -76,16 +81,15 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
     let amountToClaim = _amountToClaim;
     it(caseName, async () => {
       const { timestamp } = await hre.ethers.provider.getBlock('latest');
-      const timePerTest = 31536000;
+      const timePerTest = 100;
       const distributionEnd = timestamp + timePerTest * getRewardsBalanceScenarios.length;
-      await advanceTimeAndBlock(timePerTest);
       const { rewardsController, stakedAave, aEursMockV2, stakedTokenStrategy } = testEnv;
 
       const userAddress = await rewardsController.signer.getAddress();
 
       const underlyingAsset = aEursMockV2.address;
-      const stakedByUser = 22 * caseName.length;
-      const totalSupply = 33 * caseName.length;
+      const totalSupply = BigNumber.from(33 * 1e2 * 1e7);
+      const stakedByUser = totalSupply;
       const reward = stakedAave.address;
 
       await aEursMockV2.setUserBalanceAndSupply(stakedByUser, totalSupply);
@@ -111,6 +115,8 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
 
       const destinationAddressBalanceBefore = await stakedAave.balanceOf(destinationAddress);
       await aEursMockV2.handleActionOnAic(userAddress, totalSupply, stakedByUser);
+
+      await advanceTimeAndBlock(timePerTest);
 
       const unclaimedRewardsBefore = await rewardsController.getUserRewards(
         [underlyingAsset],
@@ -172,7 +178,6 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         stakedByUser,
         userIndexAfter,
         userIndexBefore,
-        2
       ).toString();
 
       await aEursMockV2.cleanUserState();
@@ -211,7 +216,6 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
         actionBlockTimestamp,
         distributionEnd,
         {},
-        2
       );
       expect(userIndexAfter.toString()).to.be.equal(
         assetDataAfter.index.toString(),
@@ -247,6 +251,10 @@ makeSuite('Incentives Controller V2 claimRewards with 2 decimals', (testEnv) => 
           unclaimedRewardsCalc.sub(amountToClaim).toString(),
           'unclaimed rewards after are wrong'
         );
+      }
+
+      if (amountToClaim !== "0" && emissionPerSecond !== undefined && emissionPerSecond !== "0") {
+        expect(claimedAmount.toString()).to.not.equal("0");
       }
 
       expect(claimedAmount.toString()).to.be.equal(

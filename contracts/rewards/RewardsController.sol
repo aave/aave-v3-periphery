@@ -18,7 +18,7 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
   using SafeCast for uint256;
 
-  uint256 public constant REVISION = 1;
+  uint256 public constant REVISION = 2;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
   // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
@@ -47,7 +47,11 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
    * @dev Initialize for RewardsController
    * @dev It expects an address as argument since its initialized via PoolAddressesProvider._updateImpl()
    **/
-  function initialize(address) external initializer {}
+  function initialize(address) external initializer {
+    if (getRevision() == 2) {
+      _migrateV1ToV2();
+    }
+  }
 
   /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {

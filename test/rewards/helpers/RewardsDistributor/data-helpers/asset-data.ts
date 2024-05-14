@@ -90,7 +90,7 @@ export function getRewards(
   balance: BigNumberValue,
   assetIndex: BigNumberValue,
   userIndex: BigNumberValue,
-  precision: number = 18
+  precision: number = 27
 ): BigNumber {
   return BigNumber.from(
     valueToZDBigNumber(balance)
@@ -110,7 +110,7 @@ export function assetDataComparator<
   actionBlockTimestamp: number,
   emissionEndTimestamp: number,
   compareRules: CompareRules<Input, State>,
-  decimals = 18
+  decimals = 27
 ) {
   return comparatorEngine(
     ['emissionPerSecond', 'index', 'lastUpdateTimestamp'],

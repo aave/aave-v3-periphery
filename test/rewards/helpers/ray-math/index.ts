@@ -17,7 +17,7 @@ export function getNormalizedDistribution(
   lastUpdateTimestamp: BigNumberValue,
   currentTimestamp: BigNumberValue,
   emissionEndTimestamp: BigNumberValue,
-  precision: number = 18
+  precision: number = 27
 ): BigNumber {
   if (
     balance.toString() === '0' ||

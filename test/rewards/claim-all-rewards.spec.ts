@@ -226,7 +226,6 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
           stakedByUser[index],
           userIndexesAfter[index],
           userIndexesBefore[index],
-          index > 2 ? 2 : 18
         ).toString()
       );
 
@@ -238,7 +237,6 @@ makeSuite('Incentives Controller V2 claimAllRewards tests', (testEnv) => {
           actionBlockTimestamp,
           distributionEnd,
           {},
-          i > 2 ? 2 : 18
         );
 
         expect(userIndexesAfter[i].toString()).to.be.equal(

@@ -342,6 +342,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     if (userIndex == 0 && rewardData.usersData[user].index_deprecated != 0) {
       userIndex = rewardData.usersData[user].index_deprecated * PRECISION / assetUnit;
       rewardData.usersData[user].index_deprecated = 0;
+      rewardData.usersData[user].index = userIndex;
     }
 
     uint256 rewardsAccrued;

@@ -366,10 +366,12 @@ abstract contract RewardsDistributor is IRewardsDistributor {
           assetUnit
         );
 
+        uint256 netUserBalance = _getNetSupply(user, asset);
+
         (uint256 rewardsAccrued, bool userDataUpdated) = _updateUserData(
           rewardData,
           user,
-          userBalance,
+          netUserBalance,
           newAssetIndex,
           assetUnit
         );
@@ -533,5 +535,69 @@ abstract contract RewardsDistributor is IRewardsDistributor {
   /// @inheritdoc IRewardsDistributor
   function getEmissionManager() external view returns (address) {
     return EMISSION_MANAGER;
+  }
+
+  /**
+   * @dev Calculates the net supply of a user considering stablecoin and same asset looping rules
+   * @param user The address of the user
+   * @param asset The address of the asset
+   * @return The net supply balance for the user
+   */
+  function _getNetSupply(address user, address asset) internal view returns (uint256) {
+    // Initialize net supply to user's balance
+    uint256 netSupply;
+    uint256 userBalance;
+    uint256 totalSupply;
+
+    // Get the user balance and total supply
+    (userBalance, totalSupply) = IScaledBalanceToken(asset).getScaledUserBalanceAndSupply(user);
+
+    // Define stablecoins
+    address[] memory stablecoins = new address[](3);
+    stablecoins[0] = 0xB988AE9bF6a4ebE92f9FF391cAE1eA09484284E5; // arbitrary stablecoin addresses
+    stablecoins[1] = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // arbitrary stablecoin addresses
+    stablecoins[2] = 0xdAC17F958D2ee523a2206206994597C13D831ec7; // arbitrary stablecoin addresses
+
+    // Calculate total stablecoin supply and borrow
+    uint256 totalStablecoinSupply = 0;
+    uint256 totalStablecoinBorrow = 0;
+
+    for (uint256 i = 0; i < stablecoins.length; i++) {
+      (uint256 stablecoinBalance, uint256 stablecoinTotalSupply) = IScaledBalanceToken(stablecoins[i]).getScaledUserBalanceAndSupply(user);
+      totalStablecoinSupply += stablecoinBalance;
+      totalStablecoinBorrow += stablecoinTotalSupply - stablecoinBalance; // Assuming borrow is the difference between total supply and user balance
+    }
+
+    if (_isStablecoin(asset)) {
+      netSupply = totalStablecoinSupply > totalStablecoinBorrow
+        ? totalStablecoinSupply - totalStablecoinBorrow
+        : 0;
+    } else {
+      // For same asset looping
+      uint256 totalBorrow = totalSupply - userBalance; // Assuming borrow is the difference between total supply and user balance
+      netSupply = userBalance > totalBorrow ? userBalance - totalBorrow : 0;
+    }
+
+    return netSupply;
+  }
+
+  /**
+   * @dev Checks if the asset is a stablecoin
+   * @param asset The address of the asset to check
+   * @return True if the asset is a stablecoin, false otherwise
+   */
+  function _isStablecoin(address asset) internal pure returns (bool) {
+    // Define stablecoins
+    address[] memory stablecoins = new address[](3);
+    stablecoins[0] = 0xB988AE9bF6a4ebE92f9FF391cAE1eA09484284E5; // arbitrary stablecoin addresses
+    stablecoins[1] = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // arbitrary stablecoin addresses
+    stablecoins[2] = 0xdAC17F958D2ee523a2206206994597C13D831ec7; // arbitrary stablecoin addresses
+
+    for (uint256 i = 0; i < stablecoins.length; i++) {
+      if (asset == stablecoins[i]) {
+        return true;
+      }
+    }
+    return false;
   }
 }

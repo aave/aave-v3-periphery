@@ -32,6 +32,7 @@
   "license": "AGPLv3",
   "devDependencies": {
     "@aave/deploy-v3": "1.56.1",
+    "@aave/periphery-v3": "2.5.2",
     "@ethereum-waffle/mock-contract": "4.0.4",
     "@ethersproject/abi": "^5.1.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",

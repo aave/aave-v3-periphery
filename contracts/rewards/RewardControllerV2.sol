@@ -6,6 +6,7 @@ import {SafeCast} from '@aave/core-v3/contracts/dependencies/openzeppelin/contra
 import {IScaledBalanceToken} from '@aave/core-v3/contracts/interfaces/IScaledBalanceToken.sol';
 import {RewardsDistributor} from './RewardsDistributor.sol';
 import {IRewardsController} from './interfaces/IRewardsController.sol';
+import {IPool} from './interfaces/IPool.sol';
 import {ITransferStrategyBase} from './interfaces/ITransferStrategyBase.sol';
 import {RewardsDataTypes} from './libraries/RewardsDataTypes.sol';
 import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
@@ -15,10 +16,10 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
  * @notice Abstract contract template to build Distributors contracts for ERC20 rewards to protocol participants
  * @author Aave
  **/
-contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
+contract RewardsControllerV2 is RewardsDistributor, VersionedInitializable, IRewardsController {
   using SafeCast for uint256;
 
-  uint256 public constant REVISION = 1;
+  uint256 public constant REVISION = 2;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
   // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
@@ -36,20 +37,50 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   // a check to see if the provided reward oracle contains `latestAnswer`.
   mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
-  mapping(address => )
+  // upgradeable: append new storage slot to the end
+  mapping(address => uint256) internal _assetGroup;
+  mapping(uint256 => address[]) internal _groupUnderlyings;
+  address public pool;
+  address public constant owner = 0xDf716940F602E2d7289d41402f52231d515B116f; //deployer
 
   modifier onlyAuthorizedClaimers(address claimer, address user) {
     require(_authorizedClaimers[user] == claimer, 'CLAIMER_UNAUTHORIZED');
     _;
   }
 
+  modifier onlyOwner() {
+    require(msg.sender == owner, 'OWNER_UNAUTHORIZED');
+    _;
+  }
+
   constructor(address emissionManager) RewardsDistributor(emissionManager) {}
+
+  function setAssetGroup(
+    address[] calldata underlyingTokens,
+    uint256[] calldata groups
+  ) external onlyOwner {
+    require(underlyingTokens.length == groups.length, 'INVALID_INPUT');
+    for (uint256 i = 0; i < underlyingTokens.length; i++) {
+      require(groups[i] > 0, 'INVALID_GROUP');
+      IPool.ReserveData memory reserveData = IPool(pool).getReserveData(underlyingTokens[i]);
+      _assetGroup[reserveData.aTokenAddress] = groups[i];
+      _groupUnderlyings[groups[i]].push(underlyingTokens[i]);
+    }
+  }
+
+  function setPool(address _pool) external onlyOwner {
+    pool = _pool;
+  }
 
   /**
    * @dev Initialize for RewardsController
    * @dev It expects an address as argument since its initialized via PoolAddressesProvider._updateImpl()
    **/
   function initialize(address) external initializer {}
+
+  function hello() external view returns (address) {
+    return pool;
+  }
 
   /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {
@@ -80,7 +111,8 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   ) external override onlyEmissionManager {
     for (uint256 i = 0; i < config.length; i++) {
       // Get the current Scaled Total Supply of AToken or Debt token
-      config[i].totalSupply = IScaledBalanceToken(config[i].asset).scaledTotalSupply();
+      (, uint256 groupNetSupply) = _getGroupScaledUserBalanceAndSupply(config[i].asset, address(0));
+      config[i].totalSupply = groupNetSupply;
 
       // Install TransferStrategy logic at IncentivesController
       _installTransferStrategy(config[i].reward, config[i].transferStrategy);
@@ -196,11 +228,43 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
     userAssetBalances = new RewardsDataTypes.UserAssetBalance[](assets.length);
     for (uint256 i = 0; i < assets.length; i++) {
       userAssetBalances[i].asset = assets[i];
-      (userAssetBalances[i].userBalance, userAssetBalances[i].totalSupply) = IScaledBalanceToken(
-        assets[i]
-      ).getScaledUserBalanceAndSupply(user);
+      (
+        userAssetBalances[i].userBalance,
+        userAssetBalances[i].totalSupply
+      ) = _getGroupScaledUserBalanceAndSupply(assets[i], user);
     }
     return userAssetBalances;
+  }
+
+  function _getGroupScaledUserBalanceAndSupply(
+    address asset,
+    address user
+  ) public view returns (uint256, uint256) {
+    uint256 group = _assetGroup[asset];
+    int256 userNetBalance;
+    int256 totalNetSupply;
+    for (uint256 i = 0; i < _groupUnderlyings[group].length; i++) {
+      IPool.ReserveData memory reserveData = IPool(pool).getReserveData(
+        _groupUnderlyings[group][i]
+      );
+      uint256 balance;
+      uint256 supply;
+      (balance, supply) = IScaledBalanceToken(reserveData.aTokenAddress)
+        .getScaledUserBalanceAndSupply(user);
+
+      userNetBalance += int256(balance);
+      totalNetSupply += int256(supply);
+
+      (balance, supply) = IScaledBalanceToken(reserveData.variableDebtTokenAddress)
+        .getScaledUserBalanceAndSupply(user);
+
+      userNetBalance -= int256(balance);
+      totalNetSupply -= int256(supply);
+    }
+
+    uint256 userBalance = userNetBalance >= 0 ? uint256(userNetBalance) : 0;
+    uint256 totalSupply = totalNetSupply >= 0 ? uint256(totalNetSupply) : 0;
+    return (userBalance, totalSupply);
   }
 
   /**

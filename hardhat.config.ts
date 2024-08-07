@@ -62,28 +62,19 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      hardfork: 'berlin',
-      blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
-      gas: DEFAULT_BLOCK_GAS_LIMIT,
-      gasPrice: 8000000000,
-      chainId: 31337,
-      throwOnTransactionFailures: true,
-      throwOnCallFailures: true,
-      accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-        privateKey: secretKey,
-        balance,
-      })),
-      forking: mainnetFork,
-      allowUnlimitedContractSize: true,
-    },
-    ganache: {
-      url: 'http://ganache:8545',
-      accounts: {
-        mnemonic: 'fox sight canyon orphan hotel grow hedgehog build bless august weather swarm',
-        path: "m/44'/60'/0'/0",
-        initialIndex: 0,
-        count: 20,
+      forking: {
+        enabled: true,
+        url: `https://radial-polished-field.sei-pacific.quiknode.pro/8400232cc3049cb86a624659dfa20cac418e6a9e/`,
+        blockNumber: 93921171,
       },
+    },
+    'sei-testnet': {
+      url: 'https://evm-rpc-testnet.sei-apis.com',
+      chainId: 1328,
+    },
+    'sei-mainnet': {
+      url: 'https://evm-rpc.sei-apis.com',
+      chainId: 1329,
     },
   },
   mocha: {

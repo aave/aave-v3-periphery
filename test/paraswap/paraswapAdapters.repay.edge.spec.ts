@@ -157,6 +157,7 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
           '0x0000000000000000000000000000000000000000000000000000000000000000'
         );
 
+        console.log();
         await expect(
           pool
             .connect(user)
@@ -174,6 +175,13 @@ makeSuite('Paraswap adapters', (testEnv: TestEnv) => {
             dai.address,
             amountWETHtoSwap.sub(EXCESS_FROM_AMOUNT).toString(),
             expectedDaiAmount.add(EXCESS_TO_AMOUNT)
+          )
+          .to.emit(pool, 'Withdraw')
+          .withArgs(
+            weth.address,
+            paraswapRepayAdapter.address,
+            paraswapRepayAdapter.address,
+            flashloanTotal.sub(EXCESS_FROM_AMOUNT)
           );
 
         const adapterWethBalance = await weth.balanceOf(paraswapRepayAdapter.address);

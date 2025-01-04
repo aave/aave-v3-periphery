@@ -46,26 +46,6 @@ interface IRewardsDistributor {
   );
 
   /**
-   * @dev Emitted when rewards of an asset are adjusted manually for a user
-   * @param asset The address of the incentivized asset
-   * @param reward The address of the reward token
-   * @param user The address of the user that rewards are accrued on behalf of
-   * @param oldUserIndex The old index of the asset distribution on behalf of the user
-   * @param oldRewardsAccrued The old amount of rewards accrued
-   * @param newUserIndex The new index of the asset distribution on behalf of the user
-   * @param newRewardsAccrued The new amount of rewards accrued
-   */
-  event AccruedIndexChange(
-    address indexed asset,
-    address indexed reward,
-    address indexed user,
-    uint256 oldUserIndex,
-    uint256 oldRewardsAccrued,
-    uint256 newUserIndex,
-    uint256 newRewardsAccrued
-  );
-
-  /**
    * @dev Sets the end date for the distribution
    * @param asset The asset to incentivize
    * @param reward The reward token that incentives the asset

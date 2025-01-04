@@ -43,24 +43,6 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     EMISSION_MANAGER = emissionManager;
   }
 
-  function _migrateV1ToV2() internal {
-    for (uint256 i = 0; i < _assetsList.length; i++) {
-      address asset = _assetsList[i];
-      RewardsDataTypes.AssetData storage assetData = _assets[asset];
-
-      for (uint128 j = 0; j < assetData.availableRewardsCount; j++) {
-        RewardsDataTypes.RewardData storage rewardData = assetData.rewards[assetData.availableRewards[j]];
-
-        if (rewardData.index == 0 && rewardData.index_deprecated != 0) {
-          rewardData.index = uint256(rewardData.index_deprecated) * PRECISION / (10 ** assetData.decimals);
-          rewardData.index_deprecated = 0;
-        }
-
-        _updateRewardData(rewardData, IScaledBalanceToken(asset).scaledTotalSupply());
-      }
-    }
-  }
-
   /// @inheritdoc IRewardsDistributor
   function getRewardsData(
     address asset,
@@ -117,13 +99,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     address asset,
     address reward
   ) public view override returns (uint256) {
-    uint256 userIndex = _assets[asset].rewards[reward].usersData[user].index;
-
-    if (userIndex == 0 && _assets[asset].rewards[reward].usersData[user].index_deprecated != 0) {
-      uint256 assetUnit = 10 ** _assets[asset].decimals;
-      userIndex = _assets[asset].rewards[reward].usersData[user].index_deprecated * PRECISION / assetUnit;
-    }
-    return userIndex;
+    return _assets[asset].rewards[reward].usersData[user].index;
   }
 
   /// @inheritdoc IRewardsDistributor
@@ -334,16 +310,9 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     RewardsDataTypes.RewardData storage rewardData,
     address user,
     uint256 userBalance,
-    uint256 newAssetIndex,
-    uint256 assetUnit
+    uint256 newAssetIndex
   ) internal returns (uint256, bool) {
     uint256 userIndex = rewardData.usersData[user].index;
-    
-    if (userIndex == 0 && rewardData.usersData[user].index_deprecated != 0) {
-      userIndex = rewardData.usersData[user].index_deprecated * PRECISION / assetUnit;
-      rewardData.usersData[user].index_deprecated = 0;
-      rewardData.usersData[user].index = userIndex;
-    }
 
     uint256 rewardsAccrued;
     bool dataUpdated;
@@ -371,12 +340,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     uint256 userBalance,
     uint256 totalSupply
   ) internal {
-    uint256 assetUnit;
     uint256 numAvailableRewards = _assets[asset].availableRewardsCount;
-    unchecked {
-      assetUnit = 10 ** _assets[asset].decimals;
-    }
-
     if (numAvailableRewards == 0) {
       return;
     }
@@ -394,8 +358,7 @@ abstract contract RewardsDistributor is IRewardsDistributor {
           rewardData,
           user,
           userBalance,
-          newAssetIndex,
-          assetUnit
+          newAssetIndex
         );
 
         if (rewardDataUpdated || userDataUpdated) {
@@ -470,18 +433,11 @@ abstract contract RewardsDistributor is IRewardsDistributor {
     ];
     (, uint256 nextIndex) = _getAssetIndex(rewardData, userAssetBalance.totalSupply);
 
-    uint256 userIndex = rewardData.usersData[user].index;
-
-    if (userIndex == 0 && rewardData.usersData[user].index_deprecated != 0) {
-      uint256 assetUnit = 10 ** _assets[userAssetBalance.asset].decimals;
-      userIndex = rewardData.usersData[user].index_deprecated * PRECISION / assetUnit;
-    }
-
     return
       _getRewards(
         userAssetBalance.userBalance,
         nextIndex,
-        userIndex
+        rewardData.usersData[user].index
       );
   }
 

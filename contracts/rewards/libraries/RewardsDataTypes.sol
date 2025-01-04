@@ -23,16 +23,14 @@ library RewardsDataTypes {
 
   struct UserData {
     // Deprecated: This storage slot is kept to not break upgrades
-    uint104 index_deprecated;
+    uint256 index;
     // Amount of accrued rewards for the user since last user index update
     uint128 accrued;
-    // Liquidity index of the reward distribution for the user
-    uint256 index;
   }
 
   struct RewardData {
     // Deprecated: This storage slot is kept to not break upgrades
-    uint104 index_deprecated;
+    uint256 index;
     // Amount of reward tokens distributed per second
     uint88 emissionPerSecond;
     // Timestamp of the last reward index update
@@ -41,8 +39,6 @@ library RewardsDataTypes {
     uint32 distributionEnd;
     // Map of user addresses and their rewards data (userAddress => userData)
     mapping(address => UserData) usersData;
-    // Liquidity index of the reward distribution
-    uint256 index;
   }
 
   struct AssetData {

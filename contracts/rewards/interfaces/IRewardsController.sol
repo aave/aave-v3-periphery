@@ -50,13 +50,6 @@ interface IRewardsController is IRewardsDistributor {
   event RewardOracleUpdated(address indexed reward, address indexed rewardOracle);
 
   /**
-   * @dev Emitted when the Temporary Override Admin updated
-   * @param previousAdmin The address of the previous admin
-   * @param newAdmin The address of the new admin
-   */
-  event TemporaryOverrideAdminSet(address indexed previousAdmin, address indexed newAdmin);
-
-  /**
    * @dev Whitelists an address to claim the rewards on behalf of another address
    * @param user The address of the user
    * @param claimer The address of the claimer

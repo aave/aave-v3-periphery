@@ -18,7 +18,7 @@ import {IEACAggregatorProxy} from '../misc/interfaces/IEACAggregatorProxy.sol';
 contract RewardsController is RewardsDistributor, VersionedInitializable, IRewardsController {
   using SafeCast for uint256;
 
-  uint256 public constant REVISION = 3;
+  uint256 public constant REVISION = 1;
 
   // This mapping allows whitelisted addresses to claim on behalf of others
   // useful for contracts that hold tokens to be rewarded but don't have any native logic to claim Liquidity Mining rewards
@@ -36,15 +36,8 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
   // a check to see if the provided reward oracle contains `latestAnswer`.
   mapping(address => IEACAggregatorProxy) internal _rewardOracle;
 
-  address public temporaryOverrideAdmin;
-
   modifier onlyAuthorizedClaimers(address claimer, address user) {
     require(_authorizedClaimers[user] == claimer, 'CLAIMER_UNAUTHORIZED');
-    _;
-  }
-
-  modifier onlyTemporaryOverrideAdmin() {
-    require(msg.sender == temporaryOverrideAdmin, 'ONLY_TEMPORARY_OVERRIDE_ADMIN');
     _;
   }
 
@@ -54,46 +47,7 @@ contract RewardsController is RewardsDistributor, VersionedInitializable, IRewar
    * @dev Initialize for RewardsController
    * @dev It expects an address as argument since its initialized via PoolAddressesProvider._updateImpl()
    **/
-  function initialize(address) external initializer {
-    temporaryOverrideAdmin = 0xA1b5f2cc9B407177CD8a4ACF1699fa0b99955A22;
-
-    emit TemporaryOverrideAdminSet(address(0), temporaryOverrideAdmin);
-  }
-
-
-  /**
-   * @dev Revokes the Temporary Override Admin role form msg.sender
-   */
-  function renounceTemporaryOverrideAdmin() external onlyTemporaryOverrideAdmin {
-    address previousAdmin = temporaryOverrideAdmin;
-    temporaryOverrideAdmin = address(0);
-
-    emit TemporaryOverrideAdminSet(previousAdmin, address(0));
-  }
-
-  /**
-   * @dev Allows the Temporary Override Admin to manually set the reward index and accrued rewards index of multiple users at once. This is to fix the state for users that were impacted by a bug with reward accrual
-   * @param assets The assets for which to update user reward state
-   * @param rewards The rewards for which to update user reward state
-   * @param users The users for which to update user reward state
-   * @param indexes The indexes for which to update user reward state
-   * @param accruedAmounts The accruedAmounts for which to update user reward state
-   */
-  function setUserData(address[] calldata assets, address[] calldata rewards, address[] calldata users, uint256[] calldata indexes, uint128[] calldata accruedAmounts) external onlyTemporaryOverrideAdmin {
-    require(assets.length == rewards.length && users.length == indexes.length && accruedAmounts.length == assets.length && users.length == assets.length, "INVALID_PARAMETER_LENGTH");
-
-    for (uint256 i = 0; i < assets.length; i++) {
-      RewardsDataTypes.RewardData storage rewardData = _assets[assets[i]].rewards[rewards[i]];
-
-      uint256 oldUserIndex = rewardData.usersData[users[i]].index;
-      uint256 oldUserAccrued = rewardData.usersData[users[i]].accrued;
-
-      rewardData.usersData[users[i]].index = indexes[i];
-      rewardData.usersData[users[i]].accrued = accruedAmounts[i];
-
-      emit AccruedIndexChange(assets[i], rewards[i], users[i], oldUserIndex, oldUserAccrued, indexes[i], accruedAmounts[i]);
-    }
-  }
+  function initialize(address) external initializer {}
 
   /// @inheritdoc IRewardsController
   function getClaimer(address user) external view override returns (address) {

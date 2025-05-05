@@ -1,3 +1,9 @@
+# ⚠️ This repository is DEPRECATED and no longer maintained ⚠️
+
+For the latest Aave V3 code visit the V3 Origin Repository [here](https://github.com/aave-dao/aave-v3-origin).
+
+
+
 ```
         .///.                .///.     //.            .//  `/////////////-
        `++:++`              .++:++`    :++`          `++:  `++:......---.`

@@ -20,6 +20,9 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
   uint256 _expectedToAmountMax;
   uint256 _expectedToAmountMin;
 
+  uint256 _excessFromAmount;
+  uint256 _excessToAmount;
+
   constructor() {
     TOKEN_TRANSFER_PROXY = new MockParaSwapTokenTransferProxy();
   }
@@ -58,6 +61,11 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
     _expectedToAmountMax = toAmountMax;
   }
 
+  function expectExcess(uint256 excessFrom, uint256 excessTo) external {
+    _excessFromAmount = excessFrom;
+    _excessToAmount = excessTo;
+  }
+
   function swap(
     address fromToken,
     address toToken,
@@ -72,10 +80,17 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
       'From amount out of range'
     );
     require(_receivedAmount >= toAmount, 'Received amount of tokens are less than expected');
-    TOKEN_TRANSFER_PROXY.transferFrom(fromToken, msg.sender, address(this), fromAmount);
-    MintableERC20(toToken).mint(_receivedAmount);
-    IERC20(toToken).transfer(msg.sender, _receivedAmount);
+    TOKEN_TRANSFER_PROXY.transferFrom(
+      fromToken,
+      msg.sender,
+      address(this),
+      fromAmount - _excessFromAmount
+    );
+    MintableERC20(toToken).mint(_receivedAmount + _excessToAmount);
+    IERC20(toToken).transfer(msg.sender, _receivedAmount + _excessToAmount);
     _expectingSwap = false;
+    _excessFromAmount = 0;
+    _excessToAmount = 0;
     return _receivedAmount;
   }
 
@@ -93,10 +108,17 @@ contract MockParaSwapAugustus is IParaSwapAugustus {
       'To amount out of range'
     );
     require(_fromAmount <= fromAmount, 'From amount of tokens are higher than expected');
-    TOKEN_TRANSFER_PROXY.transferFrom(fromToken, msg.sender, address(this), _fromAmount);
-    MintableERC20(toToken).mint(toAmount);
-    IERC20(toToken).transfer(msg.sender, toAmount);
+    TOKEN_TRANSFER_PROXY.transferFrom(
+      fromToken,
+      msg.sender,
+      address(this),
+      _fromAmount - _excessFromAmount
+    );
+    MintableERC20(toToken).mint(toAmount + _excessToAmount);
+    IERC20(toToken).transfer(msg.sender, toAmount + _excessToAmount);
     _expectingSwap = false;
+    _excessFromAmount = 0;
+    _excessToAmount = 0;
     return fromAmount;
   }
 }

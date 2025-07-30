@@ -27,6 +27,7 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
   IEACAggregatorProxy public immutable marketReferenceCurrencyPriceInUsdProxyAggregator;
   uint256 public constant ETH_CURRENCY_UNIT = 1 ether;
   address public constant MKR_ADDRESS = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
+  uint256 private constant MAX_REASONABLE_PRICE = 1e15;
 
   constructor(
     IEACAggregatorProxy _networkBaseTokenPriceInUsdProxyAggregator,
@@ -81,6 +82,17 @@ contract UiPoolDataProviderV3 is IUiPoolDataProviderV3 {
         reserveData.underlyingAsset
       );
       reserveData.priceOracle = oracle.getSourceOfAsset(reserveData.underlyingAsset);
+      
+      // Validate oracle address
+      if (reserveData.priceOracle == address(0)) {
+        // Use fallback pricing or mark as invalid
+        reserveData.priceInMarketReferenceCurrency = 0;
+      }
+      
+      // Validate price bounds (prevent extreme values like 1.539e+35)
+      if (reserveData.priceInMarketReferenceCurrency > MAX_REASONABLE_PRICE) {
+        reserveData.priceInMarketReferenceCurrency = 0; // Mark as invalid
+      }
       reserveData.availableLiquidity = IERC20Detailed(reserveData.underlyingAsset).balanceOf(
         reserveData.aTokenAddress
       );
